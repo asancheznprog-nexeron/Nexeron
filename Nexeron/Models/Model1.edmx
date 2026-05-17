@@ -9,11 +9,21 @@
           <Key>
             <PropertyRef Name="codigo" />
           </Key>
-          <Property Name="codigo" Type="int" Nullable="false" />
+          <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="articulo" Type="char" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="usuarios">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="usuario" Type="char" MaxLength="50" />
+          <Property Name="password" Type="char" MaxLength="50" />
+          <Property Name="fallos" Type="int" />
         </EntityType>
         <EntityContainer Name="cortechecoModelStoreContainer">
           <EntitySet Name="articulo" EntityType="Self.articulo" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="usuarios" EntityType="Self.usuarios" Schema="cortecheco" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -21,6 +31,7 @@
       <Schema Namespace="cortechecoModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="cortechecoEntities" annotation:LazyLoadingEnabled="true" >
           <EntitySet Name="articulo" EntityType="cortechecoModel.articulo" />
+          <EntitySet Name="usuarios" EntityType="cortechecoModel.usuarios" />
         </EntityContainer>
         <EntityType Name="articulo">
           <Key>
@@ -28,6 +39,15 @@
           </Key>
           <Property Name="codigo" Type="Int32" Nullable="false" />
           <Property Name="articulo1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="usuarios">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="usuario" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="fallos" Type="Int32" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -40,6 +60,16 @@
               <MappingFragment StoreEntitySet="articulo">
                 <ScalarProperty Name="articulo1" ColumnName="articulo" />
                 <ScalarProperty Name="codigo" ColumnName="codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="usuarios">
+            <EntityTypeMapping TypeName="cortechecoModel.usuarios">
+              <MappingFragment StoreEntitySet="usuarios">
+                <ScalarProperty Name="fallos" ColumnName="fallos" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="usuario" ColumnName="usuario" />
+                <ScalarProperty Name="clave" ColumnName="clave" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

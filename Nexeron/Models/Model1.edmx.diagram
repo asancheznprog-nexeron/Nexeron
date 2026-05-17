@@ -6,6 +6,7 @@
     <edmx:Diagrams>
       <Diagram DiagramId="31e47d440eba48e6bc883c30be055b47" Name="Diagram1" >
         <EntityTypeShape EntityType="cortechecoModel.articulo" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="cortechecoModel.usuarios" Width="1.5" PointX="3.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
