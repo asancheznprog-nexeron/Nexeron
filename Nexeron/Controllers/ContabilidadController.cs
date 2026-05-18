@@ -14,7 +14,6 @@ namespace Nexeron.Controllers
                 return RedirectToAction("Login", "Home");
             return View();
         }
-
         public ActionResult Cuentas()
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
@@ -30,8 +29,7 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        // Usamos los nombres reales de tu base de datos
-                        cmd.CommandText = "SELECT id, CUENTA, NOMBRE_CUENTA FROM cuentas ORDER BY CUENTA ASC";
+                        cmd.CommandText = "SELECT CUENTA, NOMBRE_CUENTA FROM cuentas ORDER BY CUENTA ASC";
 
                         using (var reader = cmd.ExecuteReader())
                         {
@@ -74,7 +72,7 @@ namespace Nexeron.Controllers
 
                         using (var cmdCheck = conexion.CreateCommand())
                         {
-                            // Validar que no exista (usando la columna CUENTA)
+                            
                             cmdCheck.CommandText = "SELECT COUNT(*) FROM cuentas WHERE CUENTA = @codigo";
                             cmdCheck.Parameters.AddWithValue("@codigo", nuevaCuenta.Codigo);
 
@@ -87,7 +85,7 @@ namespace Nexeron.Controllers
 
                         using (var cmd = conexion.CreateCommand())
                         {
-                            // Insertamos usando los nombres correctos de tus columnas
+                            
                             cmd.CommandText = "INSERT INTO cuentas (CUENTA, NOMBRE_CUENTA) VALUES (@codigo, @nombre)";
                             cmd.Parameters.AddWithValue("@codigo", nuevaCuenta.Codigo);
                             cmd.Parameters.AddWithValue("@nombre", nuevaCuenta.Nombre);
@@ -101,8 +99,94 @@ namespace Nexeron.Controllers
                 }
             }
 
-            // Al terminar, volvemos a la pantalla de cuentas
+            
+            return RedirectToAction("Cuentas");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ActualizarCuenta(CuentaModel cuentaModificada)
+        {
+            if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
+                return RedirectToAction("Login", "Home");
+
+            if (ModelState.IsValid)
+            {
+                string connStr = Session["cadenaConexion"].ToString();
+
+                using (MySqlConnection conexion = new MySqlConnection(connStr))
+                {
+                    try
+                    {
+                        conexion.Open();
+                        using (var cmd = conexion.CreateCommand())
+                        {
+                            
+                            cmd.CommandText = "UPDATE cuentas SET NOMBRE_CUENTA = @nombre WHERE CUENTA = @codigo";
+                            cmd.Parameters.AddWithValue("@nombre", cuentaModificada.Nombre);
+                            cmd.Parameters.AddWithValue("@codigo", cuentaModificada.Codigo);
+
+                            cmd.ExecuteNonQuery();
+                            TempData["MensajeExito"] = "Cuenta modificada correctamente.";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["Error"] = "Error al modificar la cuenta: " + ex.Message;
+                        TempData["TipoError"] = "Editar";
+                    }
+                }
+            }
+
+            return RedirectToAction("Cuentas");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EliminarCuenta(string id)
+        {
+            if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
+                return RedirectToAction("Login", "Home");
+
+            if (string.IsNullOrEmpty(id))
+                return RedirectToAction("Cuentas");
+
+            string connStr = Session["cadenaConexion"].ToString();
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                try
+                {
+                    conexion.Open();
+                    using (var cmd = conexion.CreateCommand())
+                    {
+                        cmd.CommandText = "DELETE FROM cuentas WHERE CUENTA = @codigo";
+                        cmd.Parameters.AddWithValue("@codigo", id);
+
+                        int filasAfectadas = cmd.ExecuteNonQuery();
+
+                        if (filasAfectadas > 0)
+                            TempData["MensajeExito"] = "Cuenta eliminada correctamente.";
+                        else
+                            TempData["Error"] = "La cuenta no existe o ya ha sido eliminada.";
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    
+                    if (ex.Number == 1451)
+                        TempData["Error"] = "No se puede eliminar. Esta cuenta ya está asociada a facturas, asientos o movimientos contables.";
+                    else
+                        TempData["Error"] = "Error de base de datos: " + ex.Message;
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "Error al eliminar: " + ex.Message;
+                }
+            }
+
             return RedirectToAction("Cuentas");
         }
     }
+
 }

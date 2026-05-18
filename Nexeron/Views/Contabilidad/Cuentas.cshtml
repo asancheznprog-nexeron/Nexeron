@@ -4,234 +4,541 @@
     ViewBag.Title = "Plan de Cuentas";
 }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewBag.Title - Nexeron</title>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
+<style>
+    .wrap-contabilidad {
+        max-width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
             color: #333;
         }
 
-        /* Barra superior */
-        .navbar {
-            background-color: #ffffff;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
         }
 
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #6f42c1; /* Color morado para contabilidad */
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .header-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 1rem;
+    }
+
+        .header-acciones h3 {
             margin: 0;
-            text-decoration: none;
+            color: #495057;
         }
 
-        .btn-back {
-            background-color: #6c757d;
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 1rem;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    /* BOTONES DE LA TABLA */
+    .btn-editar {
+        background-color: #ffc107;
+        color: #212529;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: bold;
+        transition: 0.2s;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-editar:hover {
+            background-color: #e0a800;
+        }
+
+    .btn-eliminar {
+        background-color: #dc3545;
+        color: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: bold;
+        transition: 0.2s;
+        display: inline-block;
+        margin-left: 5px;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-eliminar:hover {
+            background-color: #bd2130;
+        }
+
+    /* MODALES / POPUPS */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 400px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: abrirPopup 0.3s ease-out;
+    }
+
+    @@keyframes abrirPopup {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .btn-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        font-weight: bold;
+    }
+
+        .btn-cerrar:hover {
+            color: #333;
+        }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+        .form-group label {
+            display: block;
             font-weight: bold;
+            color: #555;
+            margin-bottom: 0.5rem;
         }
 
-        /* Contenedor en dos columnas */
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-            display: flex;
-            gap: 2rem;
+    .form-control {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        transition: 0.2s;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
         }
 
-        /* Columna Izquierda: Formulario */
-        .column-form {
-            flex: 1;
-            max-width: 350px;
+        .form-control:disabled {
+            background-color: #e9ecef;
+            color: #495057;
         }
 
-        /* Columna Derecha: Tabla */
-        .column-table {
-            flex: 2;
+    .btn-submit {
+        width: 100%;
+        padding: 0.7rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
         }
 
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        .btn-submit.btn-danger {
+            background-color: #dc3545;
         }
 
-            .card h3 {
-                margin-top: 0;
-                margin-bottom: 1.5rem;
-                border-bottom: 2px solid #f1f3f5;
-                padding-bottom: 0.5rem;
-                color: #495057;
+            .btn-submit.btn-danger:hover {
+                background-color: #bd2130;
             }
 
-        /* Estilos del Formulario */
-        .form-group {
-            margin-bottom: 1.2rem;
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 0.75rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    /* DATATABLES */
+    .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length {
+        margin-bottom: 1.5rem;
+    }
+
+    table.dataTable thead th {
+        background-color: #f8f9fa;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    table.dataTable tbody td {
+        border-bottom: 1px solid #eee;
+        padding: 9px 12px;
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    table.dataTable.display tbody tr:hover > .sorting_1, table.dataTable.display tbody tr:hover {
+        background-color: #f1f3f5 !important;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 0.4rem;
+        margin-left: 0.5rem;
+    }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            outline: none;
+            border-color: #007bff;
         }
 
-            .form-group label {
-                display: block;
-                margin-bottom: 0.5rem;
-                color: #555;
-                font-weight: bold;
-                font-size: 0.9rem;
-            }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 4px !important;
+        padding: 0.4em 0.8em !important;
+        margin-left: 4px !important;
+        transition: 0.2s;
+    }
 
-        .form-control {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 1rem;
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #007bff !important;
+            color: white !important;
+            border: 1px solid #007bff !important;
         }
 
-        .btn-submit {
-            width: 100%;
-            padding: 0.7rem;
-            background-color: #6f42c1;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 0.5rem;
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #e2e6ea !important;
+            color: #333 !important;
+            border: 1px solid #dae0e5 !important;
         }
 
-            .btn-submit:hover {
-                background-color: #5a32a3;
-            }
 
-        /* Estilos de la Tabla */
-        .table-cuentas {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #ffffff;
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast-alerta {
+        background-color: #28a745; 
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 300px;
+        transform: translateX(120%);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+        .toast-alerta.toast-error {
+            background-color: #dc3545; 
         }
 
-            .table-cuentas th, .table-cuentas td {
-                padding: 1rem;
-                text-align: left;
-                border-bottom: 1px solid #dee2e6;
-            }
-
-            .table-cuentas th {
-                background-color: #f8f9fa;
-                color: #495057;
-                font-weight: bold;
-            }
-
-            .table-cuentas tr:hover {
-                background-color: #f8f9fa;
-            }
-
-        .text-danger {
-            color: #dc3545;
-            font-size: 0.85rem;
+        .toast-alerta.mostrar {
+            transform: translateX(0);
         }
+</style>
 
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
+<div class="toast-container" id="toastContainer"></div>
 
-    <nav class="navbar">
-        <a href="~/" class="navbar-brand">Nexeron 📊 Contabilidad</a>
-        <a href="@Url.Action("Index", "Home")" class="btn-back">← Volver al Panel</a>
-    </nav>
-
-    <div class="container">
-
-        <div class="column-form">
-            <div class="card">
-                <h3>Nueva Cuenta</h3>
-
-                @using (Html.BeginForm("CrearCuenta", "Contabilidad", FormMethod.Post))
-                {
-                    @Html.AntiForgeryToken()
-
-                    if (!ViewData.ModelState.IsValid && ViewData.ModelState[""] != null)
-                    {
-                        <div class="alert-error">
-                            @Html.ValidationSummary(true)
-                        </div>
-                    }
-
-                    <div class="form-group">
-                        <label for="Codigo">Código Contable</label>
-                        <input type="text" id="Codigo" name="Codigo" class="form-control" placeholder="ej: 5720001" required autocomplete="off" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="Nombre">Nombre de la Cuenta</label>
-                        <input type="text" id="Nombre" name="Nombre" class="form-control" placeholder="ej: Banco Santander" required autocomplete="off" />
-                    </div>
-
-                    <button type="submit" class="btn-submit">Guardar Cuenta</button>
-                }
-            </div>
-        </div>
-
-        <div class="column-table">
-            <div class="card" style="padding: 0; overflow: hidden;">
-                <table class="table-cuentas">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;">Código</th>
-                            <th style="width: 70%;">Nombre de la Cuenta</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            foreach (var cuenta in Model)
-                            {
-                                <tr>
-                                    <td><strong>@cuenta.Codigo</strong></td>
-                                    <td>@cuenta.Nombre</td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="2" style="text-align: center; color: #888; padding: 2rem;">
-                                    No hay cuentas creadas todavía. Utiliza el formulario de la izquierda.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+<div class="wrap-contabilidad">
+    <div class="submenu-container">
+        <a href="@Url.Action("Cuentas", "Contabilidad")" class="btn-submenu active">📚 Plan de Cuentas</a>
+        <a href="@Url.Action("Clientes", "Contabilidad")" class="btn-submenu">👤 Clientes</a>
+        <a href="@Url.Action("Proveedores", "Contabilidad")" class="btn-submenu">🏢 Proveedores</a>
+        <a href="@Url.Action("Bancos", "Contabilidad")" class="btn-submenu">🏦 Bancos</a>
+        <a href="@Url.Action("FormasPago", "Contabilidad")" class="btn-submenu">💳 Formas de Cobro/Pago</a>
     </div>
 
-</body>
-</html>
+    <div class="card">
+        <div class="header-acciones">
+            <h3>Listado de Cuentas Contables</h3>
+            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Cuenta</button>
+        </div>
+
+        <table id="miTablaCuentas" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Código</th>
+                    <th style="width: 60%;">Nombre de la Cuenta</th>
+                    <th style="width: 20%; text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var cuenta in Model)
+                    {
+                        <tr>
+                            <td><strong>@cuenta.Codigo</strong></td>
+                            <td>@cuenta.Nombre</td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <button type="button" class="btn-editar" onclick="abrirModalEditar('@cuenta.Codigo', '@cuenta.Nombre')">Editar</button>
+                                <button type="button" class="btn-eliminar" onclick="abrirModalEliminar('@cuenta.Codigo', '@cuenta.Nombre')">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalCrearCuenta" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalCrearCuenta')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Nueva Cuenta</h3>
+
+        @using (Html.BeginForm("CrearCuenta", "Contabilidad", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            if (TempData["Error"] != null && TempData["TipoError"]?.ToString() == "Crear")
+            {
+                <div class="alert-error">@TempData["Error"]</div>
+            }
+
+            <div class="form-group">
+                <label>Código Contable</label>
+                <input type="text" name="Codigo" class="form-control" required autocomplete="off" autofocus />
+            </div>
+            <div class="form-group">
+                <label>Nombre de la Cuenta</label>
+                <input type="text" name="Nombre" class="form-control" required autocomplete="off" />
+            </div>
+            <button type="submit" class="btn-submit">Guardar Cuenta</button>
+        }
+    </div>
+</div>
+
+<div id="modalEditarCuenta" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEditarCuenta')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Cuenta</h3>
+
+        @using (Html.BeginForm("ActualizarCuenta", "Contabilidad", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            if (TempData["Error"] != null && TempData["TipoError"]?.ToString() == "Editar")
+            {
+                <div class="alert-error">@TempData["Error"]</div>
+            }
+
+            <div class="form-group">
+                <label>Código Contable</label>
+                <input type="hidden" id="editCodigoHidden" name="Codigo" />
+                <input type="text" id="editCodigoView" class="form-control" disabled />
+            </div>
+            <div class="form-group">
+                <label>Nombre de la Cuenta</label>
+                <input type="text" id="editNombre" name="Nombre" class="form-control" required autocomplete="off" autofocus />
+            </div>
+            <button type="submit" class="btn-submit">Guardar Cambios</button>
+        }
+    </div>
+</div>
+
+<div id="modalEliminarCuenta" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEliminarCuenta')">&times;</span>
+        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Cuenta?</h3>
+
+        @using (Html.BeginForm("EliminarCuenta", "Contabilidad", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la eliminación definitiva de esta cuenta contable? Esta operación borrará su configuración actual.');" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <p style="color: #666; font-size: 0.95rem; line-height: 1.4;">
+                ¿Está seguro de que desea eliminar la siguiente cuenta? Esta acción no se puede deshacer.
+            </p>
+
+            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545;">
+                <span id="deleteCodigoSpan" style="font-weight: bold; color: #212529;"></span> - <span id="deleteNombreSpan" style="color: #495057;"></span>
+            </div>
+
+            <input type="hidden" id="deleteCodigoHidden" name="id" />
+
+            <button type="submit" class="btn-submit btn-danger">Confirmar Eliminación</button>
+        }
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#miTablaCuentas').DataTable({
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            "pageLength": 10,
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            "order": [],
+            "scrollY": "369px",
+            "scrollCollapse": false,
+            "paging": true,
+            "columnDefs": [
+                { "targets": 2, "orderable": false }
+            ]
+        });
+
+        @if (TempData["MensajeExito"] != null)
+        {
+            <text>crearToast('@TempData["MensajeExito"].ToString()', 'exito');</text>
+        }
+
+        @if (TempData["Error"] != null && TempData["TipoError"] == null)
+        {
+            <text>crearToast('@TempData["Error"].ToString()', 'error');</text>
+        }
+    });
+
+    function crearToast(mensaje, tipo) {
+        var icono = tipo === 'exito' ? '✅' : '❌';
+        var claseError = tipo === 'error' ? 'toast-error' : '';
+
+        var htmlToast = '<div class="toast-alerta ' + claseError + '">' +
+                            '<span>' + icono + '</span>' +
+                            '<span>' + mensaje + '</span>' +
+                        '</div>';
+
+        var $el = $(htmlToast);
+        $('#toastContainer').append($el);
+
+        setTimeout(function() {
+            $el.addClass('mostrar');
+        }, 50);
+
+        setTimeout(function() {
+            $el.removeClass('mostrar');
+            setTimeout(function() { $el.remove(); }, 300);
+        }, 3500);
+    }
+
+    function abrirModalCrear() {
+        $('#modalCrearCuenta').css('display', 'flex');
+    }
+
+    function abrirModalEditar(codigo, nombre) {
+        $('#editCodigoHidden').val(codigo);
+        $('#editCodigoView').val(codigo);
+        $('#editNombre').val(nombre);
+        $('#modalEditarCuenta').css('display', 'flex');
+    }
+
+    function abrirModalEliminar(codigo, nombre) {
+        $('#deleteCodigoHidden').val(codigo);
+        $('#deleteCodigoSpan').text(codigo);
+        $('#deleteNombreSpan').text(nombre);
+        $('#modalEliminarCuenta').css('display', 'flex');
+    }
+
+    function cerrarModal(idModal) {
+        $('#' + idModal).css('display', 'none');
+    }
+
+    window.onclick = function(event) {
+        if ($(event.target).hasClass('modal-overlay')) {
+            $('.modal-overlay').css('display', 'none');
+        }
+    }
+
+    @if (TempData["Error"] != null && TempData["TipoError"] != null)
+    {
+        var tipo = TempData["TipoError"].ToString();
+        if (tipo == "Editar") {
+            <text>$('#modalEditarCuenta').css('display', 'flex');</text>
+        } else {
+            <text>$('#modalCrearCuenta').css('display', 'flex');</text>
+        }
+    }
+</script>
