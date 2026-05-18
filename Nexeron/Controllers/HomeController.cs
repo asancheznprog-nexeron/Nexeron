@@ -10,6 +10,10 @@ namespace Nexeron.Controllers
     {
         public ActionResult Index()
         {
+            if (Session["Usuario"] == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
             return View();
         }
 
@@ -47,7 +51,7 @@ namespace Nexeron.Controllers
                         conexionBase.Open();
                         using (var cmdCheck = conexionBase.CreateCommand())
                         {
-                            
+
                             cmdCheck.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = @empresa";
                             cmdCheck.Parameters.AddWithValue("@empresa", login.Empresa);
 
@@ -55,7 +59,7 @@ namespace Nexeron.Controllers
 
                             if (existeEmpresa == 0)
                             {
-                                
+
                                 ModelState.AddModelError("", "La empresa introducida no existe o es incorrecta.");
                                 return View(login);
                             }
@@ -85,7 +89,7 @@ namespace Nexeron.Controllers
                         int fallosActuales = 0;
                         bool cuentaBloqueada = false;
 
-                        
+
                         using (var cmd = conexionEmpresa.CreateCommand())
                         {
                             cmd.CommandText = "SELECT PASSWORD, fallos FROM usuarios WHERE USUARIO = @usuario";
@@ -107,7 +111,7 @@ namespace Nexeron.Controllers
                                     }
                                     else
                                     {
-                                        
+
                                         if (passwordBd.StartsWith("$2"))
                                         {
                                             if (BCrypt.Net.BCrypt.Verify(passwordIngresada, passwordBd))
@@ -122,7 +126,7 @@ namespace Nexeron.Controllers
                             }
                         }
 
-                        
+
                         if (cuentaBloqueada)
                         {
                             ModelState.AddModelError("", "La cuenta está bloqueada por demasiados intentos fallidos. Contacte con un administrador.");
@@ -133,7 +137,7 @@ namespace Nexeron.Controllers
                             {
                                 loginExitoso = true;
 
-                                
+
                                 if (fallosActuales > 0)
                                 {
                                     using (var cmdUpdate = conexionEmpresa.CreateCommand())
@@ -146,7 +150,7 @@ namespace Nexeron.Controllers
                             }
                             else
                             {
-                                
+
                                 fallosActuales++;
 
                                 using (var cmdUpdate = conexionEmpresa.CreateCommand())
@@ -172,7 +176,7 @@ namespace Nexeron.Controllers
                             ModelState.AddModelError("", "Usuario o contraseña incorrecta.");
                         }
 
-                        
+
                         if (loginExitoso)
                         {
                             Session.Timeout = 12 * 60;
@@ -193,5 +197,13 @@ namespace Nexeron.Controllers
             return View(login);
         }
 
+
+        [HttpGet]
+        public ActionResult Logout()
+        {
+            Session.Clear();
+            Session.Abandon();
+            return Redirect("~/");
+        }
     }
 }

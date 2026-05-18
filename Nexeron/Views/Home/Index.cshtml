@@ -1,33 +1,270 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    Layout = null;
+    ViewBag.Title = "Panel de Control";
+
+    // Recuperamos el nombre del usuario de la sesión para saludarlo
+    string usuarioActual = Session["Usuario"] as string ?? "Usuario";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Nexeron</title>
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
-    </div>
-</main>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            color: #333;
+        }
+
+        /* Barra de navegación superior */
+        .navbar {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0;
+        }
+
+        /* Agrupación del saludo y el botón */
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .greeting {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* --- ESTILOS DEL MENÚ DESPLEGABLE --- */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Estilo modificado para que el botón parezca un icono */
+        .dropbtn {
+            background-color: transparent;
+            color: #333;
+            padding: 0.4rem 0.6rem; /* Más cuadrado */
+            font-size: 1.5rem; /* Hacemos las 3 líneas más grandes */
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+            .dropbtn:hover, .dropbtn:focus {
+                background-color: #f1f3f5;
+                border-color: #ddd;
+            }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #eee;
+            margin-top: 0.5rem;
+        }
+
+            .dropdown-content a {
+                color: #333;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                font-size: 0.95rem;
+                transition: background-color 0.2s;
+            }
+
+                .dropdown-content a:hover {
+                    background-color: #f1f3f5;
+                }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #eaeaea;
+            margin: 0;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+
+            .text-danger:hover {
+                background-color: #fff0f0 !important;
+            }
+
+        .show {
+            display: block;
+        }
+        /* --- FIN ESTILOS DESPLEGABLE --- */
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+            .page-header h2 {
+                margin: 0 0 0.5rem 0;
+                font-size: 1.8rem;
+            }
+
+            .page-header p {
+                color: #666;
+                margin: 0;
+            }
+
+        /* Cuadrícula de Tarjetas (Cards) */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-top: 4px solid #007bff;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            }
+
+            .card.ventas {
+                border-color: #28a745;
+            }
+
+            .card.compras {
+                border-color: #17a2b8;
+            }
+
+            .card.referencias {
+                border-color: #ffc107;
+            }
+
+            .card.contabilidad {
+                border-color: #6f42c1;
+            }
+
+            .card h3 {
+                margin: 0 0 0.5rem 0;
+                font-size: 1.2rem;
+            }
+
+            .card p {
+                margin: 0;
+                color: #666;
+                font-size: 0.95rem;
+                line-height: 1.4;
+            }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1 class="navbar-brand">Nexeron</h1>
+
+        <div class="navbar-user">
+            <span class="greeting">Hola, <strong>@usuarioActual</strong></span>
+
+            <div class="dropdown">
+                <button onclick="toggleDropdown()" class="dropbtn" title="Menú de opciones">
+                    &#9776;
+                </button>
+                <div id="userMenu" class="dropdown-content">
+                    <a href="#">👤 Mi Perfil</a>
+                    <a href="#">⚙️ Configuración</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a href="@Url.Action("Logout", "Home")" class="text-danger">🚪 Cerrar sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="page-header">
+            <h2>Panel de Control</h2>
+            <p>Selecciona un módulo para comenzar a trabajar.</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <a href="@Url.Action("Index", "Ventas")" class="card ventas">
+                <h3>🛒 Ventas</h3>
+                <p>Gestiona clientes, presupuestos, pedidos y facturación de salida.</p>
+            </a>
+            <a href="@Url.Action("Index", "Compras")" class="card compras">
+                <h3>🛍️ Compras</h3>
+                <p>Administra proveedores, órdenes de compra y recepción de mercancía.</p>
+            </a>
+            <a href="@Url.Action("Index", "Referencias")" class="card referencias">
+                <h3>📦 Referencias</h3>
+                <p>Controla el inventario, catálogo de artículos, almacenes y stock.</p>
+            </a>
+            <a href="@Url.Action("Index", "Contabilidad")" class="card contabilidad">
+                <h3>📊 Contabilidad</h3>
+                <p>Revisa asientos, libros diarios, impuestos y balances financieros.</p>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        function toggleDropdown() {
+            document.getElementById("userMenu").classList.toggle("show");
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn') && !event.target.closest('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

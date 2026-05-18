@@ -12,6 +12,13 @@
           <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="articulo" Type="char" MaxLength="50" />
         </EntityType>
+        <EntityType Name="cuentas">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="char" MaxLength="100" />
+        </EntityType>
         <EntityType Name="usuarios">
           <Key>
             <PropertyRef Name="clave" />
@@ -23,6 +30,7 @@
         </EntityType>
         <EntityContainer Name="cortechecoModelStoreContainer">
           <EntitySet Name="articulo" EntityType="Self.articulo" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="cuentas" EntityType="Self.cuentas" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="usuarios" EntityType="Self.usuarios" Schema="cortecheco" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -32,6 +40,7 @@
         <EntityContainer Name="cortechecoEntities" annotation:LazyLoadingEnabled="true" >
           <EntitySet Name="articulo" EntityType="cortechecoModel.articulo" />
           <EntitySet Name="usuarios" EntityType="cortechecoModel.usuarios" />
+          <EntitySet Name="cuentas" EntityType="cortechecoModel.cuentas" />
         </EntityContainer>
         <EntityType Name="articulo">
           <Key>
@@ -48,6 +57,13 @@
           <Property Name="usuario" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="fallos" Type="Int32" />
+        </EntityType>
+        <EntityType Name="cuentas">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -70,6 +86,14 @@
                 <ScalarProperty Name="password" ColumnName="password" />
                 <ScalarProperty Name="usuario" ColumnName="usuario" />
                 <ScalarProperty Name="clave" ColumnName="clave" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cuentas">
+            <EntityTypeMapping TypeName="cortechecoModel.cuentas">
+              <MappingFragment StoreEntitySet="cuentas">
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

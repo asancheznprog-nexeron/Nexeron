@@ -27,5 +27,6 @@ namespace Nexeron.Models
     
         public virtual DbSet<articulo> articulo { get; set; }
         public virtual DbSet<usuarios> usuarios { get; set; }
+        public virtual DbSet<cuentas> cuentas { get; set; }
     }
 }
