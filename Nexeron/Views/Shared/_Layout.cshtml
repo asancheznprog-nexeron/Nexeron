@@ -1,40 +1,219 @@
-﻿<!DOCTYPE html>
-<html>
+﻿@{
+    // Leemos el usuario de la sesión para mostrarlo arriba
+    string usuarioActual = Session["Usuario"] as string ?? "Usuario";
+}
+<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Mi aplicación ASP.NET</title>
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Nexeron</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* --- BARRA LATERAL (SIDEBAR) --- */
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: -250px; /* Oculta por defecto */
+            background-color: #2c3e50; /* Azul muy oscuro elegante */
+            overflow-x: hidden;
+            transition: 0.3s;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+            .sidebar.open {
+                left: 0; /* Aparece */
+            }
+
+        .sidebar-brand {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 1.2rem;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar a {
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            font-size: 1.05rem;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.2s;
+        }
+
+            .sidebar a:hover {
+                color: #fff;
+                background-color: #34495e;
+                border-left: 4px solid #007bff;
+            }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .main-wrapper {
+            transition: margin-left .3s;
+        }
+
+            .main-wrapper.shifted {
+                margin-left: 250px;
+            }
+
+        /* --- BARRA SUPERIOR (NAVBAR) --- */
+        .navbar {
+            background-color: #ffffff;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+            .btn-toggle:hover {
+                background-color: #f1f3f5;
+            }
+
+        /* Estilos del menú del usuario (Los que ya tenías) */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background: transparent;
+            color: #333;
+            padding: 0.4rem 0.6rem;
+            font-size: 1.2rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #fff;
+            min-width: 180px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            border: 1px solid #eee;
+            margin-top: 0.5rem;
+            z-index: 100;
+        }
+
+            .dropdown-content a {
+                color: #333;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+                font-size: 0.95rem;
+            }
+
+                .dropdown-content a:hover {
+                    background-color: #f1f3f5;
+                }
+
+        .text-danger {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+
+        .show {
+            display: block;
+        }
+
+        /* --- ZONA DE CONTENIDO DE CADA PANTALLA --- */
+        .content-body {
+            padding: 2rem;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
-        <div class="container">
-            @Html.ActionLink("Nexeron", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Inicio", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Acerca de", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contacto", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - Mi aplicación ASP.NET</p>
-        </footer>
+
+    <div id="miSidebar" class="sidebar">
+        <div class="sidebar-brand">Nexeron ERP</div>
+        <a href="@Url.Action("Index", "Home")">🏠 Panel Principal</a>
+        <a href="@Url.Action("Index", "Ventas")">🛒 Ventas</a>
+        <a href="@Url.Action("Index", "Compras")">🛍️ Compras</a>
+        <a href="@Url.Action("Index", "Referencias")">📦 Referencias</a>
+        <a href="@Url.Action("Index", "Contabilidad")">📊 Contabilidad</a>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
+    <div id="mainWrapper" class="main-wrapper">
+
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="btn-toggle" onclick="toggleMenu()" title="Abrir/Cerrar Menú">&#9776;</button>
+                <h2 style="margin: 0; font-size: 1.3rem; color: #444;">@ViewBag.Title</h2>
+            </div>
+
+            <div class="dropdown">
+                <span style="color: #666; margin-right: 10px;">Hola, <strong>@usuarioActual</strong></span>
+                <button onclick="toggleUserDropdown()" class="dropbtn">⚙️</button>
+                <div id="userMenu" class="dropdown-content">
+                    <a href="@Url.Action("Logout", "Home")" class="text-danger">🚪 Cerrar sesión</a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="content-body">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        // Abrir/Cerrar Barra Lateral
+        function toggleMenu() {
+            document.getElementById("miSidebar").classList.toggle("open");
+            document.getElementById("mainWrapper").classList.toggle("shifted");
+        }
+
+        // Abrir/Cerrar Menú Usuario
+        function toggleUserDropdown() {
+            document.getElementById("userMenu").classList.toggle("show");
+        }
+
+        // Cerrar menú de usuario si se hace clic fuera
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn') && !event.target.closest('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    if (dropdowns[i].classList.contains('show')) {
+                        dropdowns[i].classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>

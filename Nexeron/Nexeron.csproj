@@ -308,6 +308,7 @@
     <Content Include="Views\Home\Login.cshtml" />
     <Content Include="Views\Index\Index.cshtml" />
     <Content Include="Views\Contabilidad\Index.cshtml" />
+    <Content Include="Views\Contabilidad\Cuentas.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
