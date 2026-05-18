@@ -1,0 +1,84 @@
+﻿@model Nexeron.Models.ArticuloModel
+@{ ViewBag.Title = (Model.codigo == 0 ? "Nuevo" : "Editar") + " Artículo"; }
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm("Guardar", "Referencias", FormMethod.Post))
+{
+    @Html.HiddenFor(m => m.codigo)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.articulo)
+        @Html.TextBoxFor(m => m.articulo, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.articulo)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.desarti)
+        @Html.TextBoxFor(m => m.desarti, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.desarti)
+    </div>
+
+    <div class="form-group">
+        <label>Longitud</label>
+        @Html.TextBoxFor(m => m.longitud, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Altura</label>
+        @Html.TextBoxFor(m => m.altura, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Anchura</label>
+        @Html.TextBoxFor(m => m.anchura, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Tipo</label>
+        @Html.TextBoxFor(m => m.tipo, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Unidad Medida</label>
+        @Html.TextBoxFor(m => m.unidad_medida, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>País Origen</label>
+        @Html.TextBoxFor(m => m.pais_origen, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>IVA</label>
+        @Html.TextBoxFor(m => m.iva, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Reutilizable</label>
+        @Html.CheckBoxFor(m => m.es_reutilizable)
+    </div>
+
+    <div class="form-group">
+        <label>Huella de Carbono</label>
+        @Html.TextBoxFor(m => m.huella_carbono, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Dto Base</label>
+        @Html.TextBoxFor(m => m.dto_base, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <label>Fecha Alta</label>
+        @Html.TextBoxFor(m => m.fecha_alta, new { @class = "form-control", type = "date" })
+    </div>
+
+    <div class="form-group">
+        <label>Observaciones</label>
+        @Html.TextAreaFor(m => m.observaciones, new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="@Url.Action("Index")" class="btn btn-default">Cancelar</a>
+}
