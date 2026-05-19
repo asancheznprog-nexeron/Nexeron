@@ -7,7 +7,10 @@
       <Diagram DiagramId="31e47d440eba48e6bc883c30be055b47" Name="Diagram1" >
         <EntityTypeShape EntityType="cortechecoModel.articulo" Width="1.5" PointX="0.75" PointY="0.75" />
         <EntityTypeShape EntityType="cortechecoModel.usuarios" Width="1.5" PointX="3.375" PointY="0.75" />
-        <EntityTypeShape EntityType="cortechecoModel.cuentas" Width="1.5" PointX="0.75" PointY="3.75" />
+        <EntityTypeShape EntityType="cortechecoModel.cuentas" Width="1.5" PointX="7.25" PointY="0.75" />
+        <EntityTypeShape EntityType="cortechecoModel.articulo_proveedor" Width="1.5" PointX="3" PointY="3.75" />
+        <EntityTypeShape EntityType="cortechecoModel.clientes" Width="1.5" PointX="5.375" PointY="0.75" />
+        <AssociationConnector Association="cortechecoModel.fk_art_prov_articulo" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

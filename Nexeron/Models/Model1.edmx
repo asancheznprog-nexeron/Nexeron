@@ -11,6 +11,53 @@
           </Key>
           <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="articulo" Type="char" MaxLength="50" />
+          <Property Name="descripcion" Type="text" />
+          <Property Name="longitud" Type="decimal" Precision="14" Scale="4" />
+          <Property Name="altura" Type="decimal" Precision="14" Scale="4" />
+          <Property Name="anchura" Type="decimal" Precision="14" Scale="4" />
+          <Property Name="tipo" Type="varchar" MaxLength="20" />
+          <Property Name="unidad_medida" Type="varchar" MaxLength="5" />
+          <Property Name="pais_origen" Type="char" MaxLength="3" />
+          <Property Name="iva" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="es_reutilizable" Type="bool" />
+          <Property Name="huella_carbono" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="dto_base" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="fecha_alta" Type="date" />
+          <Property Name="fecha_baja" Type="date" />
+          <Property Name="activo" Type="bool" />
+          <Property Name="observaciones" Type="text" />
+        </EntityType>
+        <EntityType Name="articulo_proveedor">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="articulo_codigo" Type="int" Nullable="false" />
+          <Property Name="proveedor_codigo" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="descripcion_proveedor" Type="varchar" MaxLength="100" />
+          <Property Name="tarifa" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="descuento" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="unidad" Type="varchar" MaxLength="5" />
+        </EntityType>
+        <EntityType Name="clientes">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
+          <Property Name="POBLACION" Type="varchar" MaxLength="30" />
+          <Property Name="NUMERO" Type="varchar" MaxLength="20" />
+          <Property Name="CP" Type="varchar" MaxLength="5" />
+          <Property Name="PROVINCIA" Type="varchar" MaxLength="30" />
+          <Property Name="PAIS" Type="varchar" MaxLength="100" />
+          <Property Name="FECHA_ALTA" Type="date" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="date" />
+          <Property Name="IBAN" Type="varchar" MaxLength="34" />
+          <Property Name="TELEFONO" Type="varchar" MaxLength="30" />
+          <Property Name="EMAIL" Type="varchar" MaxLength="30" />
+          <Property Name="CIF" Type="varchar" MaxLength="20" Nullable="false" />
         </EntityType>
         <EntityType Name="cuentas">
           <Key>
@@ -28,10 +75,30 @@
           <Property Name="password" Type="char" MaxLength="50" />
           <Property Name="fallos" Type="int" />
         </EntityType>
+        <Association Name="fk_art_prov_articulo">
+          <End Role="articulo" Type="Self.articulo" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="articulo_proveedor" Type="Self.articulo_proveedor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="articulo">
+              <PropertyRef Name="codigo" />
+            </Principal>
+            <Dependent Role="articulo_proveedor">
+              <PropertyRef Name="articulo_codigo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="cortechecoModelStoreContainer">
           <EntitySet Name="articulo" EntityType="Self.articulo" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="articulo_proveedor" EntityType="Self.articulo_proveedor" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="clientes" EntityType="Self.clientes" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="cuentas" EntityType="Self.cuentas" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="usuarios" EntityType="Self.usuarios" Schema="cortecheco" store:Type="Tables" />
+          <AssociationSet Name="fk_art_prov_articulo" Association="Self.fk_art_prov_articulo">
+            <End Role="articulo" EntitySet="articulo" />
+            <End Role="articulo_proveedor" EntitySet="articulo_proveedor" />
+          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -41,6 +108,12 @@
           <EntitySet Name="articulo" EntityType="cortechecoModel.articulo" />
           <EntitySet Name="usuarios" EntityType="cortechecoModel.usuarios" />
           <EntitySet Name="cuentas" EntityType="cortechecoModel.cuentas" />
+          <EntitySet Name="articulo_proveedor" EntityType="cortechecoModel.articulo_proveedor" />
+          <EntitySet Name="clientes" EntityType="cortechecoModel.clientes" />
+          <AssociationSet Name="fk_art_prov_articulo" Association="cortechecoModel.fk_art_prov_articulo">
+            <End Role="articulo" EntitySet="articulo" />
+            <End Role="articulo_proveedor" EntitySet="articulo_proveedor" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="articulo">
           <Key>
@@ -48,6 +121,22 @@
           </Key>
           <Property Name="codigo" Type="Int32" Nullable="false" />
           <Property Name="articulo1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+          <Property Name="longitud" Type="Decimal" />
+          <Property Name="altura" Type="Decimal" />
+          <Property Name="anchura" Type="Decimal" />
+          <Property Name="tipo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="unidad_medida" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="pais_origen" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="iva" Type="Decimal" />
+          <Property Name="es_reutilizable" Type="Boolean" />
+          <Property Name="huella_carbono" Type="Decimal" />
+          <Property Name="dto_base" Type="Decimal" />
+          <Property Name="fecha_alta" Type="DateTime" />
+          <Property Name="fecha_baja" Type="DateTime" />
+          <Property Name="activo" Type="Boolean" />
+          <Property Name="observaciones" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="articulo_proveedor" Relationship="cortechecoModel.fk_art_prov_articulo" FromRole="articulo" ToRole="articulo_proveedor" />
         </EntityType>
         <EntityType Name="usuarios">
           <Key>
@@ -65,6 +154,53 @@
           <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
           <Property Name="NOMBRE_CUENTA" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
         </EntityType>
+        <EntityType Name="articulo_proveedor">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="articulo_codigo" Type="Int32" Nullable="false" />
+          <Property Name="proveedor_codigo" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion_proveedor" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="tarifa" Type="Decimal" />
+          <Property Name="descuento" Type="Decimal" />
+          <Property Name="unidad" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="articulo" Relationship="cortechecoModel.fk_art_prov_articulo" FromRole="articulo_proveedor" ToRole="articulo" />
+        </EntityType>
+        <EntityType Name="clientes">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_FISCAL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DIRECCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="POBLACION" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="NUMERO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CP" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="PROVINCIA" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="PAIS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_ALTA" Type="DateTime" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="DateTime" />
+          <Property Name="IBAN" Type="String" MaxLength="34" FixedLength="false" Unicode="false" />
+          <Property Name="TELEFONO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="CIF" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <Association Name="fk_art_prov_articulo">
+          <End Type="cortechecoModel.articulo" Role="articulo" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="cortechecoModel.articulo_proveedor" Role="articulo_proveedor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="articulo">
+              <PropertyRef Name="codigo" />
+            </Principal>
+            <Dependent Role="articulo_proveedor">
+              <PropertyRef Name="articulo_codigo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -74,6 +210,21 @@
           <EntitySetMapping Name="articulo">
             <EntityTypeMapping TypeName="cortechecoModel.articulo">
               <MappingFragment StoreEntitySet="articulo">
+                <ScalarProperty Name="observaciones" ColumnName="observaciones" />
+                <ScalarProperty Name="activo" ColumnName="activo" />
+                <ScalarProperty Name="fecha_baja" ColumnName="fecha_baja" />
+                <ScalarProperty Name="fecha_alta" ColumnName="fecha_alta" />
+                <ScalarProperty Name="dto_base" ColumnName="dto_base" />
+                <ScalarProperty Name="huella_carbono" ColumnName="huella_carbono" />
+                <ScalarProperty Name="es_reutilizable" ColumnName="es_reutilizable" />
+                <ScalarProperty Name="iva" ColumnName="iva" />
+                <ScalarProperty Name="pais_origen" ColumnName="pais_origen" />
+                <ScalarProperty Name="unidad_medida" ColumnName="unidad_medida" />
+                <ScalarProperty Name="tipo" ColumnName="tipo" />
+                <ScalarProperty Name="anchura" ColumnName="anchura" />
+                <ScalarProperty Name="altura" ColumnName="altura" />
+                <ScalarProperty Name="longitud" ColumnName="longitud" />
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
                 <ScalarProperty Name="articulo1" ColumnName="articulo" />
                 <ScalarProperty Name="codigo" ColumnName="codigo" />
               </MappingFragment>
@@ -92,6 +243,40 @@
           <EntitySetMapping Name="cuentas">
             <EntityTypeMapping TypeName="cortechecoModel.cuentas">
               <MappingFragment StoreEntitySet="cuentas">
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="articulo_proveedor">
+            <EntityTypeMapping TypeName="cortechecoModel.articulo_proveedor">
+              <MappingFragment StoreEntitySet="articulo_proveedor">
+                <ScalarProperty Name="unidad" ColumnName="unidad" />
+                <ScalarProperty Name="descuento" ColumnName="descuento" />
+                <ScalarProperty Name="tarifa" ColumnName="tarifa" />
+                <ScalarProperty Name="descripcion_proveedor" ColumnName="descripcion_proveedor" />
+                <ScalarProperty Name="proveedor_codigo" ColumnName="proveedor_codigo" />
+                <ScalarProperty Name="articulo_codigo" ColumnName="articulo_codigo" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="clientes">
+            <EntityTypeMapping TypeName="cortechecoModel.clientes">
+              <MappingFragment StoreEntitySet="clientes">
+                <ScalarProperty Name="CIF" ColumnName="CIF" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="TELEFONO" ColumnName="TELEFONO" />
+                <ScalarProperty Name="IBAN" ColumnName="IBAN" />
+                <ScalarProperty Name="FECHA_BAJA" ColumnName="FECHA_BAJA" />
+                <ScalarProperty Name="FECHA_ALTA" ColumnName="FECHA_ALTA" />
+                <ScalarProperty Name="PAIS" ColumnName="PAIS" />
+                <ScalarProperty Name="PROVINCIA" ColumnName="PROVINCIA" />
+                <ScalarProperty Name="CP" ColumnName="CP" />
+                <ScalarProperty Name="NUMERO" ColumnName="NUMERO" />
+                <ScalarProperty Name="POBLACION" ColumnName="POBLACION" />
+                <ScalarProperty Name="DIRECCION" ColumnName="DIRECCION" />
+                <ScalarProperty Name="NOMBRE_FISCAL" ColumnName="NOMBRE_FISCAL" />
                 <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
                 <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
               </MappingFragment>

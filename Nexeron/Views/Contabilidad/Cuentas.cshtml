@@ -335,7 +335,7 @@
 <div class="wrap-contabilidad">
     <div class="submenu-container">
         <a href="@Url.Action("Cuentas", "Contabilidad")" class="btn-submenu active">Plan de Cuentas</a>
-        <a href="@Url.Action("Clientes", "Contabilidad")" class="btn-submenu">Clientes</a>
+        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
         <a href="@Url.Action("Proveedores", "Contabilidad")" class="btn-submenu">Proveedores</a>
         <a href="@Url.Action("Bancos", "Contabilidad")" class="btn-submenu">Bancos</a>
         <a href="@Url.Action("FormasPago", "Contabilidad")" class="btn-submenu">Formas de Cobro/Pago</a>
@@ -473,7 +473,7 @@
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
             "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            "order": [],
+            "order": [[0, "asc"]],
             "scrollY": "369px",
             "scrollCollapse": false,
             "paging": true,
