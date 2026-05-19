@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
 
 namespace Nexeron.Models
 {
@@ -7,11 +9,8 @@ namespace Nexeron.Models
     {
         public int codigo { get; set; }
 
-        [Required(ErrorMessage = "El código es obligatorio")]
+        [Required(ErrorMessage = "El nombre del artículo es obligatorio")]
         public string articulo { get; set; }
-
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        public string desarti { get; set; }
 
         public string descripcion { get; set; }
         public decimal longitud { get; set; }
@@ -28,5 +27,11 @@ namespace Nexeron.Models
         public DateTime? fecha_baja { get; set; }
         public bool activo { get; set; }
         public string observaciones { get; set; }
+
+        public decimal volumen => longitud * altura * anchura;
+
+        public IEnumerable<SelectListItem> TiposList { get; set; }
+        public IEnumerable<SelectListItem> UnidadesList { get; set; }
+        public IEnumerable<SelectListItem> PaisesList { get; set; }
     }
 }

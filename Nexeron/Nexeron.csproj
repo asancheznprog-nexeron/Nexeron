@@ -232,7 +232,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Models\Modelos\ArticuloController.cs" />
+    <Compile Include="Models\Modelos\ArticuloModel.cs" />
     <Compile Include="Models\Modelos\CuentaModel.cs" />
     <Compile Include="Models\Modelos\LoginModel.cs" />
     <Compile Include="Models\usuarios.cs">

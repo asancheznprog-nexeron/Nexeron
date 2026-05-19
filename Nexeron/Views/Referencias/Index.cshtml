@@ -1,39 +1,163 @@
 ﻿@model IEnumerable<Nexeron.Models.ArticuloModel>
-@{ 
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "Gestión de Artículos"; 
-    }
+    ViewBag.Title = "Gestión de Artículos";
+}
 
-<h2>Gestión de Artículos</h2>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Artículos</h2>
+        <a href="@Url.Action("AddOrEdit", "Referencias", new { id = 0 })" class="btn btn-primary">
+            <i class="glyphicon glyphicon-plus"></i> Nuevo Artículo
+        </a>
+    </div>
 
-<p>
-    <a href="@Url.Action("AddOrEdit", "Referencias", new { id = 0 })" class="btn btn-primary">Nuevo Artículo</a>
-</p>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+    <!-- Barra de Búsqueda Rápida y Botones -->
+    <div class="well well-sm">
+        @using (Html.BeginForm("Index", "Referencias", FormMethod.Get, new { @class = "form-inline" }))
         {
-            <tr>
-                <td>@item.articulo</td>
-                <td>@item.desarti</td>
-                <td>@item.descripcion</td>
-                <td>
-                    <a href="@Url.Action("AddOrEdit", "Referencias", new { id = item.codigo })" class="btn btn-warning">Modificar</a>
-                    @using (Html.BeginForm("Borrar", "Referencias", new { id = item.codigo }, FormMethod.Post, new { style = "display:inline;" }))
-                    {
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Borrar registro?')">Borrar</button>
-                    }
-                </td>
-            </tr>
+            <div class="form-group mr-3">
+                <input type="text" name="buscar" class="form-control" placeholder="Buscar por código, nombre o desc..." value="@ViewBag.buscar" style="width: 300px;">
+            </div>
+            <button type="submit" class="btn btn-info">Buscar</button>
+            <a href="@Url.Action("Index", "Referencias")" class="btn btn-default">Limpiar</a>
+            <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#modalFiltros">
+                <i class="glyphicon glyphicon-filter"></i> Filtros Avanzados
+            </button>
         }
-    </tbody>
-</table>
+    </div>
+
+    <!-- Tabla de Resultados -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th>Código</th>
+                    <th>Artículo</th>
+                    <th>Tipo</th>
+                    <th>Unidad</th>
+                    <th>Fecha Alta</th>
+                    <th>Fecha Baja</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.codigo</td>
+                            <td>@item.articulo</td>
+                            <td>@item.tipo</td>
+                            <td>@item.unidad_medida</td>
+                            <td>@(item.fecha_alta.HasValue ? item.fecha_alta.Value.ToString("dd/MM/yyyy") : "")</td>
+                            <td>@(item.fecha_baja.HasValue ? item.fecha_baja.Value.ToString("dd/MM/yyyy") : "")</td>
+                            <td class="text-center" style="white-space: nowrap;">
+                                <a href="@Url.Action("AddOrEdit", "Referencias", new { id = item.codigo })" class="btn btn-warning btn-sm">Modificar</a>
+
+                                @using (Html.BeginForm("Borrar", "Referencias", new { id = item.codigo }, FormMethod.Post, new { style = "display:inline;" }))
+                                {
+                                    bool estaDeBaja = item.fecha_baja.HasValue && item.fecha_baja.Value < DateTime.Today;
+                                    string btnClass = estaDeBaja ? "btn btn-secondary btn-sm" : "btn btn-danger btn-sm";
+                                    string btnText = estaDeBaja ? "Borrar (Baja)" : "Borrar";
+
+                                    <button type="submit" class="@btnClass" onclick="return confirm('¿Borrar registro de forma permanente?')">@btnText</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">No se encontraron artículos con los criterios actuales.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Filtros Avanzados -->
+<div class="modal fade" id="modalFiltros" tabindex="-1" role="dialog" aria-labelledby="modalFiltrosLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("Index", "Referencias", FormMethod.Get))
+            {
+                <div class="modal-header bg-primary text-white">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="modalFiltrosLabel">Filtros Avanzados</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- Para mantener la busqueda rápida si se uso -->
+                    <input type="hidden" name="buscar" value="@ViewBag.buscar" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Código Desde</label>
+                                <input type="number" name="codDesde" class="form-control" value="@ViewBag.codDesde" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Código Hasta</label>
+                                <input type="number" name="codHasta" class="form-control" value="@ViewBag.codHasta" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tipo Desde</label>
+                                <input type="text" name="tipoDesde" class="form-control" value="@ViewBag.tipoDesde" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tipo Hasta</label>
+                                <input type="text" name="tipoHasta" class="form-control" value="@ViewBag.tipoHasta" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha Alta Desde</label>
+                                <input type="date" name="fechaAltaDesde" class="form-control" value="@ViewBag.fechaAltaDesde" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha Alta Hasta</label>
+                                <input type="date" name="fechaAltaHasta" class="form-control" value="@ViewBag.fechaAltaHasta" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha Baja Desde</label>
+                                <input type="date" name="fechaBajaDesde" class="form-control" value="@ViewBag.fechaBajaDesde" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha Baja Hasta</label>
+                                <input type="date" name="fechaBajaHasta" class="form-control" value="@ViewBag.fechaBajaHasta" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
