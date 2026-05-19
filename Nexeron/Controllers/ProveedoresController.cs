@@ -6,14 +6,14 @@ using Nexeron.Models;
 
 namespace Nexeron.Controllers
 {
-    public class ClientesController : Controller
+    public class ProveedoresController : Controller
     {
         public ActionResult Index()
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
                 return RedirectToAction("Login", "Home");
 
-            List<clientes> listaClientes = new List<clientes>();
+            List<proveedores> listaProveedores = new List<proveedores>();
             string connStr = Session["cadenaConexion"].ToString();
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
@@ -26,14 +26,14 @@ namespace Nexeron.Controllers
                         cmd.CommandText = @"SELECT CUENTA, NOMBRE_CUENTA, NOMBRE_FISCAL, CIF, 
                                                    DIRECCION, CP, POBLACION, TELEFONO,
                                                    NUMERO, PROVINCIA, PAIS, FECHA_ALTA, FECHA_BAJA, IBAN, EMAIL 
-                                            FROM clientes 
-                                            ORDER BY NOMBRE_CUENTA ASC";
+                                            FROM proveedores 
+                                            ORDER BY CUENTA ASC";
 
                         using (var reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                listaClientes.Add(new clientes
+                                listaProveedores.Add(new proveedores
                                 {
                                     CUENTA = reader["CUENTA"].ToString(),
                                     NOMBRE_CUENTA = reader["NOMBRE_CUENTA"].ToString(),
@@ -57,16 +57,16 @@ namespace Nexeron.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Error = "Error al cargar clientes: " + ex.Message;
+                    ViewBag.Error = "Error al cargar proveedores: " + ex.Message;
                 }
             }
 
-            return View(listaClientes);
+            return View(listaProveedores);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Crear(clientes nuevo)
+        public ActionResult Crear(proveedores nuevo)
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
                 return RedirectToAction("Login", "Home");
@@ -75,7 +75,6 @@ namespace Nexeron.Controllers
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
                 conexion.Open();
-
                 using (MySqlTransaction transaccion = conexion.BeginTransaction())
                 {
                     try
@@ -83,13 +82,13 @@ namespace Nexeron.Controllers
                         using (var cmdCheck = conexion.CreateCommand())
                         {
                             cmdCheck.Transaction = transaccion;
-                            cmdCheck.CommandText = "SELECT COUNT(*) FROM clientes WHERE CUENTA = @cuenta OR CIF = @cif";
+                            cmdCheck.CommandText = "SELECT COUNT(*) FROM proveedores WHERE CUENTA = @cuenta OR CIF = @cif";
                             cmdCheck.Parameters.AddWithValue("@cuenta", nuevo.CUENTA);
                             cmdCheck.Parameters.AddWithValue("@cif", nuevo.CIF);
 
                             if (Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0)
                             {
-                                TempData["Error"] = "La cuenta contable o el CIF ya existen en el fichero de clientes.";
+                                TempData["Error"] = "La cuenta contable o el CIF ya existen en el fichero de proveedores.";
                                 TempData["TipoError"] = "Crear";
                                 return RedirectToAction("Index");
                             }
@@ -102,9 +101,7 @@ namespace Nexeron.Controllers
                             cmdCheckCta.CommandText = "SELECT COUNT(*) FROM cuentas WHERE CUENTA = @cuenta";
                             cmdCheckCta.Parameters.AddWithValue("@cuenta", nuevo.CUENTA);
                             if (Convert.ToInt32(cmdCheckCta.ExecuteScalar()) > 0)
-                            {
                                 existeCuenta = true;
-                            }
                         }
 
                         if (!existeCuenta)
@@ -119,38 +116,38 @@ namespace Nexeron.Controllers
                             }
                         }
 
-                        using (var cmdInsertCli = conexion.CreateCommand())
+                        using (var cmdInsertProv = conexion.CreateCommand())
                         {
-                            cmdInsertCli.Transaction = transaccion;
-                            cmdInsertCli.CommandText = @"INSERT INTO clientes (CUENTA, NOMBRE_CUENTA, NOMBRE_FISCAL, DIRECCION, POBLACION, NUMERO, CP, PROVINCIA, PAIS, FECHA_ALTA, FECHA_BAJA, IBAN, TELEFONO, EMAIL, CIF) 
-                                        VALUES (@cuenta, @nombreCuenta, @nombreFiscal, @direccion, @poblacion, @numero, @cp, @provincia, @pais, @fechaAlta, @fechaBaja, @iban, @telefono, @email, @cif)";
+                            cmdInsertProv.Transaction = transaccion;
+                            cmdInsertProv.CommandText = @"INSERT INTO proveedores (CUENTA, NOMBRE_CUENTA, NOMBRE_FISCAL, DIRECCION, POBLACION, NUMERO, CP, PROVINCIA, PAIS, FECHA_ALTA, FECHA_BAJA, IBAN, TELEFONO, EMAIL, CIF) 
+                                                VALUES (@cuenta, @nombreCuenta, @nombreFiscal, @direccion, @poblacion, @numero, @cp, @provincia, @pais, @fechaAlta, @fechaBaja, @iban, @telefono, @email, @cif)";
 
-                            cmdInsertCli.Parameters.AddWithValue("@cuenta", nuevo.CUENTA);
-                            cmdInsertCli.Parameters.AddWithValue("@nombreCuenta", nuevo.NOMBRE_CUENTA);
-                            cmdInsertCli.Parameters.AddWithValue("@nombreFiscal", nuevo.NOMBRE_FISCAL);
-                            cmdInsertCli.Parameters.AddWithValue("@direccion", nuevo.DIRECCION ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@poblacion", nuevo.POBLACION ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@numero", nuevo.NUMERO ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@cp", nuevo.CP ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@provincia", nuevo.PROVINCIA ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@pais", nuevo.PAIS ?? "España");
-                            cmdInsertCli.Parameters.AddWithValue("@fechaAlta", nuevo.FECHA_ALTA);
-                            cmdInsertCli.Parameters.AddWithValue("@fechaBaja", (object)nuevo.FECHA_BAJA ?? DBNull.Value);
-                            cmdInsertCli.Parameters.AddWithValue("@iban", nuevo.IBAN ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@telefono", nuevo.TELEFONO ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@email", nuevo.EMAIL ?? "");
-                            cmdInsertCli.Parameters.AddWithValue("@cif", nuevo.CIF);
+                            cmdInsertProv.Parameters.AddWithValue("@cuenta", nuevo.CUENTA);
+                            cmdInsertProv.Parameters.AddWithValue("@nombreCuenta", nuevo.NOMBRE_CUENTA);
+                            cmdInsertProv.Parameters.AddWithValue("@nombreFiscal", nuevo.NOMBRE_FISCAL);
+                            cmdInsertProv.Parameters.AddWithValue("@direccion", nuevo.DIRECCION ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@poblacion", nuevo.POBLACION ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@numero", nuevo.NUMERO ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@cp", nuevo.CP ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@provincia", nuevo.PROVINCIA ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@pais", nuevo.PAIS ?? "España");
+                            cmdInsertProv.Parameters.AddWithValue("@fechaAlta", nuevo.FECHA_ALTA);
+                            cmdInsertProv.Parameters.AddWithValue("@fechaBaja", (object)nuevo.FECHA_BAJA ?? DBNull.Value);
+                            cmdInsertProv.Parameters.AddWithValue("@iban", nuevo.IBAN ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@telefono", nuevo.TELEFONO ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@email", nuevo.EMAIL ?? "");
+                            cmdInsertProv.Parameters.AddWithValue("@cif", nuevo.CIF);
 
-                            cmdInsertCli.ExecuteNonQuery();
+                            cmdInsertProv.ExecuteNonQuery();
                         }
 
                         transaccion.Commit();
-                        TempData["MensajeExito"] = "Cliente dado de alta correctamente en el sistema.";
+                        TempData["MensajeExito"] = "Proveedor dado de alta correctamente en el sistema.";
                     }
                     catch (Exception ex)
                     {
                         transaccion.Rollback();
-                        TempData["Error"] = "Error al guardar el cliente: " + ex.Message;
+                        TempData["Error"] = "Error al guardar el proveedor: " + ex.Message;
                         TempData["TipoError"] = "Crear";
                     }
                 }
@@ -160,7 +157,7 @@ namespace Nexeron.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Actualizar(clientes modificado)
+        public ActionResult Actualizar(proveedores modificado)
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
                 return RedirectToAction("Login", "Home");
@@ -182,40 +179,40 @@ namespace Nexeron.Controllers
                             cmdCta.ExecuteNonQuery();
                         }
 
-                        using (var cmdCli = conexion.CreateCommand())
+                        using (var cmdProv = conexion.CreateCommand())
                         {
-                            cmdCli.Transaction = transaccion;
-                            cmdCli.CommandText = @"UPDATE clientes SET 
-                                        NOMBRE_CUENTA = @nombreCuenta, NOMBRE_FISCAL = @nombreFiscal, DIRECCION = @direccion, 
-                                        POBLACION = @poblacion, NUMERO = @numero, CP = @cp, PROVINCIA = @provincia, PAIS = @pais, 
-                                        FECHA_BAJA = @fechaBaja, IBAN = @iban, TELEFONO = @telefono, EMAIL = @email, CIF = @cif 
-                                        WHERE CUENTA = @cuenta";
+                            cmdProv.Transaction = transaccion;
+                            cmdProv.CommandText = @"UPDATE proveedores SET 
+                                                NOMBRE_CUENTA = @nombreCuenta, NOMBRE_FISCAL = @nombreFiscal, DIRECCION = @direccion, 
+                                                POBLACION = @poblacion, NUMERO = @numero, CP = @cp, PROVINCIA = @provincia, PAIS = @pais, 
+                                                FECHA_BAJA = @fechaBaja, IBAN = @iban, TELEFONO = @telefono, EMAIL = @email, CIF = @cif 
+                                                WHERE CUENTA = @cuenta";
 
-                            cmdCli.Parameters.AddWithValue("@nombreCuenta", modificado.NOMBRE_CUENTA);
-                            cmdCli.Parameters.AddWithValue("@nombreFiscal", modificado.NOMBRE_FISCAL);
-                            cmdCli.Parameters.AddWithValue("@direccion", modificado.DIRECCION ?? "");
-                            cmdCli.Parameters.AddWithValue("@poblacion", modificado.POBLACION ?? "");
-                            cmdCli.Parameters.AddWithValue("@numero", modificado.NUMERO ?? "");
-                            cmdCli.Parameters.AddWithValue("@cp", modificado.CP ?? "");
-                            cmdCli.Parameters.AddWithValue("@provincia", modificado.PROVINCIA ?? "");
-                            cmdCli.Parameters.AddWithValue("@pais", modificado.PAIS ?? "");
-                            cmdCli.Parameters.AddWithValue("@fechaBaja", (object)modificado.FECHA_BAJA ?? DBNull.Value);
-                            cmdCli.Parameters.AddWithValue("@iban", modificado.IBAN ?? "");
-                            cmdCli.Parameters.AddWithValue("@telefono", modificado.TELEFONO ?? "");
-                            cmdCli.Parameters.AddWithValue("@email", modificado.EMAIL ?? "");
-                            cmdCli.Parameters.AddWithValue("@cif", modificado.CIF);
-                            cmdCli.Parameters.AddWithValue("@cuenta", modificado.CUENTA);
+                            cmdProv.Parameters.AddWithValue("@nombreCuenta", modificado.NOMBRE_CUENTA);
+                            cmdProv.Parameters.AddWithValue("@nombreFiscal", modificado.NOMBRE_FISCAL);
+                            cmdProv.Parameters.AddWithValue("@direccion", modificado.DIRECCION ?? "");
+                            cmdProv.Parameters.AddWithValue("@poblacion", modificado.POBLACION ?? "");
+                            cmdProv.Parameters.AddWithValue("@numero", modificado.NUMERO ?? "");
+                            cmdProv.Parameters.AddWithValue("@cp", modificado.CP ?? "");
+                            cmdProv.Parameters.AddWithValue("@provincia", modificado.PROVINCIA ?? "");
+                            cmdProv.Parameters.AddWithValue("@pais", modificado.PAIS ?? "");
+                            cmdProv.Parameters.AddWithValue("@fechaBaja", (object)modificado.FECHA_BAJA ?? DBNull.Value);
+                            cmdProv.Parameters.AddWithValue("@iban", modificado.IBAN ?? "");
+                            cmdProv.Parameters.AddWithValue("@telefono", modificado.TELEFONO ?? "");
+                            cmdProv.Parameters.AddWithValue("@email", modificado.EMAIL ?? "");
+                            cmdProv.Parameters.AddWithValue("@cif", modificado.CIF);
+                            cmdProv.Parameters.AddWithValue("@cuenta", modificado.CUENTA);
 
-                            cmdCli.ExecuteNonQuery();
+                            cmdProv.ExecuteNonQuery();
                         }
 
                         transaccion.Commit();
-                        TempData["MensajeExito"] = "Cliente y cuenta contable actualizados correctamente.";
+                        TempData["MensajeExito"] = "Proveedor y cuenta contable actualizados correctamente.";
                     }
                     catch (Exception ex)
                     {
                         transaccion.Rollback();
-                        TempData["Error"] = "Error al modificar el cliente: " + ex.Message;
+                        TempData["Error"] = "Error al modificar el proveedor: " + ex.Message;
                         TempData["TipoError"] = "Editar";
                     }
                 }
@@ -238,12 +235,12 @@ namespace Nexeron.Controllers
                 {
                     try
                     {
-                        using (var cmdCli = conexion.CreateCommand())
+                        using (var cmdProv = conexion.CreateCommand())
                         {
-                            cmdCli.Transaction = transaccion;
-                            cmdCli.CommandText = "DELETE FROM clientes WHERE CUENTA = @cuenta";
-                            cmdCli.Parameters.AddWithValue("@cuenta", id);
-                            cmdCli.ExecuteNonQuery();
+                            cmdProv.Transaction = transaccion;
+                            cmdProv.CommandText = "DELETE FROM proveedores WHERE CUENTA = @cuenta";
+                            cmdProv.Parameters.AddWithValue("@cuenta", id);
+                            cmdProv.ExecuteNonQuery();
                         }
 
                         using (var cmdCta = conexion.CreateCommand())
@@ -255,13 +252,13 @@ namespace Nexeron.Controllers
                         }
 
                         transaccion.Commit();
-                        TempData["MensajeExito"] = "Cliente y cuenta contable eliminados del sistema.";
+                        TempData["MensajeExito"] = "Proveedor y cuenta contable eliminados del sistema.";
                     }
                     catch (MySqlException ex)
                     {
                         transaccion.Rollback();
                         if (ex.Number == 1451)
-                            TempData["Error"] = "No se puede eliminar. Este registro ya posee histórico, movimientos contables o facturas asociadas.";
+                            TempData["Error"] = "No se puede eliminar. Este proveedor ya posee histórico, movimientos contables o facturas asociadas.";
                         else
                             TempData["Error"] = "Error de base de datos al eliminar: " + ex.Message;
                     }

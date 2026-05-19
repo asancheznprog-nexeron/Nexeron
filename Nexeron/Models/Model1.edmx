@@ -66,6 +66,26 @@
           <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="NOMBRE_CUENTA" Type="char" MaxLength="100" />
         </EntityType>
+        <EntityType Name="proveedores">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
+          <Property Name="POBLACION" Type="varchar" MaxLength="30" />
+          <Property Name="NUMERO" Type="varchar" MaxLength="20" />
+          <Property Name="CP" Type="varchar" MaxLength="5" />
+          <Property Name="PROVINCIA" Type="varchar" MaxLength="30" />
+          <Property Name="PAIS" Type="varchar" MaxLength="100" />
+          <Property Name="FECHA_ALTA" Type="date" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="date" />
+          <Property Name="IBAN" Type="varchar" MaxLength="34" />
+          <Property Name="TELEFONO" Type="varchar" MaxLength="30" />
+          <Property Name="EMAIL" Type="varchar" MaxLength="30" />
+          <Property Name="CIF" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
         <EntityType Name="usuarios">
           <Key>
             <PropertyRef Name="clave" />
@@ -94,6 +114,7 @@
           <EntitySet Name="articulo_proveedor" EntityType="Self.articulo_proveedor" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="clientes" EntityType="Self.clientes" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="cuentas" EntityType="Self.cuentas" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="proveedores" EntityType="Self.proveedores" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="usuarios" EntityType="Self.usuarios" Schema="cortecheco" store:Type="Tables" />
           <AssociationSet Name="fk_art_prov_articulo" Association="Self.fk_art_prov_articulo">
             <End Role="articulo" EntitySet="articulo" />
@@ -114,6 +135,7 @@
             <End Role="articulo" EntitySet="articulo" />
             <End Role="articulo_proveedor" EntitySet="articulo_proveedor" />
           </AssociationSet>
+          <EntitySet Name="proveedores" EntityType="cortechecoModel.proveedores" />
         </EntityContainer>
         <EntityType Name="articulo">
           <Key>
@@ -201,6 +223,26 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="proveedores">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_FISCAL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DIRECCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="POBLACION" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="NUMERO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CP" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="PROVINCIA" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="PAIS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_ALTA" Type="DateTime" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="DateTime" />
+          <Property Name="IBAN" Type="String" MaxLength="34" FixedLength="false" Unicode="false" />
+          <Property Name="TELEFONO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="CIF" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -264,6 +306,27 @@
           <EntitySetMapping Name="clientes">
             <EntityTypeMapping TypeName="cortechecoModel.clientes">
               <MappingFragment StoreEntitySet="clientes">
+                <ScalarProperty Name="CIF" ColumnName="CIF" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="TELEFONO" ColumnName="TELEFONO" />
+                <ScalarProperty Name="IBAN" ColumnName="IBAN" />
+                <ScalarProperty Name="FECHA_BAJA" ColumnName="FECHA_BAJA" />
+                <ScalarProperty Name="FECHA_ALTA" ColumnName="FECHA_ALTA" />
+                <ScalarProperty Name="PAIS" ColumnName="PAIS" />
+                <ScalarProperty Name="PROVINCIA" ColumnName="PROVINCIA" />
+                <ScalarProperty Name="CP" ColumnName="CP" />
+                <ScalarProperty Name="NUMERO" ColumnName="NUMERO" />
+                <ScalarProperty Name="POBLACION" ColumnName="POBLACION" />
+                <ScalarProperty Name="DIRECCION" ColumnName="DIRECCION" />
+                <ScalarProperty Name="NOMBRE_FISCAL" ColumnName="NOMBRE_FISCAL" />
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="proveedores">
+            <EntityTypeMapping TypeName="cortechecoModel.proveedores">
+              <MappingFragment StoreEntitySet="proveedores">
                 <ScalarProperty Name="CIF" ColumnName="CIF" />
                 <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
                 <ScalarProperty Name="TELEFONO" ColumnName="TELEFONO" />

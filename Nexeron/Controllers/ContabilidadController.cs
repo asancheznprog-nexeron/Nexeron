@@ -116,24 +116,66 @@ namespace Nexeron.Controllers
 
                 using (MySqlConnection conexion = new MySqlConnection(connStr))
                 {
-                    try
+                    conexion.Open();
+                    using (MySqlTransaction transaccion = conexion.BeginTransaction())
                     {
-                        conexion.Open();
-                        using (var cmd = conexion.CreateCommand())
+                        try
                         {
                             
-                            cmd.CommandText = "UPDATE cuentas SET NOMBRE_CUENTA = @nombre WHERE CUENTA = @codigo";
-                            cmd.Parameters.AddWithValue("@nombre", cuentaModificada.Nombre);
-                            cmd.Parameters.AddWithValue("@codigo", cuentaModificada.Codigo);
+                            using (var cmdCta = conexion.CreateCommand())
+                            {
+                                cmdCta.Transaction = transaccion;
+                                cmdCta.CommandText = "UPDATE cuentas SET NOMBRE_CUENTA = @nombre WHERE CUENTA = @codigo";
+                                cmdCta.Parameters.AddWithValue("@nombre", cuentaModificada.Nombre);
+                                cmdCta.Parameters.AddWithValue("@codigo", cuentaModificada.Codigo);
+                                cmdCta.ExecuteNonQuery();
+                            }
 
-                            cmd.ExecuteNonQuery();
-                            TempData["MensajeExito"] = "Cuenta modificada correctamente.";
+                            switch (cuentaModificada.Codigo)
+                            {
+                                case string c when c.StartsWith("43"): // Clientes
+                                    using (var cmdCli = conexion.CreateCommand())
+                                    {
+                                        cmdCli.Transaction = transaccion;
+                                        cmdCli.CommandText = "UPDATE clientes SET NOMBRE_CUENTA = @nombre WHERE CUENTA = @codigo";
+                                        cmdCli.Parameters.AddWithValue("@nombre", cuentaModificada.Nombre);
+                                        cmdCli.Parameters.AddWithValue("@codigo", cuentaModificada.Codigo);
+                                        cmdCli.ExecuteNonQuery();
+                                    }
+                                    break;
+
+                                case string c when c.StartsWith("40") || c.StartsWith("41"): // Proveedores / Acreedores
+                                    using (var cmdProv = conexion.CreateCommand())
+                                    {
+                                        cmdProv.Transaction = transaccion;
+                                        cmdProv.CommandText = "UPDATE proveedores SET NOMBRE_CUENTA = @nombre WHERE CUENTA = @codigo";
+                                        cmdProv.Parameters.AddWithValue("@nombre", cuentaModificada.Nombre);
+                                        cmdProv.Parameters.AddWithValue("@codigo", cuentaModificada.Codigo);
+                                        cmdProv.ExecuteNonQuery();
+                                    }
+                                    break;
+
+                                case string c when c.StartsWith("5"): // Bancos
+                                    using (var cmdBan = conexion.CreateCommand())
+                                    {
+                                        cmdBan.Transaction = transaccion;
+                                        cmdBan.CommandText = "UPDATE bancos SET NOMBRE_CUENTA = @nombre WHERE CUENTA = @codigo";
+                                        cmdBan.Parameters.AddWithValue("@nombre", cuentaModificada.Nombre);
+                                        cmdBan.Parameters.AddWithValue("@codigo", cuentaModificada.Codigo);
+                                        cmdBan.ExecuteNonQuery();
+                                    }
+                                    break;
+                            }
+
+                            transaccion.Commit();
+                            TempData["MensajeExito"] = "Cuenta modificada y sincronizada correctamente.";
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        TempData["Error"] = "Error al modificar la cuenta: " + ex.Message;
-                        TempData["TipoError"] = "Editar";
+                        catch (Exception ex)
+                        {
+                            transaccion.Rollback();
+                            TempData["Error"] = "Error al modificar la cuenta: " + ex.Message;
+                            TempData["TipoError"] = "Editar";
+                        }
                     }
                 }
             }
@@ -155,33 +197,73 @@ namespace Nexeron.Controllers
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
-                try
+                conexion.Open();
+                using (MySqlTransaction transaccion = conexion.BeginTransaction())
                 {
-                    conexion.Open();
-                    using (var cmd = conexion.CreateCommand())
+                    try
                     {
-                        cmd.CommandText = "DELETE FROM cuentas WHERE CUENTA = @codigo";
-                        cmd.Parameters.AddWithValue("@codigo", id);
+                        switch (id)
+                        {
+                            case string c when c.StartsWith("43"): // Clientes
+                                using (var cmdCli = conexion.CreateCommand())
+                                {
+                                    cmdCli.Transaction = transaccion;
+                                    cmdCli.CommandText = "DELETE FROM clientes WHERE CUENTA = @codigo";
+                                    cmdCli.Parameters.AddWithValue("@codigo", id);
+                                    cmdCli.ExecuteNonQuery();
+                                }
+                                break;
 
-                        int filasAfectadas = cmd.ExecuteNonQuery();
+                            case string c when c.StartsWith("40") || c.StartsWith("41"): // Proveedores / Acreedores
+                                using (var cmdProv = conexion.CreateCommand())
+                                {
+                                    cmdProv.Transaction = transaccion;
+                                    cmdProv.CommandText = "DELETE FROM proveedores WHERE CUENTA = @codigo";
+                                    cmdProv.Parameters.AddWithValue("@codigo", id);
+                                    cmdProv.ExecuteNonQuery();
+                                }
+                                break;
 
-                        if (filasAfectadas > 0)
-                            TempData["MensajeExito"] = "Cuenta eliminada correctamente.";
-                        else
-                            TempData["Error"] = "La cuenta no existe o ya ha sido eliminada.";
+                            case string c when c.StartsWith("5"): // Bancos
+                                using (var cmdBan = conexion.CreateCommand())
+                                {
+                                    cmdBan.Transaction = transaccion;
+                                    cmdBan.CommandText = "DELETE FROM bancos WHERE CUENTA = @codigo";
+                                    cmdBan.Parameters.AddWithValue("@codigo", id);
+                                    cmdBan.ExecuteNonQuery();
+                                }
+                                break;
+                        }
+
+                        using (var cmdCta = conexion.CreateCommand())
+                        {
+                            cmdCta.Transaction = transaccion;
+                            cmdCta.CommandText = "DELETE FROM cuentas WHERE CUENTA = @codigo";
+                            cmdCta.Parameters.AddWithValue("@codigo", id);
+
+                            int filasAfectadas = cmdCta.ExecuteNonQuery();
+
+                            if (filasAfectadas > 0)
+                                TempData["MensajeExito"] = "Cuenta y registros asociados eliminados correctamente.";
+                            else
+                                TempData["Error"] = "La cuenta no existe o ya ha sido eliminada.";
+                        }
+
+                        transaccion.Commit();
                     }
-                }
-                catch (MySqlException ex)
-                {
-                    
-                    if (ex.Number == 1451)
-                        TempData["Error"] = "No se puede eliminar. Esta cuenta ya está asociada a facturas, asientos o movimientos contables.";
-                    else
-                        TempData["Error"] = "Error de base de datos: " + ex.Message;
-                }
-                catch (Exception ex)
-                {
-                    TempData["Error"] = "Error al eliminar: " + ex.Message;
+                    catch (MySqlException ex)
+                    {
+                        transaccion.Rollback();
+                        if (ex.Number == 1451)
+                            TempData["Error"] = "No se puede eliminar. Esta cuenta ya está asociada a facturas o movimientos.";
+                        else
+                            TempData["Error"] = "Error de base de datos: " + ex.Message;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaccion.Rollback();
+                        TempData["Error"] = "Error al intentar eliminar la cuenta: " + ex.Message;
+                    }
                 }
             }
 

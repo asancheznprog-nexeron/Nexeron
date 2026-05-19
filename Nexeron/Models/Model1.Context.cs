@@ -30,5 +30,6 @@ namespace Nexeron.Models
         public virtual DbSet<cuentas> cuentas { get; set; }
         public virtual DbSet<articulo_proveedor> articulo_proveedor { get; set; }
         public virtual DbSet<clientes> clientes { get; set; }
+        public virtual DbSet<proveedores> proveedores { get; set; }
     }
 }

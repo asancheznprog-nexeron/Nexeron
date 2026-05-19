@@ -11,6 +11,7 @@
         <EntityTypeShape EntityType="cortechecoModel.articulo_proveedor" Width="1.5" PointX="3" PointY="3.75" />
         <EntityTypeShape EntityType="cortechecoModel.clientes" Width="1.5" PointX="5.375" PointY="0.75" />
         <AssociationConnector Association="cortechecoModel.fk_art_prov_articulo" />
+        <EntityTypeShape EntityType="cortechecoModel.proveedores" Width="1.5" PointX="5.375" PointY="5.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -204,6 +204,7 @@
     <Compile Include="App_Start\BundleConfig2.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ProveedoresController.cs" />
     <Compile Include="Controllers\ClientesController.cs" />
     <Compile Include="Controllers\ContabilidadController.cs" />
     <Compile Include="Controllers\IndexController.cs" />
@@ -242,6 +243,9 @@
     <Compile Include="Models\Modelos\ArticuloModel.cs" />
     <Compile Include="Models\Modelos\CuentaModel.cs" />
     <Compile Include="Models\Modelos\LoginModel.cs" />
+    <Compile Include="Models\proveedores.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\usuarios.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -322,6 +326,7 @@
     <Content Include="Views\Referencias\Index.cshtml" />
     <Content Include="Views\Referencias\AddOrEdit.cshtml" />
     <Content Include="Views\Clientes\Index.cshtml" />
+    <Content Include="Views\Proveedores\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
