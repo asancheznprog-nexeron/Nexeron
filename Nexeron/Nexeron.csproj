@@ -320,7 +320,6 @@
     <Content Include="Views\Contabilidad\Index.cshtml" />
     <Content Include="Views\Contabilidad\Cuentas.cshtml" />
     <Content Include="Views\Referencias\Index.cshtml" />
-    <Content Include="Views\Referencias\AddOrEdit.cshtml" />
     <Content Include="Views\Clientes\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
