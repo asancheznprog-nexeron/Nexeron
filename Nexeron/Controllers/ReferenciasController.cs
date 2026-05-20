@@ -15,6 +15,7 @@ namespace Nexeron.Controllers
             var tipos = new List<SelectListItem> { new SelectListItem { Value = "", Text = "-- Seleccione --" } };
             var unidades = new List<SelectListItem> { new SelectListItem { Value = "", Text = "-- Seleccione --" } };
             var paises = new List<SelectListItem> { new SelectListItem { Value = "", Text = "-- Seleccione --" } };
+            var proveedores = new List<SelectListItem> { new SelectListItem { Value = "", Text = "-- Seleccione --" } };
 
             using (var con = new MySqlConnection(GetConnectionString()))
             {
@@ -42,11 +43,28 @@ namespace Nexeron.Controllers
                         while (reader.Read()) paises.Add(new SelectListItem { Value = reader[0].ToString(), Text = reader[1].ToString() });
                 }
                 catch { }
+                try
+                {
+                    using (var cmd = new MySqlCommand("SELECT CUENTA, NOMBRE_FISCAL FROM proveedores", con))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            proveedores.Add(new SelectListItem
+                            {
+                                Value = reader["CUENTA"].ToString(),
+                                Text = $"{reader["CUENTA"]} - {reader["NOMBRE_FISCAL"]}"
+                            });
+                        }
+                    }
+                }
+                catch { }
             }
 
             articulo.TiposList = tipos;
             articulo.UnidadesList = unidades;
             articulo.PaisesList = paises;
+            articulo.ProveedoresList = proveedores;
         }
 
         public ActionResult Index(string buscar = "", int? codDesde = null, int? codHasta = null, string tipoDesde = "", string tipoHasta = "", DateTime? fechaAltaDesde = null, DateTime? fechaAltaHasta = null, DateTime? fechaBajaDesde = null, DateTime? fechaBajaHasta = null)
@@ -57,6 +75,7 @@ namespace Nexeron.Controllers
             ViewBag.TiposList = dummy.TiposList;
             ViewBag.UnidadesList = dummy.UnidadesList;
             ViewBag.PaisesList = dummy.PaisesList;
+            ViewBag.ProveedoresList = dummy.ProveedoresList;
 
             using (var con = new MySqlConnection(GetConnectionString()))
             {
@@ -432,6 +451,109 @@ namespace Nexeron.Controllers
                 TempData["MensajeExito"] = "Unidad eliminada correctamente.";
             }
             return RedirectToAction("Unidades");
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerProveedoresPorArticulo(int articuloCodigo)
+        {
+            var lista = new List<ArticuloProveedorModel>();
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                string sql = "SELECT * FROM articulo_proveedor WHERE articulo_codigo = @articuloCodigo";
+                using (var cmd = new MySqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@articuloCodigo", articuloCodigo);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new ArticuloProveedorModel
+                            {
+                                id = Convert.ToInt32(reader["id"]),
+                                articulo_codigo = Convert.ToInt32(reader["articulo_codigo"]),
+                                proveedor_codigo = reader["proveedor_codigo"].ToString(),
+                                descripcion_proveedor = reader["descripcion_proveedor"]?.ToString(),
+                                tarifa = reader["tarifa"] != DBNull.Value ? Convert.ToDecimal(reader["tarifa"]) : 0m,
+                                descuento = reader["descuento"] != DBNull.Value ? Convert.ToDecimal(reader["descuento"]) : 0m,
+                                unidad = reader["unidad"]?.ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(lista, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult GuardarProveedorArticulo(ArticuloProveedorModel model)
+        {
+            try
+            {
+                var culture = System.Globalization.CultureInfo.InvariantCulture;
+                if (!string.IsNullOrEmpty(Request.Form["tarifa"]))
+                    model.tarifa = Convert.ToDecimal(Request.Form["tarifa"].Replace(",", "."), culture);
+
+                if (!string.IsNullOrEmpty(Request.Form["descuento"]))
+                    model.descuento = Convert.ToDecimal(Request.Form["descuento"].Replace(",", "."), culture);
+
+                using (var con = new MySqlConnection(GetConnectionString()))
+                {
+                    con.Open();
+                    string sql;
+
+                    if (model.id == 0)
+                    {
+                        sql = "INSERT INTO articulo_proveedor (articulo_codigo, proveedor_codigo, descripcion_proveedor, tarifa, descuento, unidad) " +
+                              "VALUES (@articulo_codigo, @proveedor_codigo, @descripcion_proveedor, @tarifa, @descuento, @unidad)";
+                    }
+                    else
+                    {
+                        sql = "UPDATE articulo_proveedor SET proveedor_codigo=@proveedor_codigo, descripcion_proveedor=@descripcion_proveedor, " +
+                              "tarifa=@tarifa, descuento=@descuento, unidad=@unidad WHERE id=@id";
+                    }
+
+                    using (var cmd = new MySqlCommand(sql, con))
+                    {
+                        if (model.id != 0) cmd.Parameters.AddWithValue("@id", model.id);
+                        cmd.Parameters.AddWithValue("@articulo_codigo", model.articulo_codigo);
+                        cmd.Parameters.AddWithValue("@proveedor_codigo", model.proveedor_codigo);
+                        cmd.Parameters.AddWithValue("@descripcion_proveedor", string.IsNullOrEmpty(model.descripcion_proveedor) ? (object)DBNull.Value : model.descripcion_proveedor);
+                        cmd.Parameters.AddWithValue("@tarifa", model.tarifa);
+                        cmd.Parameters.AddWithValue("@descuento", model.descuento);
+                        cmd.Parameters.AddWithValue("@unidad", string.IsNullOrEmpty(model.unidad) ? (object)DBNull.Value : model.unidad);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarProveedorArticulo(int id)
+        {
+            try
+            {
+                using (var con = new MySqlConnection(GetConnectionString()))
+                {
+                    con.Open();
+                    using (var cmd = new MySqlCommand("DELETE FROM articulo_proveedor WHERE id = @id", con))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

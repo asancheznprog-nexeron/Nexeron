@@ -251,6 +251,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\ArticuloProveedorModel.cs" />
     <Compile Include="Models\Modelos\UnidadModel.cs" />
     <Compile Include="Models\Modelos\TipoModel.cs" />
     <Compile Include="Models\Modelos\ArticuloModel.cs" />
