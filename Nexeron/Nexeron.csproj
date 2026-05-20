@@ -248,6 +248,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\UnidadModel.cs" />
+    <Compile Include="Models\Modelos\TipoModel.cs" />
     <Compile Include="Models\Modelos\ArticuloModel.cs" />
     <Compile Include="Models\Modelos\CuentaModel.cs" />
     <Compile Include="Models\Modelos\LoginModel.cs" />
@@ -348,7 +350,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Data\" />
-    <Folder Include="Views\Articulo\" />
+    <Folder Include="Views\TipoModel\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
