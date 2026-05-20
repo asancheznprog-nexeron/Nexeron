@@ -188,6 +188,7 @@ namespace Nexeron.Controllers
                     }
                     catch (Exception ex)
                     {
+                        System.Diagnostics.Debug.WriteLine($"Error en el login: {ex.Message}");
                         Session.Clear();
                         ModelState.AddModelError("", "Empresa o usuario incorrectos.");
                     }
