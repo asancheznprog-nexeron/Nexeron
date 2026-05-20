@@ -1,7 +1,7 @@
-﻿@model IEnumerable<Nexeron.Models.clientes>
+﻿@model IEnumerable<Nexeron.Models.bancos>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "Gestión de Clientes";
+    ViewBag.Title = "Gestión de Bancos";
 }
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
@@ -269,20 +269,20 @@
 
 <div class="wrap-contabilidad">
     <div class="submenu-container">
-        <a href="@Url.Action("Index", "Cuentas")" class="btn-submenu">Plan de Cuentas</a>
-        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu active">Clientes</a>
+        <a href="@Url.Action("Cuentas", "Contabilidad")" class="btn-submenu">Plan de Cuentas</a>
+        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
         <a href="@Url.Action("Index", "Proveedores")" class="btn-submenu">Proveedores</a>
-        <a href="@Url.Action("Index", "Bancos")" class="btn-submenu">Bancos</a>
+        <a href="@Url.Action("Index", "Bancos")" class="btn-submenu active">Bancos</a>
         <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu">Formas de Cobro/Pago</a>
     </div>
 
     <div class="card">
         <div class="header-acciones">
-            <h3>Fichero General de Clientes</h3>
-            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Cliente</button>
+            <h3>Tesorería y Entidades Bancarias</h3>
+            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Banco</button>
         </div>
 
-        <table id="tablaClientes" class="display" style="width:100%">
+        <table id="tablaBancos" class="display" style="width:100%">
             <thead>
                 <tr>
                     <th>Cuenta</th>
@@ -290,7 +290,6 @@
                     <th>Nombre Fiscal</th>
                     <th>CIF/NIF</th>
                     <th>Dirección</th>
-                    <th>CP</th>
                     <th>Población</th>
                     <th>Teléfono</th>
                     <th style="text-align: center; width: 8%;">Acciones</th>
@@ -299,22 +298,21 @@
             <tbody>
                 @if (Model != null)
                 {
-                    foreach (var c in Model)
+                    foreach (var b in Model)
                     {
                         <tr>
-                            <td><strong>@c.CUENTA</strong></td>
-                            <td>@c.NOMBRE_CUENTA</td>
-                            <td>@c.NOMBRE_FISCAL</td>
-                            <td>@c.CIF</td>
-                            <td>@c.DIRECCION @c.NUMERO</td>
-                            <td>@c.CP</td>
-                            <td>@c.POBLACION</td>
-                            <td>@c.TELEFONO</td>
+                            <td><strong>@b.CUENTA</strong></td>
+                            <td>@b.NOMBRE_CUENTA</td>
+                            <td>@b.NOMBRE_FISCAL</td>
+                            <td>@b.CIF</td>
+                            <td>@b.DIRECCION</td>
+                            <td>@b.POBLACION</td>
+                            <td>@b.TELEFONO</td>
                             <td style="text-align: center; white-space: nowrap;">
-                                <button type="button" class="btn-editar" onclick="abrirModalEditar('@c.CUENTA', '@c.NOMBRE_CUENTA', '@c.NOMBRE_FISCAL', '@c.DIRECCION', '@c.POBLACION', '@c.NUMERO', '@c.CP', '@c.PROVINCIA', '@c.PAIS', '@(c.FECHA_ALTA.ToString("yyyy-MM-dd"))', '@(c.FECHA_BAJA?.ToString("yyyy-MM-dd"))', '@c.IBAN', '@c.TELEFONO', '@c.EMAIL', '@c.CIF')" title="Editar Cliente">
+                                <button type="button" class="btn-editar" onclick="abrirModalEditar('@b.CUENTA', '@b.NOMBRE_CUENTA', '@b.NOMBRE_FISCAL', '@b.DIRECCION', '@b.CP', '@b.POBLACION', '@b.CIF', '@b.TELEFONO', '@b.EMAIL', '@b.IBAN', '@b.BIC')" title="Editar Entidad">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 </button>
-                                <button type="button" class="btn-eliminar" onclick="abrirModalEliminar('@c.CUENTA', '@c.NOMBRE_FISCAL')" title="Eliminar Cliente">
+                                <button type="button" class="btn-eliminar" onclick="abrirModalEliminar('@b.CUENTA', '@b.NOMBRE_FISCAL')" title="Eliminar Entidad">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                                 </button>
                             </td>
@@ -326,12 +324,12 @@
     </div>
 </div>
 
-<div id="modalCrearCliente" class="modal-overlay">
+<div id="modalCrearBanco" class="modal-overlay">
     <div class="modal-content">
-        <span class="btn-cerrar" onclick="cerrarModal('modalCrearCliente')">&times;</span>
-        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Cliente</h3>
+        <span class="btn-cerrar" onclick="cerrarModal('modalCrearBanco')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Entidad Bancaria</h3>
 
-        @using (Html.BeginForm("Crear", "Clientes", FormMethod.Post))
+        @using (Html.BeginForm("Crear", "Bancos", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
             <div class="form-grid">
@@ -341,10 +339,10 @@
                 }
                 <div class="form-group">
                     <label>Cuenta Contable *</label>
-                    <input type="text" name="CUENTA" class="form-control" required autocomplete="off" maxlength="20" placeholder="Ej: 43000001" />
+                    <input type="text" name="CUENTA" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: 57200001" />
                 </div>
                 <div class="form-group">
-                    <label>CIF / NIF *</label>
+                    <label>CIF / NIF Entidad *</label>
                     <input type="text" name="CIF" class="form-control" required autocomplete="off" maxlength="20" />
                 </div>
                 <div class="form-group">
@@ -360,10 +358,6 @@
                     <input type="text" name="DIRECCION" class="form-control" autocomplete="off" maxlength="100" />
                 </div>
                 <div class="form-group">
-                    <label>Número / Portal</label>
-                    <input type="text" name="NUMERO" class="form-control" autocomplete="off" maxlength="20" />
-                </div>
-                <div class="form-group">
                     <label>Código Postal (CP)</label>
                     <input type="text" name="CP" class="form-control" autocomplete="off" maxlength="5" />
                 </div>
@@ -372,41 +366,33 @@
                     <input type="text" name="POBLACION" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group">
-                    <label>Provincia</label>
-                    <input type="text" name="PROVINCIA" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group">
-                    <label>País</label>
-                    <input type="text" name="PAIS" class="form-control" value="España" autocomplete="off" maxlength="100" />
-                </div>
-                <div class="form-group">
                     <label>Teléfono</label>
                     <input type="text" name="TELEFONO" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
-                <div class="form-group full-width">
+                <div class="form-group">
                     <label>Correo Electrónico (Email)</label>
                     <input type="email" name="EMAIL" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
-                <div class="form-group full-width">
-                    <label>Código IBAN Bancario</label>
-                    <input type="text" name="IBAN" class="form-control" autocomplete="off" maxlength="34" placeholder="ES00 0000..." />
+                <div class="form-group">
+                    <label>Código IBAN de la Cuenta *</label>
+                    <input type="text" name="IBAN" class="form-control" required autocomplete="off" maxlength="34" placeholder="ES00 0000..." />
                 </div>
                 <div class="form-group">
-                    <label>Fecha de Alta</label>
-                    <input type="date" name="FECHA_ALTA" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <label>Código BIC / SWIFT</label>
+                    <input type="text" name="BIC" class="form-control" autocomplete="off" maxlength="11" placeholder="Ej: BBVAESMMXXX" />
                 </div>
             </div>
-            <button type="submit" class="btn-submit">Guardar Cliente</button>
+            <button type="submit" class="btn-submit">Guardar Entidad</button>
         }
     </div>
 </div>
 
-<div id="modalEditarCliente" class="modal-overlay">
+<div id="modalEditarBanco" class="modal-overlay">
     <div class="modal-content">
-        <span class="btn-cerrar" onclick="cerrarModal('modalEditarCliente')">&times;</span>
-        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Ficha de Cliente</h3>
+        <span class="btn-cerrar" onclick="cerrarModal('modalEditarBanco')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Configuración Bancaria</h3>
 
-        @using (Html.BeginForm("Actualizar", "Clientes", FormMethod.Post))
+        @using (Html.BeginForm("Actualizar", "Bancos", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
             <div class="form-grid">
@@ -415,12 +401,12 @@
                     <div class="alert-error">@TempData["Error"]</div>
                 }
                 <div class="form-group">
-                    <label>Cuenta Contable</label>
+                    <label>Cuenta Contable (Llave)</label>
                     <input type="hidden" id="editCuentaHidden" name="CUENTA" />
                     <input type="text" id="editCuentaView" class="form-control" disabled />
                 </div>
                 <div class="form-group">
-                    <label>CIF / NIF *</label>
+                    <label>CIF / NIF Entidad *</label>
                     <input type="text" id="editCif" name="CIF" class="form-control" required autocomplete="off" maxlength="20" />
                 </div>
                 <div class="form-group">
@@ -436,10 +422,6 @@
                     <input type="text" id="editDireccion" name="DIRECCION" class="form-control" autocomplete="off" maxlength="100" />
                 </div>
                 <div class="form-group">
-                    <label>Número / Portal</label>
-                    <input type="text" id="editNumero" name="NUMERO" class="form-control" autocomplete="off" maxlength="20" />
-                </div>
-                <div class="form-group">
                     <label>Código Postal (CP)</label>
                     <input type="text" id="editCp" name="CP" class="form-control" autocomplete="off" maxlength="5" />
                 </div>
@@ -448,32 +430,20 @@
                     <input type="text" id="editPoblacion" name="POBLACION" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group">
-                    <label>Provincia</label>
-                    <input type="text" id="editProvincia" name="PROVINCIA" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group">
-                    <label>País</label>
-                    <input type="text" id="editPais" name="PAIS" class="form-control" autocomplete="off" maxlength="100" />
-                </div>
-                <div class="form-group">
                     <label>Teléfono</label>
                     <input type="text" id="editTelefono" name="TELEFONO" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
-                <div class="form-group full-width">
+                <div class="form-group">
                     <label>Correo Electrónico (Email)</label>
                     <input type="email" id="editEmail" name="EMAIL" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
-                <div class="form-group full-width">
-                    <label>Código IBAN Bancario</label>
-                    <input type="text" id="editIban" name="IBAN" class="form-control" autocomplete="off" maxlength="34" />
+                <div class="form-group">
+                    <label>Código IBAN de la Cuenta *</label>
+                    <input type="text" id="editIban" name="IBAN" class="form-control" required autocomplete="off" maxlength="34" />
                 </div>
                 <div class="form-group">
-                    <label>Fecha de Alta</label>
-                    <input type="date" id="editFechaAlta" class="form-control" disabled />
-                </div>
-                <div class="form-group">
-                    <label>Fecha de Baja (Suspender)</label>
-                    <input type="date" id="editFechaBaja" name="FECHA_BAJA" class="form-control" />
+                    <label>Código BIC / SWIFT</label>
+                    <input type="text" id="editBic" name="BIC" class="form-control" autocomplete="off" maxlength="11" />
                 </div>
             </div>
             <button type="submit" class="btn-submit">Guardar Cambios</button>
@@ -481,16 +451,16 @@
     </div>
 </div>
 
-<div id="modalEliminarCliente" class="modal-overlay">
+<div id="modalEliminarBanco" class="modal-overlay">
     <div class="modal-content" style="max-width: 450px;">
-        <span class="btn-cerrar" onclick="cerrarModal('modalEliminarCliente')">&times;</span>
-        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Registro?</h3>
+        <span class="btn-cerrar" onclick="cerrarModal('modalEliminarBanco')">&times;</span>
+        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Registro Bancario?</h3>
 
-        @using (Html.BeginForm("Eliminar", "Clientes", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la baja definitiva de este cliente? Esta acción purgará su registro maestro.');" }))
+        @using (Html.BeginForm("Eliminar", "Bancos", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la eliminación definitiva de esta entidad bancaria? Esto purgará su parametrización maestro.');" }))
         {
             @Html.AntiForgeryToken()
             <p style="color: #666; font-size: 0.95rem; line-height: 1.4;">
-                ¿Está completamente seguro de borrar la ficha del cliente? Esta acción no se puede deshacer de forma manual.
+                ¿Está seguro de eliminar el registro financiero? Esta acción desvinculará la cuenta corriente del sistema contable.
             </p>
             <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545;">
                 <span id="deleteCuentaSpan" style="font-weight: bold; color: #212529;"></span> - <span id="deleteNombreSpan" style="color: #495057;"></span>
@@ -503,13 +473,12 @@
 
 <script>
     $(document).ready(function() {
-        $('#tablaClientes').DataTable({
+        $('#tablaBancos').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
             "order": [[0, "asc"]],
-
             "scrollY": "400px",
-            "columnDefs": [{ "targets": 8, "orderable": false }]
+            "columnDefs": [ { "targets": 7, "orderable": false } ]
         });
 
         @if (TempData["MensajeExito"] != null) {
@@ -532,6 +501,7 @@
         }
 
         var html = '<div class="toast-alerta ' + claseError + '"><span style="display:flex;align-items:center;">' + svgIcono + '</span><span>' + mensaje + '</span></div>';
+
         var $el = $(html);
         $('#toastContainer').append($el);
         setTimeout(function() { $el.addClass('mostrar'); }, 50);
@@ -541,33 +511,29 @@
         }, 3500);
     }
 
-    function abrirModalCrear() { $('#modalCrearCliente').css('display', 'flex'); }
+    function abrirModalCrear() { $('#modalCrearBanco').css('display', 'flex'); }
 
-    function abrirModalEditar(cuenta, nombreC, nombreF, dir, pob, num, cp, prov, pais, fAlta, fBaja, iban, tel, email, cif) {
+    function abrirModalEditar(cuenta, nombreC, nombreF, dir, cp, pob, cif, tel, email, iban, bic) {
         $('#editCuentaHidden').val(cuenta);
         $('#editCuentaView').val(cuenta);
         $('#editCif').val(cif);
         $('#editNombreCuenta').val(nombreC);
         $('#editNombreFiscal').val(nombreF);
         $('#editDireccion').val(dir);
-        $('#editNumero').val(num);
         $('#editCp').val(cp);
         $('#editPoblacion').val(pob);
-        $('#editProvincia').val(prov);
-        $('#editPais').val(pais);
         $('#editTelefono').val(tel);
         $('#editEmail').val(email);
         $('#editIban').val(iban);
-        $('#editFechaAlta').val(fAlta);
-        $('#editFechaBaja').val(fBaja);
-        $('#modalEditarCliente').css('display', 'flex');
+        $('#editBic').val(bic);
+        $('#modalEditarBanco').css('display', 'flex');
     }
 
     function abrirModalEliminar(cuenta, nombreF) {
         $('#deleteCuentaHidden').val(cuenta);
         $('#deleteCuentaSpan').text(cuenta);
         $('#deleteNombreSpan').text(nombreF);
-        $('#modalEliminarCliente').css('display', 'flex');
+        $('#modalEliminarBanco').css('display', 'flex');
     }
 
     function cerrarModal(idModal) { $('#' + idModal).css('display', 'none'); }
@@ -578,9 +544,9 @@
 
     @if (TempData["Error"] != null && TempData["TipoError"] != null) {
         if (TempData["TipoError"].ToString() == "Editar") {
-            <text>$('#modalEditarCliente').css('display', 'flex');</text>
+            <text>$('#modalEditarBanco').css('display', 'flex');</text>
         } else {
-            <text>$('#modalCrearCliente').css('display', 'flex');</text>
+            <text>$('#modalCrearBanco').css('display', 'flex');</text>
         }
     }
 </script>
