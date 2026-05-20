@@ -206,7 +206,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ProveedoresController.cs" />
     <Compile Include="Controllers\ClientesController.cs" />
-    <Compile Include="Controllers\ContabilidadController.cs" />
+    <Compile Include="Controllers\CuentasController.cs" />
     <Compile Include="Controllers\IndexController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ReferenciasController.cs" />
@@ -321,8 +321,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\Login.cshtml" />
     <Content Include="Views\Index\Index.cshtml" />
-    <Content Include="Views\Contabilidad\Index.cshtml" />
-    <Content Include="Views\Contabilidad\Cuentas.cshtml" />
+    <Content Include="Views\Cuentas\Index.cshtml" />
     <Content Include="Views\Referencias\Index.cshtml" />
     <Content Include="Views\Clientes\Index.cshtml" />
     <Content Include="Views\Proveedores\Index.cshtml" />

@@ -6,7 +6,7 @@ using Nexeron.Models;
 
 namespace Nexeron.Controllers
 {
-    public class ContabilidadController : Controller
+    public class CuentasController : Controller
     {
         public ActionResult Index()
         {
