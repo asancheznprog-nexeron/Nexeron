@@ -33,5 +33,6 @@ namespace Nexeron.Models
         public IEnumerable<SelectListItem> TiposList { get; set; }
         public IEnumerable<SelectListItem> UnidadesList { get; set; }
         public IEnumerable<SelectListItem> PaisesList { get; set; }
+        public List<SelectListItem> ProveedoresList { get; set; }
     }
 }

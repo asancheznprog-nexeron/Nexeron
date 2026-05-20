@@ -231,6 +231,10 @@
             grid-column: span 4;
         }
 
+        .form-group.col-span-6 {
+            grid-column: span 6;
+        }
+
         .form-group label {
             font-weight: bold;
             color: #555;
@@ -244,6 +248,7 @@
         border-radius: 4px;
         box-sizing: border-box;
         width: 100%;
+        font-family: inherit;
     }
 
         .form-control:focus {
@@ -319,6 +324,72 @@
 
         .toast-alerta.mostrar {
             transform: translateX(0);
+        }
+
+    .tabs-header {
+        display: flex;
+        border-bottom: 2px solid #f1f3f5;
+        margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #6c757d;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+        .tab-btn:hover {
+            color: #495057;
+        }
+
+        .tab-btn.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+    .tab-content {
+        display: none;
+    }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .tabla-proveedores {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+
+        .tabla-proveedores th, .tabla-proveedores td {
+            border: 1px solid #dee2e6;
+            padding: 0.6rem;
+            text-align: left;
+        }
+
+        .tabla-proveedores th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: bold;
         }
 </style>
 
@@ -455,7 +526,6 @@
                     <label>Descripción</label>
                     <textarea name="descripcion" id="crearDescripcion" class="form-control" rows="2"></textarea>
                 </div>
-
                 <div class="form-group">
                     <label>Longitud</label>
                     <input type="number" step="any" name="longitud" id="crearLongitud" class="form-control calc-crear" />
@@ -472,7 +542,6 @@
                     <label>Volumen</label>
                     <input type="text" id="crearVolumen" class="form-control" readonly />
                 </div>
-
                 <div class="form-group">
                     <label>Tipo</label>
                     <select name="tipo" id="crearTipo" class="form-control">
@@ -500,7 +569,6 @@
                         }
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>IVA (%)</label>
                     <input type="number" step="any" name="iva" id="crearIva" class="form-control" />
@@ -517,7 +585,6 @@
                     <label style="margin:0;"><input type="checkbox" name="es_reutilizable" id="crearReutilizable" value="true" /> Reutilizable</label>
                     <label style="margin:0;"><input type="checkbox" name="activo" id="crearActivo" value="true" checked /> Activo</label>
                 </div>
-
                 <div class="form-group col-span-2">
                     <label>Fecha de Alta</label>
                     <input type="date" name="fecha_alta" id="crearFechaAlta" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
@@ -526,7 +593,6 @@
                     <label>Fecha de Baja</label>
                     <input type="date" name="fecha_baja" id="crearFechaBaja" class="form-control" />
                 </div>
-
                 <div class="form-group col-span-4">
                     <label>Observaciones</label>
                     <textarea name="observaciones" id="crearObservaciones" class="form-control" rows="2"></textarea>
@@ -538,109 +604,171 @@
 </div>
 
 <div id="modalEditarArticulo" class="modal-overlay">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 900px;">
         <span class="btn-cerrar" onclick="cerrarModal('modalEditarArticulo')">&times;</span>
-        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Artículo</h3>
 
-        @using (Html.BeginForm("Guardar", "Referencias", FormMethod.Post))
-        {
-            <div class="form-grid">
-                @if (TempData["Error"] != null && TempData["TipoError"]?.ToString() == "Editar")
-                {
-                    <div class="alert-error">@TempData["Error"]</div>
-                }
-                <div class="form-group col-span-1">
-                    <label>Código</label>
-                    <input type="hidden" name="codigo" id="editCodigoHidden" />
-                    <input type="number" id="editCodigoView" class="form-control" disabled />
-                </div>
-                <div class="form-group col-span-3">
-                    <label>Nombre del Artículo *</label>
-                    <input type="text" name="articulo" id="editArticulo" class="form-control" required autocomplete="off" />
-                </div>
-                <div class="form-group col-span-4">
-                    <label>Descripción</label>
-                    <textarea name="descripcion" id="editDescripcion" class="form-control" rows="2"></textarea>
-                </div>
+        <div class="tabs-header">
+            <button class="tab-btn active" id="btnTabDetalle" onclick="cambiarTabEditar('detalle')">Datos del Artículo</button>
+            <button class="tab-btn" id="btnTabProveedores" onclick="cambiarTabEditar('proveedores')">Proveedores</button>
+        </div>
 
-                <div class="form-group">
-                    <label>Longitud</label>
-                    <input type="number" step="any" name="longitud" id="editLongitud" class="form-control calc-edit" />
-                </div>
-                <div class="form-group">
-                    <label>Altura</label>
-                    <input type="number" step="any" name="altura" id="editAltura" class="form-control calc-edit" />
-                </div>
-                <div class="form-group">
-                    <label>Anchura</label>
-                    <input type="number" step="any" name="anchura" id="editAnchura" class="form-control calc-edit" />
-                </div>
-                <div class="form-group">
-                    <label>Volumen</label>
-                    <input type="text" id="editVolumen" class="form-control" readonly />
-                </div>
+        <div id="tabDetalle" class="tab-content active">
+            @using (Html.BeginForm("Guardar", "Referencias", FormMethod.Post))
+            {
+                <div class="form-grid">
+                    @if (TempData["Error"] != null && TempData["TipoError"]?.ToString() == "Editar")
+                    {
+                        <div class="alert-error">@TempData["Error"]</div>
+                    }
+                    <div class="form-group col-span-1">
+                        <label>Código</label>
+                        <input type="hidden" name="codigo" id="editCodigoHidden" />
+                        <input type="number" id="editCodigoView" class="form-control" disabled />
+                    </div>
+                    <div class="form-group col-span-3">
+                        <label>Nombre del Artículo *</label>
+                        <input type="text" name="articulo" id="editArticulo" class="form-control" required autocomplete="off" />
+                    </div>
+                    <div class="form-group col-span-4">
+                        <label>Descripción</label>
+                        <textarea name="descripcion" id="editDescripcion" class="form-control" rows="2"></textarea>
+                    </div>
 
-                <div class="form-group">
-                    <label>Tipo</label>
-                    <select name="tipo" id="editTipo" class="form-control">
-                        @foreach (var t in ViewBag.TiposList)
+                    <div class="form-group">
+                        <label>Longitud</label>
+                        <input type="number" step="any" name="longitud" id="editLongitud" class="form-control calc-edit" />
+                    </div>
+                    <div class="form-group">
+                        <label>Altura</label>
+                        <input type="number" step="any" name="altura" id="editAltura" class="form-control calc-edit" />
+                    </div>
+                    <div class="form-group">
+                        <label>Anchura</label>
+                        <input type="number" step="any" name="anchura" id="editAnchura" class="form-control calc-edit" />
+                    </div>
+                    <div class="form-group">
+                        <label>Volumen</label>
+                        <input type="text" id="editVolumen" class="form-control" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select name="tipo" id="editTipo" class="form-control">
+                            @foreach (var t in ViewBag.TiposList)
+                            {
+                                <option value="@t.Value">@t.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unidad Medida</label>
+                        <select name="unidad_medida" id="editUnidad" class="form-control">
+                            @foreach (var u in ViewBag.UnidadesList)
+                            {
+                                <option value="@u.Value">@u.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>País Origen</label>
+                        <select name="pais_origen" id="editPais" class="form-control">
+                            @foreach (var p in ViewBag.PaisesList)
+                            {
+                                <option value="@p.Value">@p.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>IVA (%)</label>
+                        <input type="number" step="any" name="iva" id="editIva" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Dto Base (%)</label>
+                        <input type="number" step="any" name="dto_base" id="editDto" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Huella Carbono</label>
+                        <input type="number" step="any" name="huella_carbono" id="editHuella" class="form-control" />
+                    </div>
+                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 15px; margin-top: 25px;">
+                        <label style="margin:0;"><input type="checkbox" name="es_reutilizable" id="editReutilizable" value="true" /> Reutilizable</label>
+                        <label style="margin:0;"><input type="checkbox" name="activo" id="editActivo" value="true" /> Activo</label>
+                    </div>
+
+                    <div class="form-group col-span-2">
+                        <label>Fecha de Alta</label>
+                        <input type="date" name="fecha_alta" id="editFechaAlta" class="form-control" />
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Fecha de Baja</label>
+                        <input type="date" name="fecha_baja" id="editFechaBaja" class="form-control" />
+                    </div>
+
+                    <div class="form-group col-span-4">
+                        <label>Observaciones</label>
+                        <textarea name="observaciones" id="editObservaciones" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Guardar Cambios del Artículo</button>
+            }
+        </div>
+
+        <div id="tabProveedores" class="tab-content">
+            <div class="form-grid" style="grid-template-columns: repeat(6, 1fr); background: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                <input type="hidden" id="provId" value="0" />
+                <div class="form-group col-span-2">
+                    <label>Proveedor (Código) *</label>
+                    <select id="provCodigo" class="form-control" onchange="autoCompletarDescProveedor(this)">
+                        @if (ViewBag.ProveedoresList != null)
                         {
-                            <option value="@t.Value">@t.Text</option>
-                        }
+                            foreach (var p in ViewBag.ProveedoresList)
+                            {
+                                <option value="@p.Value">@p.Text</option>}
+                            }
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Unidad Medida</label>
-                    <select name="unidad_medida" id="editUnidad" class="form-control">
+                <div class="form-group col-span-4">
+                    <label>Descripción Proveedor</label>
+                    <input type="text" id="provDesc" class="form-control" />
+                </div>
+                <div class="form-group col-span-2">
+                    <label>Tarifa</label>
+                    <input type="number" step="any" id="provTarifa" class="form-control" />
+                </div>
+                <div class="form-group col-span-2">
+                    <label>Descuento (%)</label>
+                    <input type="number" step="any" id="provDto" class="form-control" />
+                </div>
+                <div class="form-group col-span-2">
+                    <label>Unidad</label>
+                    <select id="provUnidad" class="form-control">
                         @foreach (var u in ViewBag.UnidadesList)
                         {
                             <option value="@u.Value">@u.Text</option>
                         }
                     </select>
                 </div>
-                <div class="form-group col-span-2">
-                    <label>País Origen</label>
-                    <select name="pais_origen" id="editPais" class="form-control">
-                        @foreach (var p in ViewBag.PaisesList)
-                        {
-                            <option value="@p.Value">@p.Text</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>IVA (%)</label>
-                    <input type="number" step="any" name="iva" id="editIva" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label>Dto Base (%)</label>
-                    <input type="number" step="any" name="dto_base" id="editDto" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label>Huella Carbono</label>
-                    <input type="number" step="any" name="huella_carbono" id="editHuella" class="form-control" />
-                </div>
-                <div class="form-group" style="flex-direction: row; align-items: center; gap: 15px; margin-top: 25px;">
-                    <label style="margin:0;"><input type="checkbox" name="es_reutilizable" id="editReutilizable" value="true" /> Reutilizable</label>
-                    <label style="margin:0;"><input type="checkbox" name="activo" id="editActivo" value="true" /> Activo</label>
-                </div>
-
-                <div class="form-group col-span-2">
-                    <label>Fecha de Alta</label>
-                    <input type="date" name="fecha_alta" id="editFechaAlta" class="form-control" />
-                </div>
-                <div class="form-group col-span-2">
-                    <label>Fecha de Baja</label>
-                    <input type="date" name="fecha_baja" id="editFechaBaja" class="form-control" />
-                </div>
-
-                <div class="form-group col-span-4">
-                    <label>Observaciones</label>
-                    <textarea name="observaciones" id="editObservaciones" class="form-control" rows="2"></textarea>
+                <div class="form-group col-span-6">
+                    <button type="button" class="btn-submit" onclick="guardarArticuloProveedor()" style="background-color: #28a745; margin-top:0.5rem;">Guardar Especificación de Proveedor</button>
                 </div>
             </div>
-            <button type="submit" class="btn-submit">Guardar Cambios</button>
-        }
+
+            <table class="tabla-proveedores">
+                <thead>
+                    <tr>
+                        <th>Cód. Prov</th>
+                        <th>Descripción</th>
+                        <th>Tarifa</th>
+                        <th>Dto %</th>
+                        <th>Unidad</th>
+                        <th style="text-align:center; width: 80px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyProveedores">
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -695,7 +823,17 @@
             setTimeout(function() { $el.remove(); }, 300);
         }, 3500);
     }
-
+    function autoCompletarDescProveedor(selectElement) {
+        var texto = selectElement.options[selectElement.selectedIndex].text;
+        if (selectElement.value !== "") {
+            var partes = texto.split(" - ");
+            if (partes.length > 1) {
+                $('#provDesc').val(partes.slice(1).join(" - "));
+            }
+        } else {
+            $('#provDesc').val("");
+        }
+    }
     function abrirModalFiltros() { $('#modalFiltrosAvanzados').css('display', 'flex'); }
     function abrirModalCrear() { $('#modalCrearArticulo').css('display', 'flex'); }
     function cerrarModal(idModal) { $('#' + idModal).css('display', 'none'); }
@@ -753,7 +891,28 @@
         }
     }
 
+    function cambiarTabEditar(tab) {
+        $('.tab-btn').removeClass('active');
+        $('.tab-content').removeClass('active');
+
+        if (tab === 'detalle') {
+            $('#btnTabDetalle').addClass('active');
+            $('#tabDetalle').addClass('active');
+        } else if (tab === 'proveedores') {
+            $('#btnTabProveedores').addClass('active');
+            $('#tabProveedores').addClass('active');
+            var cod = $('#editCodigoHidden').val();
+            if (cod) {
+                cargarProveedoresArticulo(cod);
+            }
+        }
+    }
+
     function abrirModalEditar(cod) {
+        cambiarTabEditar('detalle');
+        limpiarFormularioProveedor();
+        $('#tbodyProveedores').empty();
+
         $.ajax({
             url: '@Url.Action("ObtenerArticuloPorCodigo", "Referencias")',
             type: 'GET',
@@ -806,9 +965,118 @@
         return fechaJson.split('T')[0];
     }
 
+    function limpiarFormularioProveedor() {
+        $('#provId').val("0");
+        $('#provCodigo').val("");
+        $('#provDesc').val("");
+        $('#provTarifa').val("");
+        $('#provDto').val("");
+        $('#provUnidad').val("");
+    }
+
+    function cargarProveedoresArticulo(articuloCodigo) {
+        $.ajax({
+            url: '@Url.Action("ObtenerProveedoresPorArticulo", "Referencias")',
+            type: 'GET',
+            data: { articuloCodigo: articuloCodigo },
+            success: function (data) {
+                var tbody = $('#tbodyProveedores');
+                tbody.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function (p) {
+                        var jsonP = JSON.stringify(p).replace(/"/g, '&quot;');
+                        var html = '<tr>' +
+                            '<td>' + p.proveedor_codigo + '</td>' +
+                            '<td>' + (p.descripcion_proveedor || '') + '</td>' +
+                            '<td>' + p.tarifa + '</td>' +
+                            '<td>' + p.descuento + '</td>' +
+                            '<td>' + (p.unidad || '') + '</td>' +
+                            '<td style="text-align:center;">' +
+                            '<button type="button" class="btn-editar" onclick="editarArticuloProveedor(' + jsonP + ')" style="padding:2px 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>' +
+                            '<button type="button" class="btn-eliminar" onclick="eliminarArticuloProveedor(' + p.id + ')" style="padding:2px 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>' +
+                            '</td>' +
+                            '</tr>';
+                        tbody.append(html);
+                    });
+                } else {
+                    tbody.append('<tr><td colspan="6" style="text-align:center; color:#6c757d;">No hay proveedores asignados a este artículo.</td></tr>');
+                }
+            }
+        });
+    }
+
+    function editarArticuloProveedor(p) {
+        $('#provId').val(p.id);
+        $('#provCodigo').val(p.proveedor_codigo);
+        $('#provDesc').val(p.descripcion_proveedor);
+        $('#provTarifa').val(p.tarifa);
+        $('#provDto').val(p.descuento);
+        $('#provUnidad').val(p.unidad);
+    }
+
+    function guardarArticuloProveedor() {
+        var articuloCodigo = $('#editCodigoHidden').val();
+        if (!articuloCodigo) {
+            crearToast('Error: No se ha detectado el código del artículo.', 'error');
+            return;
+        }
+
+        var provData = {
+            id: $('#provId').val(),
+            articulo_codigo: articuloCodigo,
+            proveedor_codigo: $('#provCodigo').val(),
+            descripcion_proveedor: $('#provDesc').val(),
+            tarifa: $('#provTarifa').val().replace(',', '.'),
+            descuento: $('#provDto').val().replace(',', '.'),
+            unidad: $('#provUnidad').val()
+        };
+
+        if (!provData.proveedor_codigo) {
+            crearToast('El código de proveedor es obligatorio.', 'error');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("GuardarProveedorArticulo", "Referencias")',
+            type: 'POST',
+            data: provData,
+            success: function (res) {
+                if (res.success) {
+                    crearToast('Proveedor guardado correctamente', 'exito');
+                    limpiarFormularioProveedor();
+                    cargarProveedoresArticulo(articuloCodigo);
+                } else {
+                    crearToast('Error al guardar: ' + res.message, 'error');
+                }
+            },
+            error: function () {
+                crearToast('Error de comunicación con el servidor.', 'error');
+            }
+        });
+    }
+
+    function eliminarArticuloProveedor(id) {
+        if (!confirm('¿Seguro que desea desvincular este proveedor del artículo?')) return;
+
+        $.ajax({
+            url: '@Url.Action("EliminarProveedorArticulo", "Referencias")',
+            type: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (res.success) {
+                    crearToast('Proveedor eliminado correctamente', 'exito');
+                    var articuloCodigo = $('#editCodigoHidden').val();
+                    cargarProveedoresArticulo(articuloCodigo);
+                } else {
+                    crearToast('Error al eliminar: ' + res.message, 'error');
+                }
+            }
+        });
+    }
+
     @if (TempData["Error"] != null && TempData["TipoError"] != null) {
         if (TempData["TipoError"].ToString() == "Editar") {
-            <text>$('#modalEditarArticulo').css('display', 'flex');</text>
+            <text>$('#modalEditarArticulo').css('display', 'flex'); cambiarTabEditar('detalle');</text>
         } else {
             <text>$('#modalCrearArticulo').css('display', 'flex');</text>
         }
