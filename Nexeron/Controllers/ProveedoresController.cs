@@ -14,6 +14,8 @@ namespace Nexeron.Controllers
                 return RedirectToAction("Login", "Home");
 
             List<proveedores> listaProveedores = new List<proveedores>();
+            List<SelectListItem> listaPaises = new List<SelectListItem> { new SelectListItem { Value = "", Text = "-- Seleccione --" } };
+
             string connStr = Session["cadenaConexion"].ToString();
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
@@ -54,6 +56,22 @@ namespace Nexeron.Controllers
                             }
                         }
                     }
+
+                    using (var cmdPaises = conexion.CreateCommand())
+                    {
+                        cmdPaises.CommandText = "SELECT codigo, descripcion FROM paises ORDER BY descripcion ASC";
+                        using (var reader = cmdPaises.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                listaPaises.Add(new SelectListItem
+                                {
+                                    Value = reader["codigo"].ToString(),
+                                    Text = reader["descripcion"].ToString()
+                                });
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -61,6 +79,7 @@ namespace Nexeron.Controllers
                 }
             }
 
+            ViewBag.PaisesList = listaPaises;
             return View(listaProveedores);
         }
 
@@ -130,7 +149,7 @@ namespace Nexeron.Controllers
                             cmdInsertProv.Parameters.AddWithValue("@numero", nuevo.NUMERO ?? "");
                             cmdInsertProv.Parameters.AddWithValue("@cp", nuevo.CP ?? "");
                             cmdInsertProv.Parameters.AddWithValue("@provincia", nuevo.PROVINCIA ?? "");
-                            cmdInsertProv.Parameters.AddWithValue("@pais", nuevo.PAIS ?? "España");
+                            cmdInsertProv.Parameters.AddWithValue("@pais", nuevo.PAIS ?? "ES");
                             cmdInsertProv.Parameters.AddWithValue("@fechaAlta", nuevo.FECHA_ALTA);
                             cmdInsertProv.Parameters.AddWithValue("@fechaBaja", (object)nuevo.FECHA_BAJA ?? DBNull.Value);
                             cmdInsertProv.Parameters.AddWithValue("@iban", nuevo.IBAN ?? "");

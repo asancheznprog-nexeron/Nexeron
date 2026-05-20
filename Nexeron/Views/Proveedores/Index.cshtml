@@ -17,7 +17,6 @@
         gap: 1.5rem;
     }
 
-    /* SUBMENÚ */
     .submenu-container {
         background-color: #fff;
         padding: 1rem 1.5rem;
@@ -53,7 +52,6 @@
             border-color: #007bff;
         }
 
-    /* TARJETA PRINCIPAL */
     .card {
         background: #fff;
         border-radius: 8px;
@@ -93,7 +91,6 @@
             background-color: #218838;
         }
 
-    /* BOTONES SVG DE LA TABLA */
     .btn-editar, .btn-eliminar {
         background: none;
         border: none;
@@ -116,7 +113,6 @@
             transform: scale(1.15);
         }
 
-    /* MODALES / POPUPS */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -163,7 +159,6 @@
         font-weight: bold;
     }
 
-    /* FORMULARIOS GRID */
     .form-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -236,7 +231,6 @@
         grid-column: span 2;
     }
 
-    /* TOAST DE NOTIFICACIONES */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -383,7 +377,15 @@
                 </div>
                 <div class="form-group">
                     <label>País</label>
-                    <input type="text" name="PAIS" class="form-control" value="España" autocomplete="off" maxlength="100" />
+                    <select name="PAIS" class="form-control">
+                        @if (ViewBag.PaisesList != null)
+                        {
+                            foreach (var p in ViewBag.PaisesList)
+                            {
+                                <option value="@p.Value" @(p.Value == "ES" ? "selected" : "")>@p.Text</option>
+                            }
+                        }
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
@@ -459,7 +461,15 @@
                 </div>
                 <div class="form-group">
                     <label>País</label>
-                    <input type="text" id="editPais" name="PAIS" class="form-control" autocomplete="off" maxlength="100" />
+                    <select id="editPais" name="PAIS" class="form-control">
+                        @if (ViewBag.PaisesList != null)
+                        {
+                            foreach (var p in ViewBag.PaisesList)
+                            {
+                                <option value="@p.Value">@p.Text</option>
+                            }
+                        }
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
@@ -524,7 +534,6 @@
             <text>crearToast('@TempData["Error"].ToString()', 'error');</text>
         }
     });
-
 
     function crearToast(mensaje, tipo) {
         var svgIcono = '';
