@@ -43,7 +43,7 @@
           <Key>
             <PropertyRef Name="CUENTA" />
           </Key>
-          <Property Name="CUENTA" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="CUENTA" Type="varchar" MaxLength="9" Nullable="false" />
           <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
@@ -59,7 +59,7 @@
           <Key>
             <PropertyRef Name="CUENTA" />
           </Key>
-          <Property Name="CUENTA" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="CUENTA" Type="varchar" MaxLength="9" Nullable="false" />
           <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
@@ -82,6 +82,19 @@
           <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="NOMBRE_CUENTA" Type="char" MaxLength="100" />
         </EntityType>
+        <EntityType Name="fpagcob">
+          <Key>
+            <PropertyRef Name="CODIGO" />
+          </Key>
+          <Property Name="CODIGO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="FORMACOBPAG" Type="char" MaxLength="40" Nullable="false" />
+          <Property Name="ACEPTO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="REMESACOBRO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="REMESAPAGO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="NUMCOBROS" Type="int" Nullable="false" />
+          <Property Name="PRIMVENCI" Type="int" Nullable="false" />
+          <Property Name="DIASVENCI" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="paises">
           <Key>
             <PropertyRef Name="codigo" />
@@ -93,7 +106,7 @@
           <Key>
             <PropertyRef Name="CUENTA" />
           </Key>
-          <Property Name="CUENTA" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="CUENTA" Type="varchar" MaxLength="9" Nullable="false" />
           <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
@@ -153,6 +166,7 @@
           <EntitySet Name="bancos" EntityType="Self.bancos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="clientes" EntityType="Self.clientes" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="cuentas" EntityType="Self.cuentas" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="fpagcob" EntityType="Self.fpagcob" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="paises" EntityType="Self.paises" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="proveedores" EntityType="Self.proveedores" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="tipos" EntityType="Self.tipos" Schema="cortecheco" store:Type="Tables" />
@@ -179,6 +193,7 @@
           </AssociationSet>
           <EntitySet Name="proveedores" EntityType="cortechecoModel.proveedores" />
           <EntitySet Name="bancos" EntityType="cortechecoModel.bancos" />
+          <EntitySet Name="fpagcob" EntityType="cortechecoModel.fpagcob" />
           <EntitySet Name="paises" EntityType="cortechecoModel.paises" />
           <EntitySet Name="tipos" EntityType="cortechecoModel.tipos" />
           <EntitySet Name="unidades" EntityType="cortechecoModel.unidades" />
@@ -304,6 +319,19 @@
           <Property Name="EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
           <Property Name="IBAN" Type="String" MaxLength="34" FixedLength="false" Unicode="false" />
           <Property Name="BIC" Type="String" MaxLength="11" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="fpagcob">
+          <Key>
+            <PropertyRef Name="CODIGO" />
+          </Key>
+          <Property Name="CODIGO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="FORMACOBPAG" Type="String" Nullable="false" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="ACEPTO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="REMESACOBRO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="REMESAPAGO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="NUMCOBROS" Type="Int32" Nullable="false" />
+          <Property Name="PRIMVENCI" Type="Int32" Nullable="false" />
+          <Property Name="DIASVENCI" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="paises">
           <Key>
@@ -443,6 +471,20 @@
                 <ScalarProperty Name="NOMBRE_FISCAL" ColumnName="NOMBRE_FISCAL" />
                 <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
                 <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="fpagcob">
+            <EntityTypeMapping TypeName="cortechecoModel.fpagcob">
+              <MappingFragment StoreEntitySet="fpagcob">
+                <ScalarProperty Name="DIASVENCI" ColumnName="DIASVENCI" />
+                <ScalarProperty Name="PRIMVENCI" ColumnName="PRIMVENCI" />
+                <ScalarProperty Name="NUMCOBROS" ColumnName="NUMCOBROS" />
+                <ScalarProperty Name="REMESAPAGO" ColumnName="REMESAPAGO" />
+                <ScalarProperty Name="REMESACOBRO" ColumnName="REMESACOBRO" />
+                <ScalarProperty Name="ACEPTO" ColumnName="ACEPTO" />
+                <ScalarProperty Name="FORMACOBPAG" ColumnName="FORMACOBPAG" />
+                <ScalarProperty Name="CODIGO" ColumnName="CODIGO" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

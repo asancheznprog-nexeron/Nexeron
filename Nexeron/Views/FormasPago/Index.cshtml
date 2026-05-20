@@ -1,7 +1,7 @@
-﻿@model IEnumerable<Nexeron.Models.clientes>
+﻿@model IEnumerable<Nexeron.Models.fpagcob>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "Gestión de Clientes";
+    ViewBag.Title = "Formas de Cobro y Pago";
 }
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
@@ -270,51 +270,51 @@
 <div class="wrap-contabilidad">
     <div class="submenu-container">
         <a href="@Url.Action("Index", "Cuentas")" class="btn-submenu">Plan de Cuentas</a>
-        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu active">Clientes</a>
+        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
         <a href="@Url.Action("Index", "Proveedores")" class="btn-submenu">Proveedores</a>
         <a href="@Url.Action("Index", "Bancos")" class="btn-submenu">Bancos</a>
-        <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu">Formas de Cobro/Pago</a>
+        <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu active">Formas de Cobro/Pago</a>
     </div>
 
     <div class="card">
         <div class="header-acciones">
-            <h3>Fichero General de Clientes</h3>
-            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Cliente</button>
+            <h3>Formas de Pago y Cobro</h3>
+            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Forma Pago/Cobro</button>
         </div>
 
-        <table id="tablaClientes" class="display" style="width:100%">
+        <table id="tablaFormas" class="display" style="width:100%">
             <thead>
                 <tr>
-                    <th>Cuenta</th>
-                    <th>Nombre Contable</th>
-                    <th>Nombre Fiscal</th>
-                    <th>CIF/NIF</th>
-                    <th>Dirección</th>
-                    <th>CP</th>
-                    <th>Población</th>
-                    <th>Teléfono</th>
+                    <th>Código</th>
+                    <th>Forma de cobro</th>
+                    <th>Aceptable</th>
+                    <th>Remesa cobros</th>
+                    <th>Remesa pagos</th>
+                    <th>Nº de cobros</th>
+                    <th>Primer vencimiento</th>
+                    <th>Dias entre vtos</th>
                     <th style="text-align: center; width: 8%;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model != null)
                 {
-                    foreach (var c in Model)
+                    foreach (var item in Model)
                     {
                         <tr>
-                            <td><strong>@c.CUENTA</strong></td>
-                            <td>@c.NOMBRE_CUENTA</td>
-                            <td>@c.NOMBRE_FISCAL</td>
-                            <td>@c.CIF</td>
-                            <td>@c.DIRECCION @c.NUMERO</td>
-                            <td>@c.CP</td>
-                            <td>@c.POBLACION</td>
-                            <td>@c.TELEFONO</td>
+                            <td><strong>@item.CODIGO</strong></td>
+                            <td>@item.FORMACOBPAG</td>
+                            <td>@(item.ACEPTO == "S" ? "Sí" : "No")</td>
+                            <td>@(item.REMESACOBRO == "S" ? "Sí" : "No")</td>
+                            <td>@(item.REMESAPAGO == "S" ? "Sí" : "No")</td>
+                            <td>@item.NUMCOBROS</td>
+                            <td>@item.PRIMVENCI</td>
+                            <td>@item.DIASVENCI</td>
                             <td style="text-align: center; white-space: nowrap;">
-                                <button type="button" class="btn-editar" onclick="abrirModalEditar('@c.CUENTA', '@c.NOMBRE_CUENTA', '@c.NOMBRE_FISCAL', '@c.DIRECCION', '@c.POBLACION', '@c.NUMERO', '@c.CP', '@c.PROVINCIA', '@c.PAIS', '@(c.FECHA_ALTA.ToString("yyyy-MM-dd"))', '@(c.FECHA_BAJA?.ToString("yyyy-MM-dd"))', '@c.IBAN', '@c.TELEFONO', '@c.EMAIL', '@c.CIF')" title="Editar Cliente">
+                                <button type="button" class="btn-editar" onclick="abrirModalEditar('@item.CODIGO', '@item.FORMACOBPAG', '@item.ACEPTO', '@item.REMESACOBRO', '@item.REMESAPAGO', '@item.NUMCOBROS', '@item.PRIMVENCI', '@item.DIASVENCI')" title="Editar">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 </button>
-                                <button type="button" class="btn-eliminar" onclick="abrirModalEliminar('@c.CUENTA', '@c.NOMBRE_FISCAL')" title="Eliminar Cliente">
+                                <button type="button" class="btn-eliminar" onclick="abrirModalEliminar('@item.CODIGO', '@item.FORMACOBPAG')" title="Eliminar">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                                 </button>
                             </td>
@@ -326,12 +326,12 @@
     </div>
 </div>
 
-<div id="modalCrearCliente" class="modal-overlay">
+<div id="modalCrear" class="modal-overlay">
     <div class="modal-content">
-        <span class="btn-cerrar" onclick="cerrarModal('modalCrearCliente')">&times;</span>
-        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Cliente</h3>
+        <span class="btn-cerrar" onclick="cerrarModal('modalCrear')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Forma de Pago/Cobro</h3>
 
-        @using (Html.BeginForm("Crear", "Clientes", FormMethod.Post))
+        @using (Html.BeginForm("Crear", "FormasPago", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
             <div class="form-grid">
@@ -340,73 +340,58 @@
                     <div class="alert-error">@TempData["Error"]</div>
                 }
                 <div class="form-group">
-                    <label>Cuenta Contable *</label>
-                    <input type="text" name="CUENTA" class="form-control" required autocomplete="off" maxlength="20" placeholder="Ej: 43000001" />
+                    <label>Código *</label>
+                    <input type="text" name="CODIGO" class="form-control" required autocomplete="off" maxlength="3" placeholder="Ej: 030" />
                 </div>
                 <div class="form-group">
-                    <label>CIF / NIF *</label>
-                    <input type="text" name="CIF" class="form-control" required autocomplete="off" maxlength="20" />
+                    <label>Forma de cobro *</label>
+                    <input type="text" name="FORMACOBPAG" class="form-control" required autocomplete="off" maxlength="40" placeholder="Ej: Giro a 30 dias" />
                 </div>
                 <div class="form-group">
-                    <label>Nombre Comercial *</label>
-                    <input type="text" name="NOMBRE_CUENTA" class="form-control" required autocomplete="off" maxlength="50" />
+                    <label>Nº de cobros *</label>
+                    <input type="number" name="NUMCOBROS" class="form-control" required min="1" value="1" />
                 </div>
                 <div class="form-group">
-                    <label>Razón Social (Fiscal) *</label>
-                    <input type="text" name="NOMBRE_FISCAL" class="form-control" required autocomplete="off" maxlength="50" />
-                </div>
-                <div class="form-group full-width">
-                    <label>Dirección</label>
-                    <input type="text" name="DIRECCION" class="form-control" autocomplete="off" maxlength="100" />
+                    <label>Primer vencimiento *</label>
+                    <input type="number" name="PRIMVENCI" class="form-control" required min="0" value="30" />
                 </div>
                 <div class="form-group">
-                    <label>Número / Portal</label>
-                    <input type="text" name="NUMERO" class="form-control" autocomplete="off" maxlength="20" />
+                    <label>Dias entre vtos *</label>
+                    <input type="number" name="DIASVENCI" class="form-control" required min="0" value="0" />
                 </div>
                 <div class="form-group">
-                    <label>Código Postal (CP)</label>
-                    <input type="text" name="CP" class="form-control" autocomplete="off" maxlength="5" />
+                    <label>Aceptable</label>
+                    <select name="ACEPTO" class="form-control">
+                        <option value="N">No</option>
+                        <option value="S">Sí</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Población</label>
-                    <input type="text" name="POBLACION" class="form-control" autocomplete="off" maxlength="30" />
+                    <label>Remesa cobros</label>
+                    <select name="REMESACOBRO" class="form-control">
+                        <option value="N">No</option>
+                        <option value="S">Sí</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Provincia</label>
-                    <input type="text" name="PROVINCIA" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group">
-                    <label>País</label>
-                    <input type="text" name="PAIS" class="form-control" value="España" autocomplete="off" maxlength="100" />
-                </div>
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="text" name="TELEFONO" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group full-width">
-                    <label>Correo Electrónico (Email)</label>
-                    <input type="email" name="EMAIL" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group full-width">
-                    <label>Código IBAN Bancario</label>
-                    <input type="text" name="IBAN" class="form-control" autocomplete="off" maxlength="34" placeholder="ES00 0000..." />
-                </div>
-                <div class="form-group">
-                    <label>Fecha de Alta</label>
-                    <input type="date" name="FECHA_ALTA" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <label>Remesa pagos</label>
+                    <select name="REMESAPAGO" class="form-control">
+                        <option value="N">No</option>
+                        <option value="S">Sí</option>
+                    </select>
                 </div>
             </div>
-            <button type="submit" class="btn-submit">Guardar Cliente</button>
+            <button type="submit" class="btn-submit">Guardar Configuración</button>
         }
     </div>
 </div>
 
-<div id="modalEditarCliente" class="modal-overlay">
+<div id="modalEditar" class="modal-overlay">
     <div class="modal-content">
-        <span class="btn-cerrar" onclick="cerrarModal('modalEditarCliente')">&times;</span>
-        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Ficha de Cliente</h3>
+        <span class="btn-cerrar" onclick="cerrarModal('modalEditar')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Configuración</h3>
 
-        @using (Html.BeginForm("Actualizar", "Clientes", FormMethod.Post))
+        @using (Html.BeginForm("Actualizar", "FormasPago", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
             <div class="form-grid">
@@ -415,65 +400,46 @@
                     <div class="alert-error">@TempData["Error"]</div>
                 }
                 <div class="form-group">
-                    <label>Cuenta Contable</label>
-                    <input type="hidden" id="editCuentaHidden" name="CUENTA" />
-                    <input type="text" id="editCuentaView" class="form-control" disabled />
+                    <label>Código</label>
+                    <input type="hidden" id="editCodigoHidden" name="CODIGO" />
+                    <input type="text" id="editCodigoView" class="form-control" disabled />
                 </div>
                 <div class="form-group">
-                    <label>CIF / NIF *</label>
-                    <input type="text" id="editCif" name="CIF" class="form-control" required autocomplete="off" maxlength="20" />
+                    <label>Forma de cobro *</label>
+                    <input type="text" id="editFormaCobPag" name="FORMACOBPAG" class="form-control" required autocomplete="off" maxlength="40" />
                 </div>
                 <div class="form-group">
-                    <label>Nombre Comercial *</label>
-                    <input type="text" id="editNombreCuenta" name="NOMBRE_CUENTA" class="form-control" required autocomplete="off" maxlength="50" />
+                    <label>Nº de cobros *</label>
+                    <input type="number" id="editNumCobros" name="NUMCOBROS" class="form-control" required min="1" />
                 </div>
                 <div class="form-group">
-                    <label>Razón Social (Fiscal) *</label>
-                    <input type="text" id="editNombreFiscal" name="NOMBRE_FISCAL" class="form-control" required autocomplete="off" maxlength="50" />
-                </div>
-                <div class="form-group full-width">
-                    <label>Dirección</label>
-                    <input type="text" id="editDireccion" name="DIRECCION" class="form-control" autocomplete="off" maxlength="100" />
+                    <label>Primer vencimiento *</label>
+                    <input type="number" id="editPrimVenci" name="PRIMVENCI" class="form-control" required min="0" />
                 </div>
                 <div class="form-group">
-                    <label>Número / Portal</label>
-                    <input type="text" id="editNumero" name="NUMERO" class="form-control" autocomplete="off" maxlength="20" />
+                    <label>Dias entre vtos *</label>
+                    <input type="number" id="editDiasVenci" name="DIASVENCI" class="form-control" required min="0" />
                 </div>
                 <div class="form-group">
-                    <label>Código Postal (CP)</label>
-                    <input type="text" id="editCp" name="CP" class="form-control" autocomplete="off" maxlength="5" />
+                    <label>Aceptable</label>
+                    <select id="editAcepto" name="ACEPTO" class="form-control">
+                        <option value="N">No</option>
+                        <option value="S">Sí</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Población</label>
-                    <input type="text" id="editPoblacion" name="POBLACION" class="form-control" autocomplete="off" maxlength="30" />
+                    <label>Remesa cobros</label>
+                    <select id="editRemesaCobro" name="REMESACOBRO" class="form-control">
+                        <option value="N">No</option>
+                        <option value="S">Sí</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>Provincia</label>
-                    <input type="text" id="editProvincia" name="PROVINCIA" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group">
-                    <label>País</label>
-                    <input type="text" id="editPais" name="PAIS" class="form-control" autocomplete="off" maxlength="100" />
-                </div>
-                <div class="form-group">
-                    <label>Teléfono</label>
-                    <input type="text" id="editTelefono" name="TELEFONO" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group full-width">
-                    <label>Correo Electrónico (Email)</label>
-                    <input type="email" id="editEmail" name="EMAIL" class="form-control" autocomplete="off" maxlength="30" />
-                </div>
-                <div class="form-group full-width">
-                    <label>Código IBAN Bancario</label>
-                    <input type="text" id="editIban" name="IBAN" class="form-control" autocomplete="off" maxlength="34" />
-                </div>
-                <div class="form-group">
-                    <label>Fecha de Alta</label>
-                    <input type="date" id="editFechaAlta" class="form-control" disabled />
-                </div>
-                <div class="form-group">
-                    <label>Fecha de Baja (Suspender)</label>
-                    <input type="date" id="editFechaBaja" name="FECHA_BAJA" class="form-control" />
+                    <label>Remesa pagos</label>
+                    <select id="editRemesaPago" name="REMESAPAGO" class="form-control">
+                        <option value="N">No</option>
+                        <option value="S">Sí</option>
+                    </select>
                 </div>
             </div>
             <button type="submit" class="btn-submit">Guardar Cambios</button>
@@ -481,21 +447,21 @@
     </div>
 </div>
 
-<div id="modalEliminarCliente" class="modal-overlay">
+<div id="modalEliminar" class="modal-overlay">
     <div class="modal-content" style="max-width: 450px;">
-        <span class="btn-cerrar" onclick="cerrarModal('modalEliminarCliente')">&times;</span>
-        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Registro?</h3>
+        <span class="btn-cerrar" onclick="cerrarModal('modalEliminar')">&times;</span>
+        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Configuración?</h3>
 
-        @using (Html.BeginForm("Eliminar", "Clientes", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la baja definitiva de este cliente? Esta acción purgará su registro maestro.');" }))
+        @using (Html.BeginForm("Eliminar", "FormasPago", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la baja total de esta regla de plazos?');" }))
         {
             @Html.AntiForgeryToken()
             <p style="color: #666; font-size: 0.95rem; line-height: 1.4;">
-                ¿Está completamente seguro de borrar la ficha del cliente? Esta acción no se puede deshacer de forma manual.
+                ¿Está seguro de purgar esta forma de pago del maestro contable?
             </p>
             <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545;">
-                <span id="deleteCuentaSpan" style="font-weight: bold; color: #212529;"></span> - <span id="deleteNombreSpan" style="color: #495057;"></span>
+                <span id="deleteCodigoSpan" style="font-weight: bold; color: #212529;"></span> - <span id="deleteNombreSpan" style="color: #495057;"></span>
             </div>
-            <input type="hidden" id="deleteCuentaHidden" name="id" />
+            <input type="hidden" id="deleteCodigoHidden" name="id" />
             <button type="submit" class="btn-submit btn-danger">Confirmar Eliminación</button>
         }
     </div>
@@ -503,13 +469,12 @@
 
 <script>
     $(document).ready(function() {
-        $('#tablaClientes').DataTable({
+        $('#tablaFormas').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
             "order": [[0, "asc"]],
-
             "scrollY": "400px",
-            "columnDefs": [{ "targets": 8, "orderable": false }]
+            "columnDefs": [ { "targets": 8, "orderable": false } ]
         });
 
         @if (TempData["MensajeExito"] != null) {
@@ -541,33 +506,26 @@
         }, 3500);
     }
 
-    function abrirModalCrear() { $('#modalCrearCliente').css('display', 'flex'); }
+    function abrirModalCrear() { $('#modalCrear').css('display', 'flex'); }
 
-    function abrirModalEditar(cuenta, nombreC, nombreF, dir, pob, num, cp, prov, pais, fAlta, fBaja, iban, tel, email, cif) {
-        $('#editCuentaHidden').val(cuenta);
-        $('#editCuentaView').val(cuenta);
-        $('#editCif').val(cif);
-        $('#editNombreCuenta').val(nombreC);
-        $('#editNombreFiscal').val(nombreF);
-        $('#editDireccion').val(dir);
-        $('#editNumero').val(num);
-        $('#editCp').val(cp);
-        $('#editPoblacion').val(pob);
-        $('#editProvincia').val(prov);
-        $('#editPais').val(pais);
-        $('#editTelefono').val(tel);
-        $('#editEmail').val(email);
-        $('#editIban').val(iban);
-        $('#editFechaAlta').val(fAlta);
-        $('#editFechaBaja').val(fBaja);
-        $('#modalEditarCliente').css('display', 'flex');
+    function abrirModalEditar(codigo, formacobpag, acepto, remesacobro, remesapago, numcobros, primvenci, diasvenci) {
+        $('#editCodigoHidden').val(codigo);
+        $('#editCodigoView').val(codigo);
+        $('#editFormaCobPag').val(formacobpag);
+        $('#editAcepto').val(acepto);
+        $('#editRemesaCobro').val(remesacobro);
+        $('#editRemesaPago').val(remesapago);
+        $('#editNumCobros').val(numcobros);
+        $('#editPrimVenci').val(primvenci);
+        $('#editDiasVenci').val(diasvenci);
+        $('#modalEditar').css('display', 'flex');
     }
 
-    function abrirModalEliminar(cuenta, nombreF) {
-        $('#deleteCuentaHidden').val(cuenta);
-        $('#deleteCuentaSpan').text(cuenta);
-        $('#deleteNombreSpan').text(nombreF);
-        $('#modalEliminarCliente').css('display', 'flex');
+    function abrirModalEliminar(codigo, formacobpag) {
+        $('#deleteCodigoHidden').val(codigo);
+        $('#deleteCodigoSpan').text(codigo);
+        $('#deleteNombreSpan').text(formacobpag);
+        $('#modalEliminar').css('display', 'flex');
     }
 
     function cerrarModal(idModal) { $('#' + idModal).css('display', 'none'); }
@@ -578,9 +536,9 @@
 
     @if (TempData["Error"] != null && TempData["TipoError"] != null) {
         if (TempData["TipoError"].ToString() == "Editar") {
-            <text>$('#modalEditarCliente').css('display', 'flex');</text>
+            <text>$('#modalEditar').css('display', 'flex');</text>
         } else {
-            <text>$('#modalCrearCliente').css('display', 'flex');</text>
+            <text>$('#modalCrear').css('display', 'flex');</text>
         }
     }
 </script>

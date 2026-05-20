@@ -12,12 +12,6 @@ namespace Nexeron.Controllers
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
                 return RedirectToAction("Login", "Home");
-            return View();
-        }
-        public ActionResult Cuentas()
-        {
-            if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
-                return RedirectToAction("Login", "Home");
 
             string connStr = Session["cadenaConexion"].ToString();
             List<CuentaModel> listaCuentas = new List<CuentaModel>();

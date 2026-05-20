@@ -275,17 +275,17 @@
 
 <div class="wrap-contabilidad">
     <div class="submenu-container">
-        <a href="@Url.Action("Cuentas", "Contabilidad")" class="btn-submenu">Plan de Cuentas</a>
+        <a href="@Url.Action("Index", "Cuentas")" class="btn-submenu">Plan de Cuentas</a>
         <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
         <a href="@Url.Action("Index", "Proveedores")" class="btn-submenu active">Proveedores</a>
-        <a href="@Url.Action("Bancos", "Contabilidad")" class="btn-submenu">Bancos</a>
-        <a href="@Url.Action("FormasPago", "Contabilidad")" class="btn-submenu">Formas de Cobro/Pago</a>
+        <a href="@Url.Action("Index", "Bancos")" class="btn-submenu">Bancos</a>
+        <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu">Formas de Cobro/Pago</a>
     </div>
 
     <div class="card">
         <div class="header-acciones">
             <h3>Fichero General de Proveedores</h3>
-            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nuevo Proveedor</button>
+            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Proveedor</button>
         </div>
 
         <table id="tablaProveedores" class="display" style="width:100%">
@@ -347,55 +347,55 @@
                 }
                 <div class="form-group">
                     <label>Cuenta Contable *</label>
-                    <input type="text" name="CUENTA" class="form-control" required autocomplete="off" placeholder="Ej: 40000001" />
+                    <input type="text" name="CUENTA" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: 400000001" />
                 </div>
                 <div class="form-group">
                     <label>CIF / NIF *</label>
-                    <input type="text" name="CIF" class="form-control" required autocomplete="off" />
+                    <input type="text" name="CIF" class="form-control" required autocomplete="off" maxlength="20" />
                 </div>
                 <div class="form-group">
                     <label>Nombre Comercial *</label>
-                    <input type="text" name="NOMBRE_CUENTA" class="form-control" required autocomplete="off" />
+                    <input type="text" name="NOMBRE_CUENTA" class="form-control" required autocomplete="off" maxlength="50" />
                 </div>
                 <div class="form-group">
                     <label>Razón Social (Fiscal) *</label>
-                    <input type="text" name="NOMBRE_FISCAL" class="form-control" required autocomplete="off" />
+                    <input type="text" name="NOMBRE_FISCAL" class="form-control" required autocomplete="off" maxlength="50" />
                 </div>
                 <div class="form-group full-width">
                     <label>Dirección</label>
-                    <input type="text" name="DIRECCION" class="form-control" autocomplete="off" />
+                    <input type="text" name="DIRECCION" class="form-control" autocomplete="off" maxlength="100" />
                 </div>
                 <div class="form-group">
                     <label>Número / Portal</label>
-                    <input type="text" name="NUMERO" class="form-control" autocomplete="off" />
+                    <input type="text" name="NUMERO" class="form-control" autocomplete="off" maxlength="20" />
                 </div>
                 <div class="form-group">
                     <label>Código Postal (CP)</label>
-                    <input type="text" name="CP" class="form-control" autocomplete="off" />
+                    <input type="text" name="CP" class="form-control" autocomplete="off" maxlength="5" />
                 </div>
                 <div class="form-group">
                     <label>Población</label>
-                    <input type="text" name="POBLACION" class="form-control" autocomplete="off" />
+                    <input type="text" name="POBLACION" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group">
                     <label>Provincia</label>
-                    <input type="text" name="PROVINCIA" class="form-control" autocomplete="off" />
+                    <input type="text" name="PROVINCIA" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group">
                     <label>País</label>
-                    <input type="text" name="PAIS" class="form-control" value="España" autocomplete="off" />
+                    <input type="text" name="PAIS" class="form-control" value="España" autocomplete="off" maxlength="100" />
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
-                    <input type="text" name="TELEFONO" class="form-control" autocomplete="off" />
+                    <input type="text" name="TELEFONO" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group full-width">
                     <label>Correo Electrónico (Email)</label>
-                    <input type="email" name="EMAIL" class="form-control" autocomplete="off" />
+                    <input type="email" name="EMAIL" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group full-width">
                     <label>Código IBAN Bancario</label>
-                    <input type="text" name="IBAN" class="form-control" autocomplete="off" placeholder="ES00 0000..." />
+                    <input type="text" name="IBAN" class="form-control" autocomplete="off" maxlength="34" placeholder="ES00 0000..." />
                 </div>
                 <div class="form-group">
                     <label>Fecha de Alta</label>
@@ -421,57 +421,57 @@
                     <div class="alert-error">@TempData["Error"]</div>
                 }
                 <div class="form-group">
-                    <label>Cuenta Contable (Llave)</label>
+                    <label>Cuenta Contable</label>
                     <input type="hidden" id="editCuentaHidden" name="CUENTA" />
                     <input type="text" id="editCuentaView" class="form-control" disabled />
                 </div>
                 <div class="form-group">
                     <label>CIF / NIF *</label>
-                    <input type="text" id="editCif" name="CIF" class="form-control" required autocomplete="off" />
+                    <input type="text" id="editCif" name="CIF" class="form-control" required autocomplete="off" maxlength="20" />
                 </div>
                 <div class="form-group">
                     <label>Nombre Comercial *</label>
-                    <input type="text" id="editNombreCuenta" name="NOMBRE_CUENTA" class="form-control" required autocomplete="off" />
+                    <input type="text" id="editNombreCuenta" name="NOMBRE_CUENTA" class="form-control" required autocomplete="off" maxlength="50" />
                 </div>
                 <div class="form-group">
                     <label>Razón Social (Fiscal) *</label>
-                    <input type="text" id="editNombreFiscal" name="NOMBRE_FISCAL" class="form-control" required autocomplete="off" />
+                    <input type="text" id="editNombreFiscal" name="NOMBRE_FISCAL" class="form-control" required autocomplete="off" maxlength="50" />
                 </div>
                 <div class="form-group full-width">
                     <label>Dirección</label>
-                    <input type="text" id="editDireccion" name="DIRECCION" class="form-control" autocomplete="off" />
+                    <input type="text" id="editDireccion" name="DIRECCION" class="form-control" autocomplete="off" maxlength="100" />
                 </div>
                 <div class="form-group">
                     <label>Número / Portal</label>
-                    <input type="text" id="editNumero" name="NUMERO" class="form-control" autocomplete="off" />
+                    <input type="text" id="editNumero" name="NUMERO" class="form-control" autocomplete="off" maxlength="20" />
                 </div>
                 <div class="form-group">
                     <label>Código Postal (CP)</label>
-                    <input type="text" id="editCp" name="CP" class="form-control" autocomplete="off" />
+                    <input type="text" id="editCp" name="CP" class="form-control" autocomplete="off" maxlength="5" />
                 </div>
                 <div class="form-group">
                     <label>Población</label>
-                    <input type="text" id="editPoblacion" name="POBLACION" class="form-control" autocomplete="off" />
+                    <input type="text" id="editPoblacion" name="POBLACION" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group">
                     <label>Provincia</label>
-                    <input type="text" id="editProvincia" name="PROVINCIA" class="form-control" autocomplete="off" />
+                    <input type="text" id="editProvincia" name="PROVINCIA" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group">
                     <label>País</label>
-                    <input type="text" id="editPais" name="PAIS" class="form-control" autocomplete="off" />
+                    <input type="text" id="editPais" name="PAIS" class="form-control" autocomplete="off" maxlength="100" />
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
-                    <input type="text" id="editTelefono" name="TELEFONO" class="form-control" autocomplete="off" />
+                    <input type="text" id="editTelefono" name="TELEFONO" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group full-width">
                     <label>Correo Electrónico (Email)</label>
-                    <input type="email" id="editEmail" name="EMAIL" class="form-control" autocomplete="off" />
+                    <input type="email" id="editEmail" name="EMAIL" class="form-control" autocomplete="off" maxlength="30" />
                 </div>
                 <div class="form-group full-width">
                     <label>Código IBAN Bancario</label>
-                    <input type="text" id="editIban" name="IBAN" class="form-control" autocomplete="off" />
+                    <input type="text" id="editIban" name="IBAN" class="form-control" autocomplete="off" maxlength="34" />
                 </div>
                 <div class="form-group">
                     <label>Fecha de Alta</label>
@@ -527,9 +527,17 @@
 
 
     function crearToast(mensaje, tipo) {
-        var icono = tipo === 'exito' ? '' : '';
-        var claseError = tipo === 'error' ? 'toast-error' : '';
-        var html = '<div class="toast-alerta ' + claseError + '"><span>' + icono + '</span><span>' + mensaje + '</span></div>';
+        var svgIcono = '';
+        var claseError = '';
+
+        if(tipo === 'exito') {
+            svgIcono = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        } else {
+            claseError = 'toast-error';
+            svgIcono = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+        }
+
+        var html = '<div class="toast-alerta ' + claseError + '"><span style="display:flex;align-items:center;">' + svgIcono + '</span><span>' + mensaje + '</span></div>';
         var $el = $(html);
         $('#toastContainer').append($el);
         setTimeout(function () { $el.addClass('mostrar'); }, 50);

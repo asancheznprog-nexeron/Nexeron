@@ -91,13 +91,12 @@
             background-color: #218838;
         }
 
-    /* BOTONES DE LA TABLA */
     .btn-editar {
         background: none;
         border: none;
         padding: 4px 8px;
         cursor: pointer;
-        color: #6c757d; 
+        color: #6c757d;
         transition: color 0.2s, transform 0.1s;
         display: inline-flex;
         align-items: center;
@@ -105,8 +104,8 @@
     }
 
         .btn-editar:hover {
-            color: #0056b3; 
-            transform: scale(1.15); 
+            color: #0056b3;
+            transform: scale(1.15);
         }
 
     .btn-eliminar {
@@ -114,7 +113,7 @@
         border: none;
         padding: 4px 8px;
         cursor: pointer;
-        color: #6c757d; 
+        color: #6c757d;
         transition: color 0.2s, transform 0.1s;
         display: inline-flex;
         align-items: center;
@@ -127,7 +126,6 @@
             transform: scale(1.15);
         }
 
-    /* MODALES / POPUPS */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -240,62 +238,6 @@
         margin-bottom: 1rem;
     }
 
-    /* DATATABLES */
-    .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_length {
-        margin-bottom: 1.5rem;
-    }
-
-    table.dataTable thead th {
-        background-color: #f8f9fa;
-        color: #495057;
-        border-bottom: 2px solid #dee2e6;
-        padding: 10px 12px;
-        font-size: 0.95rem;
-    }
-
-    table.dataTable tbody td {
-        border-bottom: 1px solid #eee;
-        padding: 9px 12px;
-        font-size: 0.95rem;
-        vertical-align: middle;
-    }
-
-    table.dataTable.display tbody tr:hover > .sorting_1, table.dataTable.display tbody tr:hover {
-        background-color: #f1f3f5 !important;
-    }
-
-    .dataTables_wrapper .dataTables_filter input {
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        padding: 0.4rem;
-        margin-left: 0.5rem;
-    }
-
-        .dataTables_wrapper .dataTables_filter input:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        border-radius: 4px !important;
-        padding: 0.4em 0.8em !important;
-        margin-left: 4px !important;
-        transition: 0.2s;
-    }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #007bff !important;
-            color: white !important;
-            border: 1px solid #007bff !important;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background: #e2e6ea !important;
-            color: #333 !important;
-            border: 1px solid #dae0e5 !important;
-        }
-
-
     .toast-container {
         position: fixed;
         top: 20px;
@@ -307,7 +249,7 @@
     }
 
     .toast-alerta {
-        background-color: #28a745; 
+        background-color: #28a745;
         color: white;
         padding: 1rem 1.5rem;
         border-radius: 6px;
@@ -322,7 +264,7 @@
     }
 
         .toast-alerta.toast-error {
-            background-color: #dc3545; 
+            background-color: #dc3545;
         }
 
         .toast-alerta.mostrar {
@@ -334,11 +276,11 @@
 
 <div class="wrap-contabilidad">
     <div class="submenu-container">
-        <a href="@Url.Action("Cuentas", "Contabilidad")" class="btn-submenu active">Plan de Cuentas</a>
+        <a href="@Url.Action("Index", "Cuentas")" class="btn-submenu active">Plan de Cuentas</a>
         <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
         <a href="@Url.Action("Index", "Proveedores")" class="btn-submenu">Proveedores</a>
-        <a href="@Url.Action("Bancos", "Contabilidad")" class="btn-submenu">Bancos</a>
-        <a href="@Url.Action("FormasPago", "Contabilidad")" class="btn-submenu">Formas de Cobro/Pago</a>
+        <a href="@Url.Action("Index", "Bancos")" class="btn-submenu">Bancos</a>
+        <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu">Formas de Cobro/Pago</a>
     </div>
 
     <div class="card">
@@ -393,7 +335,7 @@
         <span class="btn-cerrar" onclick="cerrarModal('modalCrearCuenta')">&times;</span>
         <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Nueva Cuenta</h3>
 
-        @using (Html.BeginForm("CrearCuenta", "Contabilidad", FormMethod.Post))
+        @using (Html.BeginForm("CrearCuenta", "Cuentas", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
 
@@ -404,11 +346,11 @@
 
             <div class="form-group">
                 <label>Código Contable</label>
-                <input type="text" name="Codigo" class="form-control" required autocomplete="off" autofocus />
+                <input type="text" name="Codigo" class="form-control" required autocomplete="off" maxlength="9" autofocus />
             </div>
             <div class="form-group">
                 <label>Nombre de la Cuenta</label>
-                <input type="text" name="Nombre" class="form-control" required autocomplete="off" />
+                <input type="text" name="Nombre" class="form-control" required autocomplete="off" maxlength="50" />
             </div>
             <button type="submit" class="btn-submit">Guardar Cuenta</button>
         }
@@ -420,7 +362,7 @@
         <span class="btn-cerrar" onclick="cerrarModal('modalEditarCuenta')">&times;</span>
         <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Cuenta</h3>
 
-        @using (Html.BeginForm("ActualizarCuenta", "Contabilidad", FormMethod.Post))
+        @using (Html.BeginForm("ActualizarCuenta", "Cuentas", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
 
@@ -436,7 +378,7 @@
             </div>
             <div class="form-group">
                 <label>Nombre de la Cuenta</label>
-                <input type="text" id="editNombre" name="Nombre" class="form-control" required autocomplete="off" autofocus />
+                <input type="text" id="editNombre" name="Nombre" class="form-control" required autocomplete="off" maxlength="50" autofocus />
             </div>
             <button type="submit" class="btn-submit">Guardar Cambios</button>
         }
@@ -448,7 +390,7 @@
         <span class="btn-cerrar" onclick="cerrarModal('modalEliminarCuenta')">&times;</span>
         <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Cuenta?</h3>
 
-        @using (Html.BeginForm("EliminarCuenta", "Contabilidad", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la eliminación definitiva de esta cuenta contable? Esta operación borrará su configuración actual.');" }))
+        @using (Html.BeginForm("EliminarCuenta", "Cuentas", FormMethod.Post, new { onsubmit = "return confirm('¿Confirma la eliminación definitiva de esta cuenta contable? Esta operación borrará su configuración actual.');" }))
         {
             @Html.AntiForgeryToken()
 
@@ -494,53 +436,48 @@
     });
 
     function crearToast(mensaje, tipo) {
-        var icono = tipo === 'exito' ? '' : '';
-        var claseError = tipo === 'error' ? 'toast-error' : '';
+        var svgIcono = '';
+        var claseError = '';
+
+        if(tipo === 'exito') {
+            svgIcono = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        } else {
+            claseError = 'toast-error';
+            svgIcono = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+        }
 
         var htmlToast = '<div class="toast-alerta ' + claseError + '">' +
-                            '<span>' + icono + '</span>' +
+                            '<span style="display:flex;align-items:center;">' + svgIcono + '</span>' +
                             '<span>' + mensaje + '</span>' +
                         '</div>';
 
         var $el = $(htmlToast);
         $('#toastContainer').append($el);
 
-        setTimeout(function() {
-            $el.addClass('mostrar');
-        }, 50);
-
+        setTimeout(function() { $el.addClass('mostrar'); }, 50);
         setTimeout(function() {
             $el.removeClass('mostrar');
             setTimeout(function() { $el.remove(); }, 300);
         }, 3500);
     }
 
-    function abrirModalCrear() {
-        $('#modalCrearCuenta').css('display', 'flex');
-    }
-
+    function abrirModalCrear() { $('#modalCrearCuenta').css('display', 'flex'); }
     function abrirModalEditar(codigo, nombre) {
         $('#editCodigoHidden').val(codigo);
         $('#editCodigoView').val(codigo);
         $('#editNombre').val(nombre);
         $('#modalEditarCuenta').css('display', 'flex');
     }
-
     function abrirModalEliminar(codigo, nombre) {
         $('#deleteCodigoHidden').val(codigo);
         $('#deleteCodigoSpan').text(codigo);
         $('#deleteNombreSpan').text(nombre);
         $('#modalEliminarCuenta').css('display', 'flex');
     }
-
-    function cerrarModal(idModal) {
-        $('#' + idModal).css('display', 'none');
-    }
+    function cerrarModal(idModal) { $('#' + idModal).css('display', 'none'); }
 
     window.onclick = function(event) {
-        if ($(event.target).hasClass('modal-overlay')) {
-            $('.modal-overlay').css('display', 'none');
-        }
+        if ($(event.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); }
     }
 
     @if (TempData["Error"] != null && TempData["TipoError"] != null)

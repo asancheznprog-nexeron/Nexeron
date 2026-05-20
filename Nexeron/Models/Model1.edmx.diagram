@@ -11,10 +11,11 @@
         <EntityTypeShape EntityType="cortechecoModel.articulo_proveedor" Width="1.5" PointX="3" PointY="3.75" />
         <EntityTypeShape EntityType="cortechecoModel.clientes" Width="1.5" PointX="5.375" PointY="0.75" />
         <AssociationConnector Association="cortechecoModel.fk_art_prov_articulo" />
-        <EntityTypeShape EntityType="cortechecoModel.proveedores" Width="1.5" PointX="5.375" PointY="5.75" />
-        <EntityTypeShape EntityType="cortechecoModel.bancos" Width="1.5" PointX="0.75" PointY="7.75" />
-        <EntityTypeShape EntityType="cortechecoModel.paises" Width="1.5" PointX="2.75" PointY="7.75" />
-        <EntityTypeShape EntityType="cortechecoModel.tipos" Width="1.5" PointX="7.75" PointY="3.75" />
+        <EntityTypeShape EntityType="cortechecoModel.proveedores" Width="1.5" PointX="9.125" PointY="0.75" />
+        <EntityTypeShape EntityType="cortechecoModel.bancos" Width="1.5" PointX="7.25" PointY="2.375" />
+        <EntityTypeShape EntityType="cortechecoModel.fpagcob" Width="1.5" PointX="5.75" PointY="6.75" />
+        <EntityTypeShape EntityType="cortechecoModel.paises" Width="1.5" PointX="0.75" PointY="7.75" />
+        <EntityTypeShape EntityType="cortechecoModel.tipos" Width="1.5" PointX="2.75" PointY="7.75" />
         <EntityTypeShape EntityType="cortechecoModel.unidades" Width="1.5" PointX="7.75" PointY="6.75" />
       </Diagram>
     </edmx:Diagrams>
