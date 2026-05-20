@@ -219,6 +219,9 @@
     <Compile Include="Models\articulo_proveedor.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\bancos.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\clientes.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -240,10 +243,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\UnidadModel.cs" />
+    <Compile Include="Models\Modelos\TipoModel.cs" />
     <Compile Include="Models\Modelos\ArticuloModel.cs" />
     <Compile Include="Models\Modelos\CuentaModel.cs" />
     <Compile Include="Models\Modelos\LoginModel.cs" />
+    <Compile Include="Models\paises.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\proveedores.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tipos.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\unidades.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\usuarios.cs">
@@ -326,11 +340,13 @@
     <Content Include="Views\Referencias\Index.cshtml" />
     <Content Include="Views\Clientes\Index.cshtml" />
     <Content Include="Views\Proveedores\Index.cshtml" />
+    <Content Include="Views\Referencias\Tipos.cshtml" />
+    <Content Include="Views\Referencias\Unidades.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Data\" />
-    <Folder Include="Views\Articulo\" />
+    <Folder Include="Views\TipoModel\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

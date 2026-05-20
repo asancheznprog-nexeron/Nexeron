@@ -1,0 +1,407 @@
+﻿@model IEnumerable<Nexeron.Models.TipoModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Gestión de Tipos de Artículo";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .wrap-contabilidad {
+        max-width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
+
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .header-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 1rem;
+    }
+
+        .header-acciones h3 {
+            margin: 0;
+            color: #495057;
+        }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 1rem;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .btn-editar, .btn-eliminar {
+        background: none;
+        border: none;
+        padding: 4px 8px;
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-editar:hover {
+            color: #0056b3;
+            transform: scale(1.15);
+        }
+
+        .btn-eliminar:hover {
+            color: #dc3545;
+            transform: scale(1.15);
+        }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 600px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: abrirPopup 0.3s ease-out;
+    }
+
+    @@keyframes abrirPopup {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .btn-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+    .form-control {
+        padding: 0.55rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        width: 100%;
+        font-family: inherit;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-submit.btn-danger {
+            background-color: #dc3545;
+        }
+
+            .btn-submit.btn-danger:hover {
+                background-color: #bd2130;
+            }
+
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast-alerta {
+        background-color: #28a745;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 300px;
+        transform: translateX(120%);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+        .toast-alerta.toast-error {
+            background-color: #dc3545;
+        }
+
+        .toast-alerta.mostrar {
+            transform: translateX(0);
+        }
+</style>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="wrap-contabilidad">
+    <div class="submenu-container">
+        <a href="@Url.Action("Index", "Referencias")" class="btn-submenu">Artículos</a>
+        <a href="@Url.Action("Tipos", "Referencias")" class="btn-submenu active">Tipos de Artículo</a>
+        <a href="@Url.Action("Unidades", "Referencias")" class="btn-submenu">Unidades de Medida</a>
+    </div>
+
+    <div class="card">
+        <div class="header-acciones">
+            <h3>Gestión de Tipos</h3>
+            <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nuevo Tipo</button>
+        </div>
+
+        <table id="tablaTipos" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">Código</th>
+                    <th style="width: 25%;">Descripción</th>
+                    <th style="width: 55%;">Descripción Detallada</th>
+                    <th style="text-align: center; width: 10%;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var t in Model)
+                    {
+                        <tr>
+                            <td><strong>@t.codigo</strong></td>
+                            <td>@t.descripcion</td>
+                            <td>@t.descripcion_detallada</td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <button type="button" class="btn-editar" onclick="abrirModalEditar('@t.codigo', '@Html.Raw(HttpUtility.JavaScriptStringEncode(t.descripcion))', '@Html.Raw(HttpUtility.JavaScriptStringEncode(t.descripcion_detallada))')" title="Editar Tipo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button type="button" class="btn-eliminar" onclick="abrirModalEliminar('@t.codigo', '@Html.Raw(HttpUtility.JavaScriptStringEncode(t.descripcion))')" title="Eliminar Tipo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalCrearTipo" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalCrearTipo')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Tipo</h3>
+
+        @using (Html.BeginForm("GuardarTipo", "Referencias", FormMethod.Post))
+        {
+            <input type="hidden" name="codigo" value="0" />
+            <div class="form-group">
+                <label>Descripción *</label>
+                <input type="text" name="descripcion" class="form-control" required autocomplete="off" />
+            </div>
+            <div class="form-group">
+                <label>Descripción Detallada</label>
+                <textarea name="descripcion_detallada" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Guardar Tipo</button>
+        }
+    </div>
+</div>
+
+<div id="modalEditarTipo" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEditarTipo')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Tipo</h3>
+
+        @using (Html.BeginForm("GuardarTipo", "Referencias", FormMethod.Post))
+        {
+            <div class="form-group">
+                <label>Código</label>
+                <input type="hidden" id="editCodigo" name="codigo" />
+                <input type="text" id="editCodigoView" class="form-control" disabled />
+            </div>
+            <div class="form-group">
+                <label>Descripción *</label>
+                <input type="text" id="editDescripcion" name="descripcion" class="form-control" required autocomplete="off" />
+            </div>
+            <div class="form-group">
+                <label>Descripción Detallada</label>
+                <textarea id="editDescripcionDetallada" name="descripcion_detallada" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Guardar Cambios</button>
+        }
+    </div>
+</div>
+
+<div id="modalEliminarTipo" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEliminarTipo')">&times;</span>
+        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Tipo?</h3>
+
+        @using (Html.BeginForm("BorrarTipo", "Referencias", FormMethod.Post))
+        {
+            <p style="color: #666; font-size: 0.95rem; line-height: 1.4;">¿Está seguro de eliminar este registro?</p>
+            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545;">
+                <span id="deleteCodigoSpan" style="font-weight: bold; color: #212529;"></span> - <span id="deleteDescSpan" style="color: #495057;"></span>
+            </div>
+            <input type="hidden" id="deleteCodigo" name="id" />
+            <button type="submit" class="btn-submit btn-danger">Confirmar Eliminación</button>
+        }
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#tablaTipos').DataTable({
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            "pageLength": 10,
+            "order": [[0, "asc"]],
+            "scrollY": "400px",
+            "columnDefs": [{ "targets": 3, "orderable": false }]
+        });
+
+        @if (TempData["MensajeExito"] != null) {
+            <text>crearToast('@TempData["MensajeExito"].ToString()', 'exito');</text>
+        }
+    });
+
+    function crearToast(mensaje, tipo) {
+        var claseError = tipo === 'error' ? 'toast-error' : '';
+        var html = '<div class="toast-alerta ' + claseError + '"><span></span><span>' + mensaje + '</span></div>';
+        var $el = $(html);
+        $('#toastContainer').append($el);
+        setTimeout(function() { $el.addClass('mostrar'); }, 50);
+        setTimeout(function() {
+            $el.removeClass('mostrar');
+            setTimeout(function() { $el.remove(); }, 300);
+        }, 3500);
+    }
+
+    function abrirModalCrear() { $('#modalCrearTipo').css('display', 'flex'); }
+    function abrirModalEditar(cod, desc, descDetallada) {
+        $('#editCodigo').val(cod);
+        $('#editCodigoView').val(cod);
+        $('#editDescripcion').val(desc);
+        $('#editDescripcionDetallada').val(descDetallada);
+        $('#modalEditarTipo').css('display', 'flex');
+    }
+    function abrirModalEliminar(cod, desc) {
+        $('#deleteCodigo').val(cod);
+        $('#deleteCodigoSpan').text(cod);
+        $('#deleteDescSpan').text(desc);
+        $('#modalEliminarTipo').css('display', 'flex');
+    }
+    function cerrarModal(idModal) { $('#' + idModal).css('display', 'none'); }
+    window.onclick = function(event) { if ($(event.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
+</script>

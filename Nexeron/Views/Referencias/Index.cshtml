@@ -17,6 +17,41 @@
         gap: 1.5rem;
     }
 
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
+
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
     .card {
         background: #fff;
         border-radius: 8px;
@@ -290,6 +325,12 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="wrap-contabilidad">
+    <div class="submenu-container">
+        <a href="@Url.Action("Index", "Referencias")" class="btn-submenu active">Artículos</a>
+        <a href="@Url.Action("Tipos", "Referencias")" class="btn-submenu">Tipos de Artículo</a>
+        <a href="@Url.Action("Unidades", "Referencias")" class="btn-submenu">Unidades de Medida</a>
+    </div>
+
     <div class="card">
         <div class="header-acciones">
             <h3>Fichero General de Artículos</h3>
@@ -344,7 +385,6 @@
     </div>
 </div>
 
-<!-- Modal Filtros Avanzados -->
 <div id="modalFiltrosAvanzados" class="modal-overlay">
     <div class="modal-content" style="max-width: 600px;">
         <span class="btn-cerrar" onclick="cerrarModal('modalFiltrosAvanzados')">&times;</span>
@@ -391,7 +431,6 @@
     </div>
 </div>
 
-<!-- Modal Crear Artículo -->
 <div id="modalCrearArticulo" class="modal-overlay">
     <div class="modal-content">
         <span class="btn-cerrar" onclick="cerrarModal('modalCrearArticulo')">&times;</span>
@@ -440,7 +479,7 @@
                         @foreach (var t in ViewBag.TiposList)
                         {
                             <option value="@t.Value">@t.Text</option>
-}
+                        }
                     </select>
                 </div>
                 <div class="form-group">
@@ -449,7 +488,7 @@
                         @foreach (var u in ViewBag.UnidadesList)
                         {
                             <option value="@u.Value">@u.Text</option>
-}
+                        }
                     </select>
                 </div>
                 <div class="form-group col-span-2">
@@ -458,7 +497,7 @@
                         @foreach (var p in ViewBag.PaisesList)
                         {
                             <option value="@p.Value">@p.Text</option>
-}
+                        }
                     </select>
                 </div>
 
@@ -498,7 +537,6 @@
     </div>
 </div>
 
-<!-- Modal Editar Artículo -->
 <div id="modalEditarArticulo" class="modal-overlay">
     <div class="modal-content">
         <span class="btn-cerrar" onclick="cerrarModal('modalEditarArticulo')">&times;</span>
@@ -548,7 +586,7 @@
                         @foreach (var t in ViewBag.TiposList)
                         {
                             <option value="@t.Value">@t.Text</option>
-}
+                        }
                     </select>
                 </div>
                 <div class="form-group">
@@ -557,7 +595,7 @@
                         @foreach (var u in ViewBag.UnidadesList)
                         {
                             <option value="@u.Value">@u.Text</option>
-}
+                        }
                     </select>
                 </div>
                 <div class="form-group col-span-2">
@@ -566,7 +604,7 @@
                         @foreach (var p in ViewBag.PaisesList)
                         {
                             <option value="@p.Value">@p.Text</option>
-}
+                        }
                     </select>
                 </div>
 
@@ -606,7 +644,6 @@
     </div>
 </div>
 
-<!-- Modal Eliminar Artículo -->
 <div id="modalEliminarArticulo" class="modal-overlay">
     <div class="modal-content" style="max-width: 450px;">
         <span class="btn-cerrar" onclick="cerrarModal('modalEliminarArticulo')">&times;</span>

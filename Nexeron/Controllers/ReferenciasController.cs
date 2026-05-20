@@ -291,5 +291,147 @@ namespace Nexeron.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        public ActionResult Tipos()
+        {
+            var lista = new List<TipoModel>();
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                using (var cmd = new MySqlCommand("SELECT codigo, descripcion, descripcion_detallada FROM tipos", con))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new TipoModel
+                        {
+                            codigo = Convert.ToInt32(reader["codigo"]),
+                            descripcion = reader["descripcion"].ToString(),
+                            descripcion_detallada = reader["descripcion_detallada"].ToString()
+                        });
+                    }
+                }
+            }
+            return View(lista);
+        }
+
+        [HttpPost]
+        public ActionResult GuardarTipo(TipoModel t)
+        {
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                bool existe = false;
+
+                if (t.codigo > 0)
+                {
+                    using (var cmdCheck = new MySqlCommand("SELECT COUNT(1) FROM tipos WHERE codigo = @codigo", con))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@codigo", t.codigo);
+                        existe = Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0;
+                    }
+                }
+
+                string sql = existe ?
+                    "UPDATE tipos SET descripcion=@descripcion, descripcion_detallada=@descripcion_detallada WHERE codigo=@codigo" :
+                    "INSERT INTO tipos (descripcion, descripcion_detallada) VALUES (@descripcion, @descripcion_detallada)";
+
+                using (var cmd = new MySqlCommand(sql, con))
+                {
+                    if (existe) cmd.Parameters.AddWithValue("@codigo", t.codigo);
+                    cmd.Parameters.AddWithValue("@descripcion", t.descripcion ?? "");
+                    cmd.Parameters.AddWithValue("@descripcion_detallada", t.descripcion_detallada ?? "");
+                    cmd.ExecuteNonQuery();
+                }
+                TempData["MensajeExito"] = existe ? "Tipo modificado correctamente." : "Tipo creado correctamente.";
+            }
+            return RedirectToAction("Tipos");
+        }
+
+        [HttpPost]
+        public ActionResult BorrarTipo(int id)
+        {
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                using (var cmd = new MySqlCommand("DELETE FROM tipos WHERE codigo = @codigo", con))
+                {
+                    cmd.Parameters.AddWithValue("@codigo", id);
+                    cmd.ExecuteNonQuery();
+                }
+                TempData["MensajeExito"] = "Tipo eliminado correctamente.";
+            }
+            return RedirectToAction("Tipos");
+        }
+
+        public ActionResult Unidades()
+        {
+            var lista = new List<UnidadModel>();
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                using (var cmd = new MySqlCommand("SELECT codigo, descripcion FROM unidades", con))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lista.Add(new UnidadModel
+                        {
+                            codigo = reader["codigo"].ToString(),
+                            descripcion = reader["descripcion"].ToString()
+                        });
+                    }
+                }
+            }
+            return View(lista);
+        }
+
+        [HttpPost]
+        public ActionResult GuardarUnidad(UnidadModel u, string codigoOriginal)
+        {
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                bool existe = false;
+                if (!string.IsNullOrEmpty(codigoOriginal))
+                {
+                    using (var cmdCheck = new MySqlCommand("SELECT COUNT(1) FROM unidades WHERE codigo = @codigoOriginal", con))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@codigoOriginal", codigoOriginal);
+                        existe = Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0;
+                    }
+                }
+
+                string sql = existe ?
+                    "UPDATE unidades SET codigo=@codigo, descripcion=@descripcion WHERE codigo=@codigoOriginal" :
+                    "INSERT INTO unidades (codigo, descripcion) VALUES (@codigo, @descripcion)";
+
+                using (var cmd = new MySqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@codigo", u.codigo);
+                    cmd.Parameters.AddWithValue("@descripcion", u.descripcion ?? "");
+                    if (existe) cmd.Parameters.AddWithValue("@codigoOriginal", codigoOriginal);
+                    cmd.ExecuteNonQuery();
+                }
+                TempData["MensajeExito"] = existe ? "Unidad modificada correctamente." : "Unidad creada correctamente.";
+            }
+            return RedirectToAction("Unidades");
+        }
+
+        [HttpPost]
+        public ActionResult BorrarUnidad(string id)
+        {
+            using (var con = new MySqlConnection(GetConnectionString()))
+            {
+                con.Open();
+                using (var cmd = new MySqlCommand("DELETE FROM unidades WHERE codigo = @codigo", con))
+                {
+                    cmd.Parameters.AddWithValue("@codigo", id);
+                    cmd.ExecuteNonQuery();
+                }
+                TempData["MensajeExito"] = "Unidad eliminada correctamente.";
+            }
+            return RedirectToAction("Unidades");
+        }
     }
 }
