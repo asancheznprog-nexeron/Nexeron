@@ -1,0 +1,608 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="cortechecoModel.Store" Provider="MySql.Data.MySqlClient" ProviderManifestToken="8.0" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="articulo">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="articulo" Type="char" MaxLength="50" />
+          <Property Name="descripcion" Type="text" />
+          <Property Name="longitud" Type="decimal" Precision="14" Scale="4" />
+          <Property Name="altura" Type="decimal" Precision="14" Scale="4" />
+          <Property Name="anchura" Type="decimal" Precision="14" Scale="4" />
+          <Property Name="tipo" Type="varchar" MaxLength="20" />
+          <Property Name="unidad_medida" Type="varchar" MaxLength="5" />
+          <Property Name="pais_origen" Type="char" MaxLength="3" />
+          <Property Name="iva" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="es_reutilizable" Type="bool" />
+          <Property Name="huella_carbono" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="dto_base" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="fecha_alta" Type="date" />
+          <Property Name="fecha_baja" Type="date" />
+          <Property Name="activo" Type="bool" />
+          <Property Name="observaciones" Type="text" />
+        </EntityType>
+        <EntityType Name="articulo_proveedor">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="articulo_codigo" Type="int" Nullable="false" />
+          <Property Name="proveedor_codigo" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="descripcion_proveedor" Type="varchar" MaxLength="100" />
+          <Property Name="tarifa" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="descuento" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="unidad" Type="varchar" MaxLength="5" />
+        </EntityType>
+        <EntityType Name="bancos">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="varchar" MaxLength="9" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
+          <Property Name="CP" Type="varchar" MaxLength="5" />
+          <Property Name="POBLACION" Type="varchar" MaxLength="30" />
+          <Property Name="CIF" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="TELEFONO" Type="varchar" MaxLength="30" />
+          <Property Name="EMAIL" Type="varchar" MaxLength="30" />
+          <Property Name="IBAN" Type="varchar" MaxLength="34" />
+          <Property Name="BIC" Type="varchar" MaxLength="11" />
+        </EntityType>
+        <EntityType Name="clientes">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="varchar" MaxLength="9" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
+          <Property Name="POBLACION" Type="varchar" MaxLength="30" />
+          <Property Name="NUMERO" Type="varchar" MaxLength="20" />
+          <Property Name="CP" Type="varchar" MaxLength="5" />
+          <Property Name="PROVINCIA" Type="varchar" MaxLength="30" />
+          <Property Name="PAIS" Type="varchar" MaxLength="100" />
+          <Property Name="FECHA_ALTA" Type="date" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="date" />
+          <Property Name="IBAN" Type="varchar" MaxLength="34" />
+          <Property Name="TELEFONO" Type="varchar" MaxLength="30" />
+          <Property Name="EMAIL" Type="varchar" MaxLength="30" />
+          <Property Name="CIF" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="cuentas">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="char" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="fpagcob">
+          <Key>
+            <PropertyRef Name="CODIGO" />
+          </Key>
+          <Property Name="CODIGO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="FORMACOBPAG" Type="char" MaxLength="40" Nullable="false" />
+          <Property Name="ACEPTO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="REMESACOBRO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="REMESAPAGO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="NUMCOBROS" Type="int" Nullable="false" />
+          <Property Name="PRIMVENCI" Type="int" Nullable="false" />
+          <Property Name="DIASVENCI" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ofertas">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NUMOFERTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHOFERTA" Type="datetime" Precision="0" Nullable="false" />
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FCOBRO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="NUMLINEA" Type="int" Nullable="false" />
+          <Property Name="ARTI" Type="char" MaxLength="13" />
+          <Property Name="DESARTI" Type="char" MaxLength="75" />
+          <Property Name="UNIDAD" Type="char" MaxLength="2" />
+          <Property Name="CANTI" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="EUROS" Type="decimal" Precision="12" Scale="4" />
+          <Property Name="IVARTI" Type="decimal" Precision="6" Scale="2" />
+          <Property Name="DTOARTI" Type="decimal" Precision="6" Scale="2" />
+          <Property Name="ESTADO" Type="char" MaxLength="3" />
+          <Property Name="ESTADOLIN" Type="char" MaxLength="3" />
+          <Property Name="NUMPEDIDO" Type="char" MaxLength="9" />
+          <Property Name="OBSERVACIONES" Type="text" />
+        </EntityType>
+        <EntityType Name="paises">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="varchar" MaxLength="3" Nullable="false" />
+          <Property Name="descripcion" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="proveedores">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="varchar" MaxLength="9" Nullable="false" />
+          <Property Name="NOMBRE_CUENTA" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="NOMBRE_FISCAL" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DIRECCION" Type="varchar" MaxLength="100" />
+          <Property Name="POBLACION" Type="varchar" MaxLength="30" />
+          <Property Name="NUMERO" Type="varchar" MaxLength="20" />
+          <Property Name="CP" Type="varchar" MaxLength="5" />
+          <Property Name="PROVINCIA" Type="varchar" MaxLength="30" />
+          <Property Name="PAIS" Type="varchar" MaxLength="100" />
+          <Property Name="FECHA_ALTA" Type="date" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="date" />
+          <Property Name="IBAN" Type="varchar" MaxLength="34" />
+          <Property Name="TELEFONO" Type="varchar" MaxLength="30" />
+          <Property Name="EMAIL" Type="varchar" MaxLength="30" />
+          <Property Name="CIF" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tipos">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="descripcion" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="descripcion_detallada" Type="text" Nullable="false" />
+        </EntityType>
+        <EntityType Name="unidades">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="varchar" MaxLength="3" Nullable="false" />
+          <Property Name="descripcion" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="usuarios">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="usuario" Type="char" MaxLength="50" />
+          <Property Name="password" Type="char" MaxLength="50" />
+          <Property Name="fallos" Type="int" />
+        </EntityType>
+        <Association Name="fk_art_prov_articulo">
+          <End Role="articulo" Type="Self.articulo" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="articulo_proveedor" Type="Self.articulo_proveedor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="articulo">
+              <PropertyRef Name="codigo" />
+            </Principal>
+            <Dependent Role="articulo_proveedor">
+              <PropertyRef Name="articulo_codigo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="cortechecoModelStoreContainer">
+          <EntitySet Name="articulo" EntityType="Self.articulo" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="articulo_proveedor" EntityType="Self.articulo_proveedor" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="bancos" EntityType="Self.bancos" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="clientes" EntityType="Self.clientes" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="cuentas" EntityType="Self.cuentas" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="fpagcob" EntityType="Self.fpagcob" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="ofertas" EntityType="Self.ofertas" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="paises" EntityType="Self.paises" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="proveedores" EntityType="Self.proveedores" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="tipos" EntityType="Self.tipos" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="unidades" EntityType="Self.unidades" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="usuarios" EntityType="Self.usuarios" Schema="cortecheco" store:Type="Tables" />
+          <AssociationSet Name="fk_art_prov_articulo" Association="Self.fk_art_prov_articulo">
+            <End Role="articulo" EntitySet="articulo" />
+            <End Role="articulo_proveedor" EntitySet="articulo_proveedor" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="cortechecoModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="cortechecoEntities" annotation:LazyLoadingEnabled="true" >
+          <EntitySet Name="articulo" EntityType="cortechecoModel.articulo" />
+          <EntitySet Name="usuarios" EntityType="cortechecoModel.usuarios" />
+          <EntitySet Name="cuentas" EntityType="cortechecoModel.cuentas" />
+          <EntitySet Name="articulo_proveedor" EntityType="cortechecoModel.articulo_proveedor" />
+          <EntitySet Name="clientes" EntityType="cortechecoModel.clientes" />
+          <AssociationSet Name="fk_art_prov_articulo" Association="cortechecoModel.fk_art_prov_articulo">
+            <End Role="articulo" EntitySet="articulo" />
+            <End Role="articulo_proveedor" EntitySet="articulo_proveedor" />
+          </AssociationSet>
+          <EntitySet Name="proveedores" EntityType="cortechecoModel.proveedores" />
+          <EntitySet Name="bancos" EntityType="cortechecoModel.bancos" />
+          <EntitySet Name="fpagcob" EntityType="cortechecoModel.fpagcob" />
+          <EntitySet Name="paises" EntityType="cortechecoModel.paises" />
+          <EntitySet Name="tipos" EntityType="cortechecoModel.tipos" />
+          <EntitySet Name="unidades" EntityType="cortechecoModel.unidades" />
+          <EntitySet Name="ofertas" EntityType="cortechecoModel.ofertas" />
+        </EntityContainer>
+        <EntityType Name="articulo">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="Int32" Nullable="false" />
+          <Property Name="articulo1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+          <Property Name="longitud" Type="Decimal" />
+          <Property Name="altura" Type="Decimal" />
+          <Property Name="anchura" Type="Decimal" />
+          <Property Name="tipo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="unidad_medida" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="pais_origen" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="iva" Type="Decimal" />
+          <Property Name="es_reutilizable" Type="Boolean" />
+          <Property Name="huella_carbono" Type="Decimal" />
+          <Property Name="dto_base" Type="Decimal" />
+          <Property Name="fecha_alta" Type="DateTime" />
+          <Property Name="fecha_baja" Type="DateTime" />
+          <Property Name="activo" Type="Boolean" />
+          <Property Name="observaciones" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="articulo_proveedor" Relationship="cortechecoModel.fk_art_prov_articulo" FromRole="articulo" ToRole="articulo_proveedor" />
+        </EntityType>
+        <EntityType Name="usuarios">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="usuario" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="fallos" Type="Int32" />
+        </EntityType>
+        <EntityType Name="cuentas">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="articulo_proveedor">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="articulo_codigo" Type="Int32" Nullable="false" />
+          <Property Name="proveedor_codigo" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion_proveedor" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="tarifa" Type="Decimal" />
+          <Property Name="descuento" Type="Decimal" />
+          <Property Name="unidad" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="articulo" Relationship="cortechecoModel.fk_art_prov_articulo" FromRole="articulo_proveedor" ToRole="articulo" />
+        </EntityType>
+        <EntityType Name="clientes">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_FISCAL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DIRECCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="POBLACION" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="NUMERO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CP" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="PROVINCIA" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="PAIS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_ALTA" Type="DateTime" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="DateTime" />
+          <Property Name="IBAN" Type="String" MaxLength="34" FixedLength="false" Unicode="false" />
+          <Property Name="TELEFONO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="CIF" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <Association Name="fk_art_prov_articulo">
+          <End Type="cortechecoModel.articulo" Role="articulo" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="cortechecoModel.articulo_proveedor" Role="articulo_proveedor" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="articulo">
+              <PropertyRef Name="codigo" />
+            </Principal>
+            <Dependent Role="articulo_proveedor">
+              <PropertyRef Name="articulo_codigo" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="proveedores">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_FISCAL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DIRECCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="POBLACION" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="NUMERO" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CP" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="PROVINCIA" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="PAIS" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_ALTA" Type="DateTime" Nullable="false" />
+          <Property Name="FECHA_BAJA" Type="DateTime" />
+          <Property Name="IBAN" Type="String" MaxLength="34" FixedLength="false" Unicode="false" />
+          <Property Name="TELEFONO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="CIF" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="bancos">
+          <Key>
+            <PropertyRef Name="CUENTA" />
+          </Key>
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_CUENTA" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="NOMBRE_FISCAL" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DIRECCION" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CP" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="POBLACION" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="CIF" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="TELEFONO" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="EMAIL" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="IBAN" Type="String" MaxLength="34" FixedLength="false" Unicode="false" />
+          <Property Name="BIC" Type="String" MaxLength="11" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="fpagcob">
+          <Key>
+            <PropertyRef Name="CODIGO" />
+          </Key>
+          <Property Name="CODIGO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="FORMACOBPAG" Type="String" Nullable="false" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="ACEPTO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="REMESACOBRO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="REMESAPAGO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="NUMCOBROS" Type="Int32" Nullable="false" />
+          <Property Name="PRIMVENCI" Type="Int32" Nullable="false" />
+          <Property Name="DIASVENCI" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="paises">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tipos">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="descripcion" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion_detallada" Type="String" Nullable="false" MaxLength="65535" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="unidades">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="descripcion" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="ofertas">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NUMOFERTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHOFERTA" Type="DateTime" Nullable="false" />
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FCOBRO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMLINEA" Type="Int32" Nullable="false" />
+          <Property Name="ARTI" Type="String" MaxLength="13" FixedLength="false" Unicode="false" />
+          <Property Name="DESARTI" Type="String" MaxLength="75" FixedLength="false" Unicode="false" />
+          <Property Name="UNIDAD" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="CANTI" Type="Decimal" />
+          <Property Name="EUROS" Type="Decimal" />
+          <Property Name="IVARTI" Type="Decimal" />
+          <Property Name="DTOARTI" Type="Decimal" />
+          <Property Name="ESTADO" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMPEDIDO" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="cortechecoModelStoreContainer" CdmEntityContainer="cortechecoEntities" >
+          <EntitySetMapping Name="articulo">
+            <EntityTypeMapping TypeName="cortechecoModel.articulo">
+              <MappingFragment StoreEntitySet="articulo">
+                <ScalarProperty Name="observaciones" ColumnName="observaciones" />
+                <ScalarProperty Name="activo" ColumnName="activo" />
+                <ScalarProperty Name="fecha_baja" ColumnName="fecha_baja" />
+                <ScalarProperty Name="fecha_alta" ColumnName="fecha_alta" />
+                <ScalarProperty Name="dto_base" ColumnName="dto_base" />
+                <ScalarProperty Name="huella_carbono" ColumnName="huella_carbono" />
+                <ScalarProperty Name="es_reutilizable" ColumnName="es_reutilizable" />
+                <ScalarProperty Name="iva" ColumnName="iva" />
+                <ScalarProperty Name="pais_origen" ColumnName="pais_origen" />
+                <ScalarProperty Name="unidad_medida" ColumnName="unidad_medida" />
+                <ScalarProperty Name="tipo" ColumnName="tipo" />
+                <ScalarProperty Name="anchura" ColumnName="anchura" />
+                <ScalarProperty Name="altura" ColumnName="altura" />
+                <ScalarProperty Name="longitud" ColumnName="longitud" />
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+                <ScalarProperty Name="articulo1" ColumnName="articulo" />
+                <ScalarProperty Name="codigo" ColumnName="codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="usuarios">
+            <EntityTypeMapping TypeName="cortechecoModel.usuarios">
+              <MappingFragment StoreEntitySet="usuarios">
+                <ScalarProperty Name="fallos" ColumnName="fallos" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="usuario" ColumnName="usuario" />
+                <ScalarProperty Name="clave" ColumnName="clave" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cuentas">
+            <EntityTypeMapping TypeName="cortechecoModel.cuentas">
+              <MappingFragment StoreEntitySet="cuentas">
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="articulo_proveedor">
+            <EntityTypeMapping TypeName="cortechecoModel.articulo_proveedor">
+              <MappingFragment StoreEntitySet="articulo_proveedor">
+                <ScalarProperty Name="unidad" ColumnName="unidad" />
+                <ScalarProperty Name="descuento" ColumnName="descuento" />
+                <ScalarProperty Name="tarifa" ColumnName="tarifa" />
+                <ScalarProperty Name="descripcion_proveedor" ColumnName="descripcion_proveedor" />
+                <ScalarProperty Name="proveedor_codigo" ColumnName="proveedor_codigo" />
+                <ScalarProperty Name="articulo_codigo" ColumnName="articulo_codigo" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="clientes">
+            <EntityTypeMapping TypeName="cortechecoModel.clientes">
+              <MappingFragment StoreEntitySet="clientes">
+                <ScalarProperty Name="CIF" ColumnName="CIF" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="TELEFONO" ColumnName="TELEFONO" />
+                <ScalarProperty Name="IBAN" ColumnName="IBAN" />
+                <ScalarProperty Name="FECHA_BAJA" ColumnName="FECHA_BAJA" />
+                <ScalarProperty Name="FECHA_ALTA" ColumnName="FECHA_ALTA" />
+                <ScalarProperty Name="PAIS" ColumnName="PAIS" />
+                <ScalarProperty Name="PROVINCIA" ColumnName="PROVINCIA" />
+                <ScalarProperty Name="CP" ColumnName="CP" />
+                <ScalarProperty Name="NUMERO" ColumnName="NUMERO" />
+                <ScalarProperty Name="POBLACION" ColumnName="POBLACION" />
+                <ScalarProperty Name="DIRECCION" ColumnName="DIRECCION" />
+                <ScalarProperty Name="NOMBRE_FISCAL" ColumnName="NOMBRE_FISCAL" />
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="proveedores">
+            <EntityTypeMapping TypeName="cortechecoModel.proveedores">
+              <MappingFragment StoreEntitySet="proveedores">
+                <ScalarProperty Name="CIF" ColumnName="CIF" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="TELEFONO" ColumnName="TELEFONO" />
+                <ScalarProperty Name="IBAN" ColumnName="IBAN" />
+                <ScalarProperty Name="FECHA_BAJA" ColumnName="FECHA_BAJA" />
+                <ScalarProperty Name="FECHA_ALTA" ColumnName="FECHA_ALTA" />
+                <ScalarProperty Name="PAIS" ColumnName="PAIS" />
+                <ScalarProperty Name="PROVINCIA" ColumnName="PROVINCIA" />
+                <ScalarProperty Name="CP" ColumnName="CP" />
+                <ScalarProperty Name="NUMERO" ColumnName="NUMERO" />
+                <ScalarProperty Name="POBLACION" ColumnName="POBLACION" />
+                <ScalarProperty Name="DIRECCION" ColumnName="DIRECCION" />
+                <ScalarProperty Name="NOMBRE_FISCAL" ColumnName="NOMBRE_FISCAL" />
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="bancos">
+            <EntityTypeMapping TypeName="cortechecoModel.bancos">
+              <MappingFragment StoreEntitySet="bancos">
+                <ScalarProperty Name="BIC" ColumnName="BIC" />
+                <ScalarProperty Name="IBAN" ColumnName="IBAN" />
+                <ScalarProperty Name="EMAIL" ColumnName="EMAIL" />
+                <ScalarProperty Name="TELEFONO" ColumnName="TELEFONO" />
+                <ScalarProperty Name="CIF" ColumnName="CIF" />
+                <ScalarProperty Name="POBLACION" ColumnName="POBLACION" />
+                <ScalarProperty Name="CP" ColumnName="CP" />
+                <ScalarProperty Name="DIRECCION" ColumnName="DIRECCION" />
+                <ScalarProperty Name="NOMBRE_FISCAL" ColumnName="NOMBRE_FISCAL" />
+                <ScalarProperty Name="NOMBRE_CUENTA" ColumnName="NOMBRE_CUENTA" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="fpagcob">
+            <EntityTypeMapping TypeName="cortechecoModel.fpagcob">
+              <MappingFragment StoreEntitySet="fpagcob">
+                <ScalarProperty Name="DIASVENCI" ColumnName="DIASVENCI" />
+                <ScalarProperty Name="PRIMVENCI" ColumnName="PRIMVENCI" />
+                <ScalarProperty Name="NUMCOBROS" ColumnName="NUMCOBROS" />
+                <ScalarProperty Name="REMESAPAGO" ColumnName="REMESAPAGO" />
+                <ScalarProperty Name="REMESACOBRO" ColumnName="REMESACOBRO" />
+                <ScalarProperty Name="ACEPTO" ColumnName="ACEPTO" />
+                <ScalarProperty Name="FORMACOBPAG" ColumnName="FORMACOBPAG" />
+                <ScalarProperty Name="CODIGO" ColumnName="CODIGO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="paises">
+            <EntityTypeMapping TypeName="cortechecoModel.paises">
+              <MappingFragment StoreEntitySet="paises">
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+                <ScalarProperty Name="codigo" ColumnName="codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tipos">
+            <EntityTypeMapping TypeName="cortechecoModel.tipos">
+              <MappingFragment StoreEntitySet="tipos">
+                <ScalarProperty Name="descripcion_detallada" ColumnName="descripcion_detallada" />
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+                <ScalarProperty Name="codigo" ColumnName="codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="unidades">
+            <EntityTypeMapping TypeName="cortechecoModel.unidades">
+              <MappingFragment StoreEntitySet="unidades">
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+                <ScalarProperty Name="codigo" ColumnName="codigo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ofertas">
+            <EntityTypeMapping TypeName="cortechecoModel.ofertas">
+              <MappingFragment StoreEntitySet="ofertas">
+                <ScalarProperty Name="OBSERVACIONES" ColumnName="OBSERVACIONES" />
+                <ScalarProperty Name="NUMPEDIDO" ColumnName="NUMPEDIDO" />
+                <ScalarProperty Name="ESTADOLIN" ColumnName="ESTADOLIN" />
+                <ScalarProperty Name="ESTADO" ColumnName="ESTADO" />
+                <ScalarProperty Name="DTOARTI" ColumnName="DTOARTI" />
+                <ScalarProperty Name="IVARTI" ColumnName="IVARTI" />
+                <ScalarProperty Name="EUROS" ColumnName="EUROS" />
+                <ScalarProperty Name="CANTI" ColumnName="CANTI" />
+                <ScalarProperty Name="UNIDAD" ColumnName="UNIDAD" />
+                <ScalarProperty Name="DESARTI" ColumnName="DESARTI" />
+                <ScalarProperty Name="ARTI" ColumnName="ARTI" />
+                <ScalarProperty Name="NUMLINEA" ColumnName="NUMLINEA" />
+                <ScalarProperty Name="FCOBRO" ColumnName="FCOBRO" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+                <ScalarProperty Name="FECHOFERTA" ColumnName="FECHOFERTA" />
+                <ScalarProperty Name="NUMOFERTA" ColumnName="NUMOFERTA" />
+                <ScalarProperty Name="clave" ColumnName="clave" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
