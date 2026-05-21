@@ -1,0 +1,902 @@
+﻿@model IEnumerable<Nexeron.Models.ofertas>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Gestión de Ofertas";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .wrap-ventas {
+        max-width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
+
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .header-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 1rem;
+    }
+
+        .header-acciones h3 {
+            margin: 0;
+            color: #495057;
+        }
+
+    .grupo-botones {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 1rem;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .btn-tabla {
+        background: none;
+        border: none;
+        padding: 4px 6px;
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-tabla-editar:hover {
+        color: #0056b3;
+        transform: scale(1.15);
+    }
+
+    .btn-tabla-eliminar:hover {
+        color: #dc3545;
+        transform: scale(1.15);
+    }
+
+    .badge-estado {
+        padding: 0.35rem 0.6rem;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .estado-pendiente {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .estado-aceptada {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .estado-rechazada {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .estado-parcial {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 1150px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: abrirPopup 0.3s ease-out;
+    }
+
+    @@keyframes abrirPopup {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .btn-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .seccion-titulo {
+        margin: 1.2rem 0 0.5rem 0;
+        color: #007bff;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.3rem;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .grid-3-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .grid-4-col {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr 1fr 2fr;
+        gap: 0.8rem;
+    }
+
+    .grid-fpago {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 0.6rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+    .form-control {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 0.9rem;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+    .form-control-bloqueado {
+        background-color: #e9ecef !important;
+        color: #495057 !important;
+        pointer-events: none;
+    }
+
+    .sugerencias-autocompletado {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        max-height: 180px;
+        overflow-y: auto;
+        z-index: 2500;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        display: none;
+    }
+
+    .sugerencia-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #f1f3f5;
+        color: #495057;
+        text-align: left;
+    }
+
+        .sugerencia-item:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+    .tabla-interna {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+        margin-bottom: 1.2rem;
+    }
+
+        .tabla-interna th {
+            background-color: #f8f9fa;
+            color: #495057;
+            padding: 8px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+        }
+
+        .tabla-interna td {
+            padding: 5px 3px;
+            border-bottom: 1px solid #eee;
+        }
+
+    .input-tabla {
+        width: 100%;
+        padding: 0.4rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-submit.btn-danger {
+            background-color: #dc3545;
+        }
+</style>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="wrap-ventas">
+    <div class="submenu-container">
+        <a href="@Url.Action("Index", "Ofertas")" class="btn-submenu active">Ofertas</a>
+    </div>
+
+    <div class="card">
+        <div class="header-acciones">
+            <h3>Control y Seguimiento de Ofertas</h3>
+            <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nueva Oferta Completa</button>
+            </div>
+        </div>
+
+        <table id="tablaOfertas" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Número Oferta</th>
+                    <th>Fecha Oferta</th>
+                    <th>Cuenta</th>
+                    <th>Cliente</th>
+                    <th>Forma Cobro</th>
+                    <th>Estado</th>
+                    <th>Pedido Asignado</th>
+                    <th style="text-align: center; width: 10%;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var o in Model)
+                    {
+                        <tr>
+                            <td><strong>@o.NUMOFERTA</strong></td>
+                            <td>@o.FECHOFERTA.ToString("dd/MM/yyyy")</td>
+                            <td>@o.CUENTA</td>
+                            <td>@o.NombreCliente</td>
+                            <td>@o.FCOBRO</td>
+                            <td>
+                                @if (o.ESTADO == "102")
+                                {<span class="badge-estado estado-aceptada">Aceptada</span> }
+                                else if (o.ESTADO == "103")
+                                { <span class="badge-estado estado-rechazada">Rechazada</span> }
+                                else if (o.ESTADO == "104")
+                                { <span class="badge-estado estado-parcial">Parcial</span> }
+                                else
+                                { <span class="badge-estado estado-pendiente">Pendiente</span>}
+                            </td>
+                            <td>@(string.IsNullOrEmpty(o.NUMPEDIDO) ? "Sin procesar" : o.NUMPEDIDO)</td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarOferta('@o.NUMOFERTA')" title="Editar Oferta Completa">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button type="button" class="btn-tabla btn-tabla-eliminar" onclick="abrirModalEliminar('@o.NUMOFERTA', '@o.NombreCliente')" title="Eliminar Oferta Completa">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalCrear" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalCrear')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Oferta Comercial</h3>
+
+        @using (Html.BeginForm("Crear", "Ofertas", FormMethod.Post, new { id = "formCrearOferta", onsubmit = "return empaquetarArticulosJson('modalCrear', 'lineasJson');" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="lineasJson" name="lineasJson" />
+
+            <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
+                <div class="seccion-titulo">Datos del Documento</div>
+                <div class="grid-3-col">
+                    <div class="form-group">
+                        <label>Número Oferta *</label>
+                        <input type="text" name="NUMOFERTA" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: 000000001" />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Oferta *</label>
+                        <input type="date" name="FECHOFERTA" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-group">
+                        <label>Estado Inicial *</label>
+                        <select name="ESTADO" class="form-control">
+                            <option value="101">Pendiente</option>
+                            <option value="102">Aceptada</option>
+                            <option value="103">Rechazada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="seccion-titulo">Datos de Facturación del Cliente</div>
+                <div class="grid-4-col">
+                    <div class="form-group">
+                        <label>Código de Cliente *</label>
+                        <input type="text" name="CUENTA" class="form-control txtCuentaCliente" required autocomplete="off" maxlength="9" placeholder="Escriba código o nombre..." onkeyup="buscarClienteAjax(this)" />
+                        <div class="sugerencias-autocompletado boxSugerenciasClientes"></div>
+                    </div>
+                    <div class="form-group"><label>Nombre Fiscal</label><input type="text" class="form-control form-control-bloqueado txtNombreFiscal" readonly /></div>
+                    <div class="form-group"><label>CIF / NIF</label><input type="text" class="form-control form-control-bloqueado txtCif" readonly /></div>
+                    <div class="form-group"><label>Dirección Fiscal</label><input type="text" class="form-control form-control-bloqueado txtDireccion" readonly /></div>
+                </div>
+                <div class="grid-3-col" style="margin-top: 0.6rem;">
+                    <div class="form-group"><label>Código Postal (CP)</label><input type="text" class="form-control form-control-bloqueado txtCp" readonly /></div>
+                    <div class="form-group"><label>Población</label><input type="text" class="form-control form-control-bloqueado txtPoblacion" readonly /></div>
+                    <div class="form-group"><label>Provincia</label><input type="text" class="form-control form-control-bloqueado txtProvincia" readonly /></div>
+                </div>
+
+                <div class="seccion-titulo">Artículos e Importes</div>
+                <table class="tabla-interna tblArticulos">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Artículo</th>
+                            <th style="width: 27%;">Descripción</th>
+                            <th style="width: 10%;">Cantidad</th>
+                            <th style="width: 8%;">Unidad</th>
+                            <th style="width: 12%;">Tarifa</th>
+                            <th style="width: 8%;">% Dto</th>
+                            <th style="width: 12%;">Importe</th>
+                            <th style="width: 8%;">% IVA</th>
+                            <th style="text-align: center; width: 10%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            <tr class="fila-articulo">
+                                <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti" maxlength="50" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
+                                <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly /></td>
+                                <td><input type="number" class="input-tabla num-canti" value="1.00" min="0.01" step="0.01" /></td>
+                                <td><input type="text" class="input-tabla txt-unidad" maxlength="5" placeholder="UD" /></td>
+                                <td><input type="number" class="input-tabla num-euros" value="0.0000" step="0.0001" /></td>
+                                <td><input type="number" class="input-tabla num-dtoarti" value="0.00" step="0.01" /></td>
+                                <td><input type="text" class="input-tabla num-importe" value="0.00" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+                                <td><input type="number" class="input-tabla num-ivarti" value="0.00" step="0.01" /></td>
+                                <td style="text-align: center;">
+                                    <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button>
+                                    <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">&times;</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
+                <div class="grid-fpago">
+                    <div class="form-group">
+                        <label>Forma de Pago *</label>
+                        <select name="FCOBRO" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                            <option value="">Seleccione...</option>
+                            @if (ViewBag.FormasPago != null)
+                            {
+                                foreach (var fp in ViewBag.FormasPago)
+                                {
+                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nº de cobros</label><input type="number" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
+                    <div class="form-group"><label>Primer vencimiento</label><input type="number" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
+                    <div class="form-group"><label>Dias entre vtos</label><input type="number" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
+                </div>
+                <div class="seccion-titulo">Observaciones</div>
+                <div class="form-group"><textarea name="OBSERVACIONES" class="form-control txtObservaciones" rows="3" style="resize: none;"></textarea></div>
+            </div>
+            <button type="submit" class="btn-submit">Procesar y Guardar Oferta Completa</button>
+        }
+    </div>
+</div>
+
+<div id="modalEditar" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEditar')">&times;</span>
+        <h3 style="margin-top: 0; color: #007bff; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Oferta Existente</h3>
+
+        @using (Html.BeginForm("Actualizar", "Ofertas", FormMethod.Post, new { id = "formEditarOferta", onsubmit = "return empaquetarArticulosJson('modalEditar', 'lineasJsonModificadas');" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="lineasJsonModificadas" name="lineasJsonModificadas" />
+
+            <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
+                <div class="seccion-titulo">Datos del Documento</div>
+                <div class="grid-3-col">
+                    <div class="form-group">
+                        <label>Número Oferta</label>
+                        <input type="text" name="NUMOFERTA" id="editNumOferta" class="form-control form-control-bloqueado" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Oferta *</label>
+                        <input type="date" name="FECHOFERTA" id="editFechOferta" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Estado Global *</label>
+                        <select name="ESTADO" id="editEstado" class="form-control">
+                            <option value="101">Pendiente</option>
+                            <option value="102">Aceptada</option>
+                            <option value="103">Rechazada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="seccion-titulo">Datos de Facturación del Cliente</div>
+                <div class="grid-4-col">
+                    <div class="form-group">
+                        <label>Código de Cliente *</label>
+                        <input type="text" name="CUENTA" id="editCuenta" class="form-control txtCuentaCliente" required autocomplete="off" maxlength="9" onkeyup="buscarClienteAjax(this)" />
+                        <div class="sugerencias-autocompletado boxSugerenciasClientes"></div>
+                    </div>
+                    <div class="form-group"><label>Nombre Fiscal</label><input type="text" id="editNombreFiscal" class="form-control form-control-bloqueado txtNombreFiscal" readonly /></div>
+                    <div class="form-group"><label>CIF / NIF</label><input type="text" id="editCif" class="form-control form-control-bloqueado txtCif" readonly /></div>
+                    <div class="form-group"><label>Dirección Fiscal</label><input type="text" id="editDireccion" class="form-control form-control-bloqueado txtDireccion" readonly /></div>
+                </div>
+                <div class="grid-3-col" style="margin-top: 0.6rem;">
+                    <div class="form-group"><label>Código Postal (CP)</label><input type="text" id="editCp" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>Población</label><input type="text" id="editPoblacion" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>Provincia</label><input type="text" id="editProvincia" class="form-control form-control-bloqueado" readonly /></div>
+                </div>
+                <div class="grid-3-col" style="margin-top: 0.6rem;">
+                    <div class="form-group"><label>Teléfono</label><input type="text" id="editTelefono" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Correo Electrónico</label><input type="email" id="editEmail" class="form-control form-control-bloqueado" readonly /></div>
+                </div>
+
+                <div class="seccion-titulo">Artículos e Importes</div>
+                <table class="tabla-interna tblArticulos" id="tablaArticulosEditar">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Artículo</th>
+                            <th style="width: 27%;">Descripción</th>
+                            <th style="width: 10%;">Cantidad</th>
+                            <th style="width: 8%;">Unidad</th>
+                            <th style="width: 12%;">Tarifa</th>
+                            <th style="width: 8%;">% Dto</th>
+                            <th style="width: 12%;">Importe</th>
+                            <th style="width: 8%;">% IVA</th>
+                            <th style="text-align: center; width: 10%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
+                <div class="grid-fpago">
+                    <div class="form-group">
+                        <label>Forma de Pago *</label>
+                        <select name="FCOBRO" id="editFcobro" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                            <option value="">Seleccione...</option>
+                            @if (ViewBag.FormasPago != null)
+                            {
+                                foreach (var fp in ViewBag.FormasPago)
+                                {
+                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nº de cobros</label><input type="number" id="editNcb" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
+                    <div class="form-group"><label>Primer vencimiento</label><input type="number" id="editVto" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
+                    <div class="form-group"><label>Dias entre vtos</label><input type="number" id="editDvto" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
+                </div>
+                <div class="seccion-titulo">Observaciones</div>
+                <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control txtObservaciones" rows="3" style="resize: none;"></textarea></div>
+            </div>
+            <button type="submit" class="btn-submit" style="background-color: #007bff;">Guardar Cambios de Oferta</button>
+        }
+    </div>
+</div>
+
+<div id="modalEliminar" class="modal-overlay">
+    <div class="modal-content" style="max-width: 450px;">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEliminar')">&times;</span>
+        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Oferta?</h3>
+        @using (Html.BeginForm("Eliminar", "Ofertas", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <p style="color: #666; font-size: 0.95rem; line-height: 1.4;">Se purgarán todas las líneas vinculadas. Esta operación no se puede deshacer.</p>
+            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545; text-align: left;">
+                Oferta Nº: <span id="deleteOfertaSpan" style="font-weight: bold;"></span> <br />
+                Cliente: <span id="deleteClienteSpan"></span>
+            </div>
+            <input type="hidden" id="deleteOfertaHidden" name="id" />
+            <button type="submit" class="btn-submit btn-danger">Confirmar Baja</button>
+        }
+    </div>
+</div>
+
+<script>
+    var cacheUltimoFiltroCliente = "";
+
+    $(document).ready(function() {
+        $('#tablaOfertas').DataTable({
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            "pageLength": 10,
+            "order": [[0, "desc"]],
+            "scrollY": "400px",
+            "columnDefs": [ { "targets": 7, "orderable": false } ]
+        });
+
+        $(document).on('input', '.num-canti, .num-euros, .num-dtoarti', function() {
+            calcularImporteFila($(this).closest('tr'));
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.txtCuentaCliente, .boxSugerenciasClientes').length) { $('.boxSugerenciasClientes').hide(); }
+            if (!$(e.target).closest('.txt-arti, .boxSugerenciasArticulos').length) { $('.boxSugerenciasArticulos').hide(); }
+        });
+    });
+
+
+    function cargarYEditarOferta(numOferta) {
+    $.ajax({
+        url: '@Url.Action("ObtenerDetalleOferta", "Ofertas")',
+        type: 'POST',
+        data: { numOferta: numOferta },
+        success: function(lineas) {
+            if(lineas && lineas.length > 0) {
+                var primerRegistro = lineas[0];
+
+                
+                $('#editNumOferta').val(primerRegistro.CUENTA ? numOferta : numOferta);
+                $('#editFechOferta').val(primerRegistro.FECHA);
+                $('#editEstado').val(primerRegistro.ESTADO);
+                $('#editCuenta').val(primerRegistro.CUENTA);
+                $('#editFcobro').val(primerRegistro.FCOBRO);
+                $('#editObservaciones').val(primerRegistro.OBSERVACIONES);
+
+
+                $('#editNombreFiscal').val(primerRegistro.NOMBRE_FISCAL);
+                $('#editCif').val(primerRegistro.CIF);
+                $('#editDireccion').val(primerRegistro.DIRECCION);
+                $('#editCp').val(primerRegistro.CP);
+                $('#editPoblacion').val(primerRegistro.POBLACION);
+                $('#editProvincia').val(primerRegistro.PROVINCIA);
+                $('#editTelefono').val(primerRegistro.TELEFONO);
+                $('#editEmail').val(primerRegistro.EMAIL);
+
+
+                sincronizarReglaPago(document.getElementById('editFcobro'));
+
+
+                var $tbody = $('#tablaArticulosEditar tbody');
+                if($tbody.length == 0) {
+                    $tbody = $('<tbody></tbody>');
+                    $('#tablaArticulosEditar').append($tbody);
+                }
+                $tbody.empty();
+
+                for (var i = 0; i < 10; i++) {
+                    var item = lineas[i] || { ARTI: '', DESARTI: '', CANTI: '1.00', UNIDAD: '', EUROS: '0.0000', DTOARTI: '0.00', IVARTI: '0.00' };
+                    var importeFila = (parseFloat(item.CANTI) * parseFloat(item.EUROS) * (1 - (parseFloat(item.DTOARTI) / 100))).toFixed(2);
+
+                    var trHtml = `
+                    <tr class="fila-articulo">
+                        <td>
+                            <div style="position: relative;">
+                                <input type="text" class="input-tabla txt-arti" maxlength="50" autocomplete="off" onkeyup="buscarArticuloAjax(this)" value="${item.ARTI}" />
+                                <div class="sugerencias-autocompletado boxSugerenciasArticulos"></div>
+                            </div>
+                        </td>
+                        <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
+                        <td><input type="number" class="input-tabla num-canti" value="${parseFloat(item.CANTI).toFixed(2)}" min="0.01" step="0.01" /></td>
+                        <td><input type="text" class="input-tabla txt-unidad" maxlength="5" placeholder="UD" value="${item.UNIDAD}" /></td>
+                        <td><input type="number" class="input-tabla num-euros" value="${parseFloat(item.EUROS).toFixed(4)}" step="0.0001" /></td>
+                        <td><input type="number" class="input-tabla num-dtoarti" value="${parseFloat(item.DTOARTI).toFixed(2)}" step="0.01" /></td>
+                        <td><input type="text" class="input-tabla num-importe" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+                        <td><input type="number" class="input-tabla num-ivarti" value="${parseFloat(item.IVARTI).toFixed(2)}" step="0.01" /></td>
+                        <td style="text-align: center;">
+                            <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button>
+                            <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">&times;</button>
+                        </td>
+                    </tr>`;
+                    $tbody.append(trHtml);
+                }
+                $('#modalEditar').css('display', 'flex');
+            }
+        }
+    });
+}
+
+    function buscarClienteAjax(input) {
+        var term = input.value.trim();
+        var $modal = $(input).closest('.modal-overlay');
+        var $contenedor = $modal.find('.boxSugerenciasClientes');
+
+        if (term.length < 1) { $contenedor.hide().empty(); return; }
+        if (term === cacheUltimoFiltroCliente) return;
+
+        $.ajax({
+            url: '@Url.Action("BuscarClientes", "Ofertas")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $contenedor.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(c) {
+                        var itemHtml = `<div class="sugerencia-item" onclick="injectarCliente('${$modal.attr('id')}', '${c.CUENTA}', '${c.NOMBRE_FISCAL}', '${c.CIF}', '${c.DIRECCION}', '${c.CP}', '${c.POBLACION}', '${c.PROVINCIA}', '${c.TELEFONO}', '${c.EMAIL}')"><strong>${c.CUENTA}</strong> - ${c.NOMBRE_FISCAL}</div>`;
+                        $contenedor.append(itemHtml);
+                    });
+                    $contenedor.show();
+                } else { $contenedor.hide(); }
+            }
+        });
+    }
+
+    function injectarCliente(modalId, cuenta, fiscal, cif, direccion, cp, poblacion, provincia, telefono, email) {
+        var $m = $('#' + modalId);
+        $m.find('.txtCuentaCliente').val(cuenta);
+        $m.find('.txtNombreFiscal').val(fiscal);
+        $m.find('.txtCif').val(cif);
+        $m.find('.txtMakeFiscal, .txtDireccion').val(direccion);
+        $m.find('.txtCp').val(cp);
+        $m.find('.txtPoblacion').val(poblacion);
+        $m.find('.txtProvincia').val(provincia);
+        $m.find('.boxSugerenciasClientes').hide();
+    }
+
+    function buscarArticuloAjax(input) {
+        var term = input.value.trim();
+        var $fila = $(input).closest('tr');
+        var $contenedor = $(input).siblings('.boxSugerenciasArticulos');
+
+        if (term.length < 1) {
+            $contenedor.hide().empty();
+            $fila.find('.txt-desarti, .txt-unidad, .num-importe').val('');
+            $fila.find('.num-euros').val('0.0000');
+            $fila.find('.num-ivarti').val('0.00');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("BuscarArticulos", "Ofertas")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $contenedor.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(a) {
+                        var safeDesarti = a.DESARTI.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                        var itemHtml = `<div class="sugerencia-item" onclick="seleccionarArticuloFila(this, '${a.ARTI}', '${safeDesarti}', '${a.UNIDAD}', '${a.IVARTI}')"><strong>${a.ARTI}</strong> - ${a.DESARTI}</div>`;
+                        $contenedor.append(itemHtml);
+                    });
+                    $contenedor.show();
+                } else { $contenedor.hide(); }
+            }
+        });
+    }
+
+    function seleccionarArticuloFila(elementoElement, arti, desarti, unidad, iva) {
+        var $fila = $(elementoElement).closest('tr');
+        $fila.find('.txt-arti').val(arti);
+        $fila.find('.txt-desarti').val(desarti);
+        $fila.find('.txt-unidad').val(unidad);
+        $fila.find('.num-ivarti').val(parseFloat(iva).toFixed(2));
+        $fila.find('.boxSugerenciasArticulos').hide();
+        calcularImporteFila($fila);
+    }
+
+    function sincronizarReglaPago(selectElement) {
+        var $opcion = $(selectElement).find('option:selected');
+        var $modal = $(selectElement).closest('.modal-overlay');
+        if ($opcion.val() !== "") {
+            $modal.find('.txtNcb').val($opcion.data('cobros'));
+            $modal.find('.txtVto').val($opcion.data('vto'));
+            $modal.find('.txtDvto').val($opcion.data('dvto'));
+        } else {
+            $modal.find('.txtNcb').val(1); $modal.find('.txtVto').val(0); $modal.find('.txtDvto').val(0);
+        }
+    }
+
+    function calcularImporteFila($fila) {
+        var canti = parseFloat($fila.find('.num-canti').val()) || 0;
+        var euros = parseFloat($fila.find('.num-euros').val()) || 0;
+        var dto = parseFloat($fila.find('.num-dtoarti').val()) || 0;
+        var importe = canti * euros * (1 - (dto / 100));
+        $fila.find('.num-importe').val(importe.toFixed(2));
+    }
+
+    function agregarFilaArticulo(boton) {
+        var nuevaFila = `
+        <tr class="fila-articulo">
+            <td>
+                <div style="position: relative;">
+                    <input type="text" class="input-tabla txt-arti" maxlength="50" autocomplete="off" onkeyup="buscarArticuloAjax(this)" />
+                    <div class="sugerencias-autocompletado boxSugerenciasArticulos"></div>
+                </div>
+            </td>
+            <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly /></td>
+            <td><input type="number" class="input-tabla num-canti" value="1.00" min="0.01" step="0.01" /></td>
+            <td><input type="text" class="input-tabla txt-unidad" maxlength="5" placeholder="UD" autocomplete="off" /></td>
+            <td><input type="number" class="input-tabla num-euros" value="0.0000" step="0.0001" /></td>
+            <td><input type="number" class="input-tabla num-dtoarti" value="0.00" step="0.01" /></td>
+            <td><input type="text" class="input-tabla num-importe" value="0.00" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+            <td><input type="number" class="input-tabla num-ivarti" value="0.00" step="0.01" /></td>
+            <td style="text-align: center;">
+                <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button>
+                <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">&times;</button>
+            </td>
+        </tr>`;
+        $(boton).closest('tr').after(nuevaFila);
+    }
+
+    function eliminarFilaArticulo(boton) {
+        var $table = $(boton).closest('table');
+        if ($table.find('tbody tr').length > 1) { $(boton).closest('tr').remove(); }
+        else { crearToast("Una oferta debe tener como mínimo una línea de artículo.", "error"); }
+    }
+
+    function empaquetarArticulosJson(modalId, targetHiddenId) {
+        try {
+            var listaArtiles = [];
+            var algunaLineaLlena = false;
+
+            $('#' + modalId + ' .tblArticulos tbody tr').each(function() {
+                var $f = $(this);
+                var inputArti = $f.find('.txt-arti').val();
+                var inputDesarti = $f.find('.txt-desarti').val();
+
+                var arti = inputArti ? inputArti.trim() : "";
+                var desarti = inputDesarti ? inputDesarti.trim() : "";
+
+                if (arti === "" && desarti === "") return true;
+                if (arti !== "" && desarti === "") { desarti = "Artículo " + arti; }
+
+                var canti = parseFloat($f.find('.num-canti').val()) || 0;
+                var inputUnidad = $f.find('.txt-unidad').val();
+                var unidad = inputUnidad && inputUnidad.trim() !== "" ? inputUnidad.trim() : "UD";
+                var euros = parseFloat($f.find('.num-euros').val()) || 0;
+                var dto = parseFloat($f.find('.num-dtoarti').val()) || 0;
+                var iva = parseFloat($f.find('.num-ivarti').val()) || 0;
+
+                algunaLineaLlena = true;
+                listaArtiles.push({ ARTI: arti, DESARTI: desarti, CANTI: canti, UNIDAD: unidad, EUROS: euros, DTOARTI: dto, IVARTI: iva });
+            });
+
+            if (!algunaLineaLlena) {
+                crearToast("La oferta debe contener al menos un artículo válido.", "error");
+                return false;
+            }
+
+            $('#' + targetHiddenId).val(JSON.stringify(listaArtiles));
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function abrirModalCrear() { $('#modalCrear').css('display', 'flex'); }
+    function abrirModalEliminar(numoferta, cliente) {
+        $('#deleteOfertaHidden').val(numoferta); $('#deleteOfertaSpan').text(numoferta); $('#deleteClienteSpan').text(cliente); $('#modalEliminar').css('display', 'flex');
+    }
+    function cerrarModal(id) { $('#' + id).css('display', 'none'); }
+    window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
+
+    function crearToast(m, t) {
+        var svg = t === 'exito' ? '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+        var html = '<div class="toast-alerta ' + (t === 'error' ? 'toast-error' : '') + '"><span style="display:flex;align-items:center;">' + svg + '</span><span>' + m + '</span></div>';
+        var $el = $(html); $('#toastContainer').append($el);
+        setTimeout(function() { $el.addClass('mostrar'); }, 50);
+        setTimeout(function() { $el.removeClass('mostrar'); setTimeout(function() { $el.remove(); }, 300); }, 3500);
+    }
+</script>
