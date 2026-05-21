@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
@@ -207,6 +207,7 @@
     <Compile Include="App_Start\BundleConfig2.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\OfertasController.cs" />
     <Compile Include="Controllers\FormasPagoController.cs" />
     <Compile Include="Controllers\BancosController.cs" />
     <Compile Include="Controllers\ProveedoresController.cs" />
@@ -251,6 +252,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\Ofertas_ext.cs" />
     <Compile Include="Models\Modelos\ArticuloProveedorModel.cs" />
     <Compile Include="Models\Modelos\UnidadModel.cs" />
     <Compile Include="Models\Modelos\TipoModel.cs" />
@@ -355,6 +357,7 @@
     <Content Include="Views\FormasPago\Index.cshtml" />
     <Content Include="Views\Referencias\Tipos.cshtml" />
     <Content Include="Views\Referencias\Unidades.cshtml" />
+    <Content Include="Views\Ofertas\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
