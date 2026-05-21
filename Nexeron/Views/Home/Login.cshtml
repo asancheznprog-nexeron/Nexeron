@@ -1,0 +1,128 @@
+﻿@model Nexeron.Models.LoginModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "Iniciar Sesión";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Mi Proyecto</title>
+
+    <style>
+        /* Estilos básicos para un diseño limpio y centrado */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+            .login-card h1 {
+                text-align: center;
+                margin-top: 0;
+                margin-bottom: 1.5rem;
+                color: #333;
+                font-size: 1.5rem;
+            }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: #555;
+                font-weight: bold;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+            .form-control:focus {
+                border-color: #007bff;
+                outline: none;
+            }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+            .btn-submit:hover {
+                background-color: #0056b3;
+            }
+
+        .text-danger {
+            color: #dc3545;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h1>Iniciar Sesión</h1>
+
+        @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @id = "frmLogin" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-group">
+                <label for="Empresa">Empresa</label>
+                @Html.EditorFor(model => model.Empresa, new { htmlAttributes = new { @class = "form-control", autocomplete = "off" } })
+                @Html.ValidationMessageFor(model => model.Empresa, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <label for="Usuario">Usuario</label>
+                @Html.EditorFor(model => model.Usuario, new { htmlAttributes = new { @class = "form-control", autocomplete = "username" } })
+                @Html.ValidationMessageFor(model => model.Usuario, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <label for="Password">Contraseña</label>
+                @Html.PasswordFor(model => model.Password, new { @class = "form-control", autocomplete = "current-password" })
+                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+            </div>
+
+            <button type="submit" class="btn-submit">Ingresar</button>
+        }
+    </div>
+
+</body>
+</html>
