@@ -36,5 +36,6 @@ namespace Nexeron.Models
         public virtual DbSet<paises> paises { get; set; }
         public virtual DbSet<tipos> tipos { get; set; }
         public virtual DbSet<unidades> unidades { get; set; }
+        public virtual DbSet<ofertas> ofertas { get; set; }
     }
 }

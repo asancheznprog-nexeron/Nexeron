@@ -17,6 +17,7 @@
         <EntityTypeShape EntityType="cortechecoModel.paises" Width="1.5" PointX="0.75" PointY="7.75" />
         <EntityTypeShape EntityType="cortechecoModel.tipos" Width="1.5" PointX="2.75" PointY="7.75" />
         <EntityTypeShape EntityType="cortechecoModel.unidades" Width="1.5" PointX="7.75" PointY="6.75" />
+        <EntityTypeShape EntityType="cortechecoModel.ofertas" Width="1.5" PointX="11.125" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
