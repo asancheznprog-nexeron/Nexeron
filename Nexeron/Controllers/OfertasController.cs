@@ -44,7 +44,6 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.FormasPago = formasPago;
 
-                    
                     List<KeyValuePair<string, string>> estadosLista = new List<KeyValuePair<string, string>>();
                     using (var cmdEst = conexion.CreateCommand())
                     {
@@ -62,7 +61,6 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.Estados = estadosLista;
 
-                    
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"
@@ -240,7 +238,7 @@ namespace Nexeron.Controllers
                                     FCOBRO = reader["FCOBRO"].ToString().Trim(),
                                     ESTADO = reader["ESTADO_CALCULADO"].ToString().Trim(),
                                     ESTADOLIN = reader["ESTADOLIN"].ToString().Trim(),
-                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(), 
+                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(),
                                     FECHA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("yyyy-MM-dd"),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
                                     NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
@@ -289,15 +287,31 @@ namespace Nexeron.Controllers
                 return RedirectToAction("Index");
             }
 
+            string numOferta = form["NUMOFERTA"].PadLeft(9);
             string connStr = Session["cadenaConexion"].ToString();
+
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
                 conexion.Open();
+
+                using (var cmdCheck = conexion.CreateCommand())
+                {
+                    cmdCheck.CommandText = "SELECT COUNT(*) FROM ofertas WHERE NUMOFERTA = @numCheck";
+                    cmdCheck.Parameters.AddWithValue("@numCheck", numOferta);
+                    long conteo = Convert.ToInt64(cmdCheck.ExecuteScalar());
+
+                    if (conteo > 0)
+                    {
+                        TempData["Error"] = "El número de oferta '" + numOferta.Trim() + "' ya se encuentra registrado en el sistema. Introduzca uno diferente.";
+                        TempData["TipoError"] = "Crear";
+                        return RedirectToAction("Index");
+                    }
+                }
+
                 using (MySqlTransaction transaccion = conexion.BeginTransaction())
                 {
                     try
                     {
-                        string numOferta = form["NUMOFERTA"].PadLeft(9);
                         DateTime fechOferta = Convert.ToDateTime(form["FECHOFERTA"]);
                         string cuenta = form["CUENTA"].PadLeft(9);
                         string fcobro = form["FCOBRO"];
@@ -396,6 +410,31 @@ namespace Nexeron.Controllers
                         string estadoGlobal = form["ESTADO"];
                         string observaciones = form["OBSERVACIONES"];
 
+                        if (nuevasLineas.Count > 0)
+                        {
+                            string primerEstadoLin = nuevasLineas[0].ESTADOLIN;
+                            bool todasLasLineasSonIguales = true;
+
+                            foreach (var linea in nuevasLineas)
+                            {
+                                if (linea.ESTADOLIN != primerEstadoLin)
+                                {
+                                    todasLasLineasSonIguales = false;
+                                    break;
+                                }
+                            }
+
+                            if (todasLasLineasSonIguales)
+                            {
+                                estadoGlobal = primerEstadoLin;
+                            }
+                            else
+                            {
+                                estadoGlobal = "104";
+                            }
+                        }
+                        
+
                         using (var cmdDelete = conexion.CreateCommand())
                         {
                             cmdDelete.Transaction = transaccion;
@@ -410,12 +449,13 @@ namespace Nexeron.Controllers
                             using (var cmdInsert = conexion.CreateCommand())
                             {
                                 cmdInsert.Transaction = transaccion;
+
                                 cmdInsert.CommandText = @"INSERT INTO ofertas (
                                     NUMOFERTA, FECHOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, NUMPEDIDO, OBSERVACIONES
                                 ) VALUES (
                                     @numoferta, @fechoferta, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, '', @observaciones
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @numpedido, @observaciones
                                 )";
 
                                 cmdInsert.Parameters.AddWithValue("@numoferta", numOferta);
@@ -430,8 +470,11 @@ namespace Nexeron.Controllers
                                 cmdInsert.Parameters.AddWithValue("@euros", linea.EUROS);
                                 cmdInsert.Parameters.AddWithValue("@ivarti", linea.IVARTI);
                                 cmdInsert.Parameters.AddWithValue("@dtoarti", linea.DTOARTI);
-                                cmdInsert.Parameters.AddWithValue("@estado", estadoGlobal);
+                                cmdInsert.Parameters.AddWithValue("@estado", estadoGlobal); 
                                 cmdInsert.Parameters.AddWithValue("@estadolin", string.IsNullOrEmpty(linea.ESTADOLIN) ? estadoGlobal : linea.ESTADOLIN);
+                                string pedidoFormateado = string.IsNullOrEmpty(linea.NUMPEDIDO) ? "" : linea.NUMPEDIDO.PadLeft(9);
+                                cmdInsert.Parameters.AddWithValue("@numpedido", pedidoFormateado);
+
                                 cmdInsert.Parameters.AddWithValue("@observaciones", observaciones ?? "");
 
                                 cmdInsert.ExecuteNonQuery();

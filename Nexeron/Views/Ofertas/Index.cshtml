@@ -531,7 +531,7 @@
                             <th style="width: 8%;">% Dto</th>
                             <th style="width: 12%;">Importe</th>
                             <th style="width: 8%;">% IVA</th>
-                            <th style="text-align: center; width: 10%;">Acciones</th>
+                            <th class="col-acciones" style="text-align: center; width: 10%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -557,18 +557,9 @@
 
                 <div class="seccion-titulo">Resumen Económico de la Oferta</div>
                 <div class="grid-3-col" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                    <div class="form-group">
-                        <label>Base Imponible Total</label>
-                        <input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" />
-                    </div>
-                    <div class="form-group">
-                        <label>Importe IVA Total</label>
-                        <input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" />
-                    </div>
-                    <div class="form-group">
-                        <label>Total de la Oferta</label>
-                        <input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" />
-                    </div>
+                    <div class="form-group"><label>Base Imponible Total</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Importe IVA Total</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Total de la Oferta</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" /></div>
                 </div>
 
                 <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
@@ -666,7 +657,7 @@
                             <th style="width: 8%;">% Dto</th>
                             <th style="width: 12%;">Importe</th>
                             <th style="width: 8%;">% IVA</th>
-                            <th style="text-align: center; width: 10%;">Acciones</th>
+                            <th class="col-acciones" style="text-align: center; width: 10%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -675,18 +666,9 @@
 
                 <div class="seccion-titulo">Resumen Económico de la Oferta</div>
                 <div class="grid-3-col" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                    <div class="form-group">
-                        <label>Base Imponible Total</label>
-                        <input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" />
-                    </div>
-                    <div class="form-group">
-                        <label>Importe IVA Total</label>
-                        <input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" />
-                    </div>
-                    <div class="form-group">
-                        <label>Total de la Oferta</label>
-                        <input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" />
-                    </div>
+                    <div class="form-group"><label>Base Imponible Total</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Importe IVA Total</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Total de la Oferta</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" /></div>
                 </div>
 
                 <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
@@ -711,7 +693,7 @@
                 <div class="seccion-titulo">Observaciones</div>
                 <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control txtObservaciones" rows="3" style="resize: none;"></textarea></div>
             </div>
-            <button type="submit" class="btn-submit" style="background-color: #007bff;">Guardar Cambios de Oferta</button>
+            <button type="submit" id="btnGuardarEditar" class="btn-submit" style="background-color: #007bff;">Guardar Cambios de Oferta</button>
         }
     </div>
 </div>
@@ -756,7 +738,7 @@
         </div>
 
         <div id="datosClienteSeleccionado" style="display: none; margin-top: 1rem;">
-            <div class="seccion-titulo">Datos del Cliente</div>
+            <div class="seccion-titulo">Datos del Client</div>
             <div class="grid-3-col">
                 <div class="form-group"><label>CIF / NIF</label><input type="text" class="form-control form-control-bloqueado" id="clienteCif" readonly /></div>
                 <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado" id="clienteDireccion" readonly /></div>
@@ -839,7 +821,6 @@
             var nuevoEstado = $(this).val();
             var $modal = $(this).closest('.modal-overlay');
             if (nuevoEstado !== "104") {
-                
                 $modal.find('.tblArticulos tbody tr').each(function() {
                     var pedidoAsignado = $(this).attr('data-numpedido') || "";
                     if(pedidoAsignado.trim() === "") {
@@ -891,19 +872,42 @@
                 $tbody.empty();
 
                 var ofertaTienePedido = false;
+                var esSoloLecturaGlobal = (primerRegistro.ESTADO === "102" || primerRegistro.ESTADO === "103");
+                var totalLineasARenderizar = esSoloLecturaGlobal ? lineas.length : Math.max(10, lineas.length);
 
-                for (var i = 0; i < 10; i++) {
+                
+                if (esSoloLecturaGlobal) {
+                    $('#tablaArticulosEditar th.col-acciones').hide();
+                    $('#btnGuardarEditar').hide();
+                } else {
+                    $('#tablaArticulosEditar th.col-acciones').show();
+                    $('#btnGuardarEditar').show();
+                }
+
+                for (var i = 0; i < totalLineasARenderizar; i++) {
                     var item = lineas[i] || { ARTI: '', DESARTI: '', CANTI: '1.00', UNIDAD: '', EUROS: '0.0000', DTOARTI: '0.00', IVARTI: '0.00', ESTADOLIN: primerRegistro.ESTADO, NUMPEDIDO: '' };
                     var importeFila = (parseFloat(item.CANTI) * parseFloat(item.EUROS) * (1 - (parseFloat(item.DTOARTI) / 100))).toFixed(2);
 
-                    
                     var lineaTienePedido = item.NUMPEDIDO && item.NUMPEDIDO.trim() !== "";
                     if (lineaTienePedido) { ofertaTienePedido = true; }
 
-                    var readonlyAttr = lineaTienePedido ? "readonly" : "";
-                    var blockedClass = lineaTienePedido ? "form-control-bloqueado" : "";
-                    var disabledAttr = lineaTienePedido ? "disabled" : "";
-                    var hideButtons  = lineaTienePedido ? 'style="visibility: hidden;"' : "";
+                    var bloquearFila = lineaTienePedido || esSoloLecturaGlobal;
+                    var readonlyAttr = bloquearFila ? "readonly" : "";
+                    var blockedClass = bloquearFila ? "form-control-bloqueado" : "";
+
+                    
+                    var accionesTdHtml = "";
+                    if (!esSoloLecturaGlobal) {
+                        if (lineaTienePedido) {
+                            accionesTdHtml = `<td style="text-align: center;"></td>`; 
+                        } else {
+                            accionesTdHtml = `
+                            <td style="text-align: center;">
+                                <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button>
+                                <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">&times;</button>
+                            </td>`;
+                        }
+                    }
 
                     var trHtml = `
                     <tr class="fila-articulo" data-estadolin="${item.ESTADOLIN}" data-numpedido="${item.NUMPEDIDO}">
@@ -920,23 +924,23 @@
                         <td><input type="number" class="input-tabla num-dtoarti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.DTOARTI).toFixed(2)}" step="0.01" /></td>
                         <td><input type="text" class="input-tabla num-importe" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
                         <td><input type="number" class="input-tabla num-ivarti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.IVARTI).toFixed(2)}" step="0.01" /></td>
-                        <td style="text-align: center;">
-                            <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;" ${disabledAttr} ${hideButtons}>+</button>
-                            <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;" ${disabledAttr} ${hideButtons}>&times;</button>
-                        </td>
+                        ${accionesTdHtml}
                     </tr>`;
                     $tbody.append(trHtml);
                 }
 
-                
-                if (ofertaTienePedido) {
-                    $('#editEstado').addClass('form-control-bloqueado')
-                                  .attr('title', 'Bloqueado: Contiene líneas con pedidos asignados.')
-                                  .css('pointer-events', 'none');
+                if (ofertaTienePedido || esSoloLecturaGlobal) {
+                    $('#editEstado').addClass('form-control-bloqueado').css('pointer-events', 'none');
+                    $('#editCuenta').addClass('form-control-bloqueado').attr('readonly', true).css('pointer-events', 'none');
+                    $('#editFechOferta').addClass('form-control-bloqueado').attr('readonly', true).css('pointer-events', 'none');
+                    $('#editFcobro').addClass('form-control-bloqueado').css('pointer-events', 'none');
+                    $('#editObservaciones').addClass('form-control-bloqueado').attr('readonly', true);
                 } else {
-                    $('#editEstado').removeClass('form-control-bloqueado')
-                                  .removeAttr('title')
-                                  .css('pointer-events', 'auto');
+                    options = $('#editEstado').removeClass('form-control-bloqueado').css('pointer-events', 'auto');
+                    $('#editCuenta').removeClass('form-control-bloqueado').removeAttr('readonly').css('pointer-events', 'auto');
+                    $('#editFechOferta').removeClass('form-control-bloqueado').removeAttr('readonly').css('pointer-events', 'auto');
+                    $('#editFcobro').removeClass('form-control-bloqueado').css('pointer-events', 'auto');
+                    $('#editObservaciones').removeClass('form-control-bloqueado').removeAttr('readonly');
                 }
 
                 actualizarTotalesGlobales($('#modalEditar'));
@@ -950,7 +954,6 @@
         var term = input.value.trim();
         var $modal = $(input).closest('.modal-overlay');
         var $contenedor = $modal.find('.boxSugerenciasClientes');
-
         if (term.length < 1) { $contenedor.hide().empty(); return; }
         if (term === cacheUltimoFiltroCliente) return;
 
@@ -976,7 +979,7 @@
         $m.find('.txtCuentaCliente').val(cuenta);
         $m.find('.txtNombreFiscal').val(fiscal);
         $m.find('.txtCif').val(cif);
-        $m.find('.txtMakeFiscal, .txtDireccion').val(direccion);
+        $m.find('.txtDireccion').val(direccion);
         $m.find('.txtCp').val(cp);
         $m.find('.txtPoblacion').val(poblacion);
         $m.find('.txtProvincia').val(provincia);
@@ -1172,14 +1175,6 @@
     function cerrarModal(id) { $('#' + id).css('display', 'none'); }
     window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
 
-    function crearToast(m, t) {
-        var svg = t === 'exito' ? '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-        var html = '<div class="toast-alerta ' + (t === 'error' ? 'toast-error' : '') + '"><span style="display:flex;align-items:center;">' + svg + '</span><span>' + m + '</span></div>';
-        var $el = $(html); $('#toastContainer').append($el);
-        setTimeout(function() { $el.addClass('mostrar'); }, 50);
-        setTimeout(function() { $el.removeClass('mostrar'); setTimeout(function() { $el.remove(); }, 300); }, 3500);
-    }
-
     var ofertaGestionActual = "";
 
     function abrirModalSeleccion() {
@@ -1263,7 +1258,7 @@
                     $('#tablaOfertasPendientes').DataTable({
                         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
                         "pageLength": 5,
-                        "order": [[0, "desc"]],
+                        "order": [[0, "asc"]],
                         "columnDefs": [ { "targets": [0,1,2,3], "orderable": true } ]
                     });
                 } else {
@@ -1324,7 +1319,8 @@
 
     function marcarTodas(accion) {
         $('#tablaLineasGestion tbody tr').each(function() {
-            $(this).find('.estado-linea').val(accion);
+            var btnTarget = accion === 'ACEPTAR' ? $(this).find('.btn-aceptar') : $(this).find('.btn-rechazar');
+            marcarLinea(btnTarget, accion);
         });
     }
 
@@ -1368,5 +1364,4 @@
             $('#sugerenciasClienteSel').hide();
         }
     });
-
 </script>
