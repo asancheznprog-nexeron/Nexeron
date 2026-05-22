@@ -243,6 +243,7 @@ namespace Nexeron.Controllers
                                     NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(), 
                                     FECHA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("yyyy-MM-dd"),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
+                                    NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
                                     NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
                                     CIF = reader["CIF"].ToString().Trim(),
                                     DIRECCION = reader["DIRECCION"].ToString().Trim(),
@@ -592,13 +593,13 @@ namespace Nexeron.Controllers
                             }
                         }
 
-                        string nuevoNumPedido = "000000001";
+                        string nuevoNumPedido = "1".PadLeft(9);
                         using (var cmdMax = conexion.CreateCommand())
                         {
                             cmdMax.Transaction = transaccion;
                             cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMPEDIDO AS UNSIGNED)), 0) + 1 FROM pedidos";
                             object result = cmdMax.ExecuteScalar();
-                            if (result != null) nuevoNumPedido = result.ToString().PadLeft(9, '0');
+                            if (result != null) nuevoNumPedido = result.ToString().PadLeft(9);
                         }
 
                         int aceptadas = 0, rechazadas = 0;
@@ -615,7 +616,7 @@ namespace Nexeron.Controllers
                                 {
                                     cmdIns.Transaction = transaccion;
                                     cmdIns.CommandText = @"INSERT INTO pedidos (NUMPEDIDO, FECHPED, FECHENT, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES)
-                                                  SELECT @nuevoNumPedido, NOW(), NULL, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, '201', '201', OBSERVACIONES
+                                                  SELECT @nuevoNumPedido, NOW(), NULL, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, '101', '101', OBSERVACIONES
                                                   FROM ofertas WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
                                     cmdIns.Parameters.AddWithValue("@nuevoNumPedido", nuevoNumPedido);
                                     cmdIns.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
