@@ -875,7 +875,7 @@
                 var esSoloLecturaGlobal = (primerRegistro.ESTADO === "102" || primerRegistro.ESTADO === "103");
                 var totalLineasARenderizar = esSoloLecturaGlobal ? lineas.length : Math.max(10, lineas.length);
 
-                
+
                 if (esSoloLecturaGlobal) {
                     $('#tablaArticulosEditar th.col-acciones').hide();
                     $('#btnGuardarEditar').hide();
@@ -895,11 +895,11 @@
                     var readonlyAttr = bloquearFila ? "readonly" : "";
                     var blockedClass = bloquearFila ? "form-control-bloqueado" : "";
 
-                    
+
                     var accionesTdHtml = "";
                     if (!esSoloLecturaGlobal) {
                         if (lineaTienePedido) {
-                            accionesTdHtml = `<td style="text-align: center;"></td>`; 
+                            accionesTdHtml = `<td style="text-align: center;"></td>`;
                         } else {
                             accionesTdHtml = `
                             <td style="text-align: center;">
@@ -1275,16 +1275,21 @@
     }
 
     function abrirModalLineasGestion(numOferta) {
-        $('#modalGestionLineas').css('display', 'flex');
-        $('#ofertaGestionNum').text(numOferta);
-        $.ajax({
-            url: '@Url.Action("ObtenerDetalleOferta", "Ofertas")',
-            type: 'POST',
-            data: { numOferta: numOferta },
-            success: function(lineas) {
-                var $tbody = $('#tablaLineasGestion tbody').empty();
-                if (lineas && lineas.length > 0) {
-                    lineas.forEach(function(l) {
+    $('#modalGestionLineas').css('display', 'flex');
+    $('#ofertaGestionNum').text(numOferta);
+    $.ajax({
+        url: '@Url.Action("ObtenerDetalleOferta", "Ofertas")',
+        type: 'POST',
+        data: { numOferta: numOferta },
+        success: function(lineas) {
+            var $tbody = $('#tablaLineasGestion tbody').empty();
+            if (lineas && lineas.length > 0) {
+                // Solo mostrar líneas pendientes
+                var pendientes = lineas.filter(function(l) {
+                    return l.ESTADOLIN === '101';
+                });
+                if (pendientes.length > 0) {
+                    pendientes.forEach(function(l) {
                         var importe = (l.CANTI * l.EUROS * (1 - l.DTOARTI / 100)).toFixed(2);
                         var fila = `<tr>
                             <td>${l.ARTI}</td>
@@ -1301,10 +1306,13 @@
                         </tr>`;
                         $tbody.append(fila);
                     });
+                } else {
+                    $tbody.append('<tr><td colspan="6" style="text-align:center;">No hay líneas pendientes en esta oferta.</td></tr>');
                 }
             }
-        });
-    }
+        }
+    });
+}
 
     function marcarLinea(boton, accion) {
         var $fila = $(boton).closest('tr');
