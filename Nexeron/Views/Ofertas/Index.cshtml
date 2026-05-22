@@ -330,6 +330,78 @@
         .btn-submit.btn-danger {
             background-color: #dc3545;
         }
+
+    .modal-content-grande {
+        max-width: 950px;
+        width: 95%;
+    }
+
+    .tabla-ofertas-pendientes {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+        .tabla-ofertas-pendientes th {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 0.6rem;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .tabla-ofertas-pendientes td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tabla-ofertas-pendientes tr:hover {
+            background-color: #f1f3f5;
+            cursor: pointer;
+        }
+
+    .fila-seleccionada {
+        background-color: #cce5ff !important;
+    }
+
+    .btn-accion-linea {
+        padding: 0.25rem 0.6rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin: 0 2px;
+    }
+
+    .btn-aceptar {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-rechazar {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-todas {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-right: 0.5rem;
+    }
+
+    .btn-aceptar-todas {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-rechazar-todas {
+        background-color: #dc3545;
+        color: white;
+    }
 </style>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -337,12 +409,14 @@
 <div class="wrap-ventas">
     <div class="submenu-container">
         <a href="@Url.Action("Index", "Ofertas")" class="btn-submenu active">Ofertas</a>
+        <a href="@Url.Action("Index", "Pedidos")" class="btn-submenu">Pedidos</a>
     </div>
 
     <div class="card">
         <div class="header-acciones">
             <h3>Control y Seguimiento de Ofertas</h3>
             <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalSeleccion()" style="background-color: #007bff; margin-right: 5px;">Aceptar/Rechazar</button>
                 <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nueva Oferta Completa</button>
             </div>
         </div>
@@ -625,6 +699,89 @@
     </div>
 </div>
 
+<div id="modalSeleccionarOferta" class="modal-overlay">
+    <div class="modal-content modal-content-grande">
+        <span class="btn-cerrar" onclick="cerrarModal('modalSeleccionarOferta')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Seleccionar Oferta de Cliente</h3>
+
+        <div class="grid-3-col" style="margin-bottom: 1rem;">
+            <div class="form-group">
+                <label>Buscar Cliente</label>
+                <input type="text" class="form-control" id="buscarClienteSel" onkeyup="buscarClienteSeleccion(this)" placeholder="Código o nombre..." />
+                <div class="sugerencias-autocompletado" id="sugerenciasClienteSel"></div>
+            </div>
+            <div class="form-group">
+                <label>Cliente seleccionado</label>
+                <input type="text" class="form-control form-control-bloqueado" id="clienteSelNombre" readonly />
+            </div>
+            <div class="form-group">
+                <label>Código</label>
+                <input type="text" class="form-control form-control-bloqueado" id="clienteSelCodigo" readonly />
+            </div>
+        </div>
+
+        <div id="datosClienteSeleccionado" style="display: none; margin-top: 1rem;">
+            <div class="seccion-titulo">Datos del Cliente</div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>CIF / NIF</label><input type="text" class="form-control form-control-bloqueado" id="clienteCif" readonly /></div>
+                <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado" id="clienteDireccion" readonly /></div>
+                <div class="form-group"><label>CP</label><input type="text" class="form-control form-control-bloqueado" id="clienteCp" readonly /></div>
+            </div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>Población</label><input type="text" class="form-control form-control-bloqueado" id="clientePoblacion" readonly /></div>
+                <div class="form-group"><label>Provincia</label><input type="text" class="form-control form-control-bloqueado" id="clienteProvincia" readonly /></div>
+                <div class="form-group"><label>Teléfono</label><input type="text" class="form-control form-control-bloqueado" id="clienteTelefono" readonly /></div>
+            </div>
+            <div class="grid-3-col">
+                <div class="form-group" style="grid-column: span 2;"><label>Email</label><input type="text" class="form-control form-control-bloqueado" id="clienteEmail" readonly /></div>
+            </div>
+
+            <div class="seccion-titulo" style="margin-top: 1.5rem;">Ofertas Pendientes</div>
+            <table class="tabla-ofertas-pendientes display" id="tablaOfertasPendientes">
+                <thead>
+                    <tr>
+                        <th>Número Oferta</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Forma de cobro</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modalGestionLineas" class="modal-overlay">
+    <div class="modal-content modal-content-grande">
+        <span class="btn-cerrar" onclick="cerrarModal('modalGestionLineas')">&times;</span>
+        <h3 style="margin-top: 0; color: #007bff; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Gestionar Líneas de Oferta <span id="ofertaGestionNum"></span></h3>
+
+        <div style="margin-bottom: 1rem;">
+            <button type="button" class="btn-todas btn-aceptar-todas" onclick="marcarTodas('ACEPTAR')">Aceptar todas</button>
+            <button type="button" class="btn-todas btn-rechazar-todas" onclick="marcarTodas('RECHAZAR')">Rechazar todas</button>
+        </div>
+
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table class="tabla-interna" id="tablaLineasGestion">
+                <thead>
+                    <tr>
+                        <th>Artículo</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Tarifa</th>
+                        <th>Importe</th>
+                        <th style="width: 140px;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <button type="button" class="btn-submit" style="margin-top: 1rem;" onclick="procesarLineasGestion()">Procesar Selección</button>
+    </div>
+</div>
+
 <script>
     var cacheUltimoFiltroCliente = "";
 
@@ -657,7 +814,7 @@
             if(lineas && lineas.length > 0) {
                 var primerRegistro = lineas[0];
 
-                
+
                 $('#editNumOferta').val(primerRegistro.CUENTA ? numOferta : numOferta);
                 $('#editFechOferta').val(primerRegistro.FECHA);
                 $('#editEstado').val(primerRegistro.ESTADO);
@@ -899,4 +1056,194 @@
         setTimeout(function() { $el.addClass('mostrar'); }, 50);
         setTimeout(function() { $el.removeClass('mostrar'); setTimeout(function() { $el.remove(); }, 300); }, 3500);
     }
+
+    var ofertaGestionActual = "";
+
+    function abrirModalSeleccion() {
+        $('#modalSeleccionarOferta').css('display', 'flex');
+        $('#buscarClienteSel').val('');
+        $('#clienteSelNombre').val('');
+        $('#clienteSelCodigo').val('');
+        $('#datosClienteSeleccionado').hide();
+        $('#tablaOfertasPendientes tbody').empty();
+    }
+
+    function buscarClienteSeleccion(input) {
+        var term = $(input).val().trim();
+        var $box = $('#sugerenciasClienteSel');
+        if (term.length < 1) { $box.hide().empty(); return; }
+
+        $.ajax({
+            url: '@Url.Action("BuscarClientes", "Ofertas")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(c) {
+                        $box.append(`<div class="sugerencia-item" onclick="seleccionarClienteGestion('${c.CUENTA}', '${c.NOMBRE_FISCAL}')">${c.CUENTA} - ${c.NOMBRE_FISCAL}</div>`);
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function seleccionarClienteGestion(cuenta, nombre) {
+        $('#buscarClienteSel').val(cuenta);
+        $('#clienteSelCodigo').val(cuenta);
+        $('#clienteSelNombre').val(nombre);
+        $('#sugerenciasClienteSel').hide();
+
+        $.ajax({
+            url: '@Url.Action("ObtenerClienteCompleto", "Ofertas")',
+            type: 'POST',
+            data: { cuenta: cuenta },
+            success: function(cliente) {
+                if (cliente) {
+                    $('#clienteCif').val(cliente.CIF);
+                    $('#clienteDireccion').val(cliente.DIRECCION);
+                    $('#clienteCp').val(cliente.CP);
+                    $('#clientePoblacion').val(cliente.POBLACION);
+                    $('#clienteProvincia').val(cliente.PROVINCIA);
+                    $('#clienteTelefono').val(cliente.TELEFONO);
+                    $('#clienteEmail').val(cliente.EMAIL);
+                    $('#datosClienteSeleccionado').show();
+                    cargarTablaOfertasPendientes(cuenta);
+                }
+            }
+        });
+    }
+
+    function cargarTablaOfertasPendientes(cuenta) {
+        $.ajax({
+            url: '@Url.Action("ObtenerOfertasPorCliente", "Ofertas")',
+            type: 'POST',
+            data: { cuenta: cuenta },
+            success: function(data) {
+                var $tbody = $('#tablaOfertasPendientes tbody');
+                $tbody.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(oferta) {
+                        var estadoTexto = oferta.ESTADO == '101' ? 'Pendiente' : 'Parcial';
+                        var row = `<tr onclick="seleccionarOfertaGestion('${oferta.NUMOFERTA}')" style="cursor:pointer;">
+                            <td><strong>${oferta.NUMOFERTA}</strong></td>
+                            <td>${oferta.FECHOFERTA}</td>
+                            <td>${estadoTexto}</td>
+                            <td>${oferta.FCOBRO}</td>
+                        </tr>`;
+                        $tbody.append(row);
+                    });
+                    if ($.fn.DataTable.isDataTable('#tablaOfertasPendientes')) {
+                        $('#tablaOfertasPendientes').DataTable().destroy();
+                    }
+                    $('#tablaOfertasPendientes').DataTable({
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                        "pageLength": 5,
+                        "order": [[0, "desc"]],
+                        "columnDefs": [ { "targets": [0,1,2,3], "orderable": true } ]
+                    });
+                } else {
+                    $tbody.append('<tr><td colspan="4" style="text-align:center;">No hay ofertas pendientes para este cliente.</td></tr>');
+                }
+            }
+        });
+    }
+
+    function seleccionarOfertaGestion(numOferta) {
+        ofertaGestionActual = numOferta;
+        cerrarModal('modalSeleccionarOferta');
+        abrirModalLineasGestion(numOferta);
+    }
+
+    function abrirModalLineasGestion(numOferta) {
+        $('#modalGestionLineas').css('display', 'flex');
+        $('#ofertaGestionNum').text(numOferta);
+        $.ajax({
+            url: '@Url.Action("ObtenerDetalleOferta", "Ofertas")',
+            type: 'POST',
+            data: { numOferta: numOferta },
+            success: function(lineas) {
+                var $tbody = $('#tablaLineasGestion tbody').empty();
+                if (lineas && lineas.length > 0) {
+                    lineas.forEach(function(l) {
+                        var importe = (l.CANTI * l.EUROS * (1 - l.DTOARTI / 100)).toFixed(2);
+                        var fila = `<tr>
+                            <td>${l.ARTI}</td>
+                            <td>${l.DESARTI}</td>
+                            <td>${l.CANTI}</td>
+                            <td>${l.EUROS}</td>
+                            <td>${importe}</td>
+                            <td>
+                                <button class="btn-accion-linea btn-aceptar" onclick="marcarLinea(this, 'ACEPTAR')">Aceptar</button>
+                                <button class="btn-accion-linea btn-rechazar" onclick="marcarLinea(this, 'RECHAZAR')">Rechazar</button>
+                                <input type="hidden" class="numlinea" value="${l.NUMLINEA}" />
+                                <input type="hidden" class="estado-linea" value="PENDIENTE" />
+                            </td>
+                        </tr>`;
+                        $tbody.append(fila);
+                    });
+                }
+            }
+        });
+    }
+
+    function marcarLinea(boton, accion) {
+        var $fila = $(boton).closest('tr');
+        $fila.find('.estado-linea').val(accion);
+        $fila.find('button').removeClass('btn-aceptar btn-rechazar');
+        if (accion === 'ACEPTAR') {
+            $(boton).addClass('btn-aceptar');
+        } else {
+            $(boton).addClass('btn-rechazar');
+        }
+    }
+
+    function marcarTodas(accion) {
+        $('#tablaLineasGestion tbody tr').each(function() {
+            $(this).find('.estado-linea').val(accion);
+        });
+    }
+
+    function procesarLineasGestion() {
+        var lineas = [];
+        $('#tablaLineasGestion tbody tr').each(function() {
+            var numLinea = parseInt($(this).find('.numlinea').val());
+            var estado = $(this).find('.estado-linea').val();
+            if (estado !== 'PENDIENTE') {
+                lineas.push({ NUMLINEA: numLinea, Estado: estado });
+            }
+        });
+
+        if (lineas.length === 0) {
+            crearToast("Debe seleccionar al menos una línea para aceptar o rechazar.", "error");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("ProcesarGestionOferta", "Ofertas")',
+            type: 'POST',
+            data: {
+                numOferta: ofertaGestionActual,
+                lineas: JSON.stringify(lineas)
+            },
+            success: function(res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    crearToast(res.message, "error");
+                }
+            },
+            error: function() {
+                crearToast("Error de comunicación con el servidor.", "error");
+            }
+        });
+    }
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#buscarClienteSel, #sugerenciasClienteSel').length) {
+            $('#sugerenciasClienteSel').hide();
+        }
+    });
+
 </script>

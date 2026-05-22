@@ -210,6 +210,7 @@
     <Compile Include="Controllers\OfertasController.cs" />
     <Compile Include="Controllers\FormasPagoController.cs" />
     <Compile Include="Controllers\BancosController.cs" />
+    <Compile Include="Controllers\PedidosController.cs" />
     <Compile Include="Controllers\ProveedoresController.cs" />
     <Compile Include="Controllers\ClientesController.cs" />
     <Compile Include="Controllers\CuentasController.cs" />
@@ -252,6 +253,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\pedidosModel.cs" />
     <Compile Include="Models\Modelos\Ofertas_ext.cs" />
     <Compile Include="Models\Modelos\ArticuloProveedorModel.cs" />
     <Compile Include="Models\Modelos\UnidadModel.cs" />
@@ -358,6 +360,7 @@
     <Content Include="Views\Referencias\Tipos.cshtml" />
     <Content Include="Views\Referencias\Unidades.cshtml" />
     <Content Include="Views\Ofertas\Index.cshtml" />
+    <Content Include="Views\Pedidos\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

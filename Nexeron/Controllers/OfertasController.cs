@@ -23,7 +23,6 @@ namespace Nexeron.Controllers
                 {
                     conexion.Open();
 
-                    
                     List<fpagcob> formasPago = new List<fpagcob>();
                     using (var cmdFp = conexion.CreateCommand())
                     {
@@ -45,7 +44,6 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.FormasPago = formasPago;
 
-                    
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"SELECT o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
@@ -81,7 +79,6 @@ namespace Nexeron.Controllers
             }
             return View(lista);
         }
-
 
         [HttpPost]
         public JsonResult BuscarClientes(string term)
@@ -128,7 +125,6 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
-
         [HttpPost]
         public JsonResult BuscarArticulos(string term)
         {
@@ -144,7 +140,6 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        
                         cmd.CommandText = @"SELECT articulo, descripcion, unidad_medida, iva 
                                             FROM articulo 
                                             WHERE (articulo LIKE @term OR descripcion LIKE @term) AND activo = 1 
@@ -170,7 +165,6 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
-
         [HttpPost]
         public JsonResult ObtenerDetalleOferta(string numOferta)
         {
@@ -186,14 +180,12 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        
                         cmd.CommandText = @"SELECT o.*, 
                                            c.NOMBRE_FISCAL, c.CIF, c.DIRECCION, c.CP, c.POBLACION, c.PROVINCIA, c.TELEFONO, c.EMAIL
                                     FROM ofertas o
                                     LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
                                     WHERE o.NUMOFERTA = @num 
                                     ORDER BY o.NUMLINEA ASC";
-
                         cmd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
                         using (var reader = cmd.ExecuteReader())
                         {
@@ -213,8 +205,7 @@ namespace Nexeron.Controllers
                                     ESTADO = reader["ESTADO"].ToString().Trim(),
                                     FECHA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("yyyy-MM-dd"),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
-
-                                    
+                                    NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
                                     NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
                                     CIF = reader["CIF"].ToString().Trim(),
                                     DIRECCION = reader["DIRECCION"].ToString().Trim(),
@@ -232,7 +223,6 @@ namespace Nexeron.Controllers
             }
             return Json(lineas);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -325,7 +315,6 @@ namespace Nexeron.Controllers
             return RedirectToAction("Index");
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Actualizar(FormCollection form, string lineasJsonModificadas)
@@ -368,7 +357,6 @@ namespace Nexeron.Controllers
                         string estadoGlobal = form["ESTADO"];
                         string observaciones = form["OBSERVACIONES"];
 
-                        
                         using (var cmdDelete = conexion.CreateCommand())
                         {
                             cmdDelete.Transaction = transaccion;
@@ -377,7 +365,6 @@ namespace Nexeron.Controllers
                             cmdDelete.ExecuteNonQuery();
                         }
 
-                        
                         int contadorLinea = 10;
                         foreach (var linea in nuevasLineas)
                         {
@@ -426,7 +413,6 @@ namespace Nexeron.Controllers
             return RedirectToAction("Index");
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(string id)
@@ -454,6 +440,193 @@ namespace Nexeron.Controllers
                 }
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public JsonResult ObtenerOfertasPorCliente(string cuenta)
+        {
+            List<object> ofertasPendientes = new List<object>();
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr)) return Json(ofertasPendientes);
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (var cmd = conexion.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, o.FCOBRO
+                                        FROM ofertas o
+                                        LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                                        WHERE o.CUENTA = @cuenta AND o.ESTADO IN ('101','104')
+                                        GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.CUENTA, c.NOMBRE_FISCAL, o.FCOBRO
+                                        ORDER BY o.NUMOFERTA DESC";
+                    cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ofertasPendientes.Add(new
+                            {
+                                NUMOFERTA = reader["NUMOFERTA"].ToString().Trim(),
+                                FECHOFERTA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("dd/MM/yyyy"),
+                                ESTADO = reader["ESTADO"].ToString().Trim(),
+                                CUENTA = reader["CUENTA"].ToString().Trim(),
+                                NombreCliente = reader["NombreCliente"].ToString().Trim(),
+                                FCOBRO = reader["FCOBRO"].ToString().Trim()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(ofertasPendientes);
+        }
+
+        [HttpPost]
+        public JsonResult ObtenerClienteCompleto(string cuenta)
+        {
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr)) return Json(null);
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (var cmd = conexion.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT CUENTA, NOMBRE_FISCAL, CIF, DIRECCION, CP, POBLACION, PROVINCIA, TELEFONO, EMAIL
+                                        FROM clientes
+                                        WHERE CUENTA = @cuenta";
+                    cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return Json(new
+                            {
+                                CUENTA = reader["CUENTA"].ToString().Trim(),
+                                NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
+                                CIF = reader["CIF"].ToString().Trim(),
+                                DIRECCION = reader["DIRECCION"].ToString().Trim(),
+                                CP = reader["CP"].ToString().Trim(),
+                                POBLACION = reader["POBLACION"].ToString().Trim(),
+                                PROVINCIA = reader["PROVINCIA"].ToString().Trim(),
+                                TELEFONO = reader["TELEFONO"].ToString().Trim(),
+                                EMAIL = reader["EMAIL"].ToString().Trim()
+                            });
+                        }
+                        else
+                        {
+                            return Json(null);
+                        }
+                    }
+                }
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ProcesarGestionOferta(string numOferta, string lineas)
+        {
+            var serializer = new JavaScriptSerializer();
+            var listaProcesar = serializer.Deserialize<List<Dictionary<string, object>>>(lineas);
+
+            string connStr = Session["cadenaConexion"].ToString();
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (MySqlTransaction transaccion = conexion.BeginTransaction())
+                {
+                    try
+                    {
+                        string cuenta = "", fcobro = "", observaciones = "";
+                        using (var cmdHead = conexion.CreateCommand())
+                        {
+                            cmdHead.Transaction = transaccion;
+                            cmdHead.CommandText = "SELECT CUENTA, FCOBRO, OBSERVACIONES FROM ofertas WHERE NUMOFERTA = @num LIMIT 1";
+                            cmdHead.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                            using (var reader = cmdHead.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    cuenta = reader["CUENTA"].ToString();
+                                    fcobro = reader["FCOBRO"].ToString();
+                                    observaciones = reader["OBSERVACIONES"].ToString();
+                                }
+                            }
+                        }
+
+                        string nuevoNumPedido = "000000001";
+                        using (var cmdMax = conexion.CreateCommand())
+                        {
+                            cmdMax.Transaction = transaccion;
+                            cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMPEDIDO AS UNSIGNED)), 0) + 1 FROM pedidos";
+                            object result = cmdMax.ExecuteScalar();
+                            if (result != null) nuevoNumPedido = result.ToString().PadLeft(9, '0');
+                        }
+
+                        int aceptadas = 0, rechazadas = 0;
+
+                        foreach (var item in listaProcesar)
+                        {
+                            int numLinea = Convert.ToInt32(item["NUMLINEA"]);
+                            string estadoAccion = item["Estado"].ToString();
+
+                            if (estadoAccion == "ACEPTAR")
+                            {
+                                aceptadas++;
+                                using (var cmdIns = conexion.CreateCommand())
+                                {
+                                    cmdIns.Transaction = transaccion;
+                                    cmdIns.CommandText = @"INSERT INTO pedidos (NUMPEDIDO, FECHPED, FECHENT, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES)
+                                                  SELECT @nuevoNumPedido, NOW(), NULL, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, '201', '201', OBSERVACIONES
+                                                  FROM ofertas WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
+                                    cmdIns.Parameters.AddWithValue("@nuevoNumPedido", nuevoNumPedido);
+                                    cmdIns.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                                    cmdIns.Parameters.AddWithValue("@linea", numLinea);
+                                    cmdIns.ExecuteNonQuery();
+                                }
+                                using (var cmdUpd = conexion.CreateCommand())
+                                {
+                                    cmdUpd.Transaction = transaccion;
+                                    cmdUpd.CommandText = "UPDATE ofertas SET ESTADOLIN = '102' WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
+                                    cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                                    cmdUpd.Parameters.AddWithValue("@linea", numLinea);
+                                    cmdUpd.ExecuteNonQuery();
+                                }
+                            }
+                            else
+                            {
+                                rechazadas++;
+                                using (var cmdUpd = conexion.CreateCommand())
+                                {
+                                    cmdUpd.Transaction = transaccion;
+                                    cmdUpd.CommandText = "UPDATE ofertas SET ESTADOLIN = '103' WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
+                                    cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                                    cmdUpd.Parameters.AddWithValue("@linea", numLinea);
+                                    cmdUpd.ExecuteNonQuery();
+                                }
+                            }
+                        }
+
+                        string estadoGlobal = (aceptadas > 0 && rechazadas > 0) ? "104" : (aceptadas > 0 ? "102" : "103");
+                        using (var cmdUpd = conexion.CreateCommand())
+                        {
+                            cmdUpd.Transaction = transaccion;
+                            cmdUpd.CommandText = "UPDATE ofertas SET ESTADO = @estado, NUMPEDIDO = @nuevoNumPedido WHERE NUMOFERTA = @num";
+                            cmdUpd.Parameters.AddWithValue("@estado", estadoGlobal);
+                            cmdUpd.Parameters.AddWithValue("@nuevoNumPedido", (aceptadas > 0 ? nuevoNumPedido : ""));
+                            cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                            cmdUpd.ExecuteNonQuery();
+                        }
+
+                        transaccion.Commit();
+                        return Json(new { success = true });
+                    }
+                    catch (Exception ex)
+                    {
+                        transaccion.Rollback();
+                        return Json(new { success = false, message = ex.Message });
+                    }
+                }
+            }
         }
     }
 }
