@@ -46,19 +46,48 @@ namespace Nexeron.Controllers
                     ViewBag.FormasPago = formasPago;
 
                     
+                    List<KeyValuePair<string, string>> estadosLista = new List<KeyValuePair<string, string>>();
+                    using (var cmdEst = conexion.CreateCommand())
+                    {
+                        cmdEst.CommandText = "SELECT codigo, estado FROM estados ORDER BY codigo ASC";
+                        using (var readerEst = cmdEst.ExecuteReader())
+                        {
+                            while (readerEst.Read())
+                            {
+                                estadosLista.Add(new KeyValuePair<string, string>(
+                                    readerEst["codigo"].ToString().Trim(),
+                                    readerEst["estado"].ToString().Trim()
+                                ));
+                            }
+                        }
+                    }
+                    ViewBag.Estados = estadosLista;
+
+                    
                     using (var cmd = conexion.CreateCommand())
                     {
-                        cmd.CommandText = @"SELECT o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
-                                                   o.ESTADO, o.NUMPEDIDO, o.FCOBRO, o.OBSERVACIONES
-                                            FROM ofertas o
-                                            LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                            GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL, o.ESTADO, o.NUMPEDIDO, o.FCOBRO, o.OBSERVACIONES
-                                            ORDER BY o.NUMOFERTA DESC";
+                        cmd.CommandText = @"
+                            SELECT t.*, IFNULL(e.estado, 'Desconocido') as NombreEstado
+                            FROM (
+                                SELECT o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
+                                       o.FCOBRO, o.OBSERVACIONES,
+                                       IF(COUNT(DISTINCT o.ESTADOLIN) > 1, '104', MAX(o.ESTADO)) as ESTADO,
+                                       SUM(ROUND(o.CANTI * o.EUROS * (1 - (o.DTOARTI / 100)), 2)) as BaseTotal,
+                                       SUM(ROUND(ROUND(o.CANTI * o.EUROS * (1 - (o.DTOARTI / 100)), 2) * (o.IVARTI / 100), 2)) as IvaTotal
+                                FROM ofertas o
+                                LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                                GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL, o.FCOBRO, o.OBSERVACIONES
+                            ) t
+                            LEFT JOIN estados e ON t.ESTADO = e.codigo
+                            ORDER BY t.NUMOFERTA DESC";
 
                         using (var reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
+                                decimal baseTotal = Convert.ToDecimal(reader["BaseTotal"]);
+                                decimal ivaTotal = Convert.ToDecimal(reader["IvaTotal"]);
+
                                 lista.Add(new ofertas
                                 {
                                     NUMOFERTA = reader["NUMOFERTA"].ToString(),
@@ -66,9 +95,11 @@ namespace Nexeron.Controllers
                                     CUENTA = reader["CUENTA"].ToString(),
                                     NombreCliente = reader["NombreCliente"].ToString(),
                                     ESTADO = reader["ESTADO"].ToString(),
-                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString(),
+                                    NombreEstado = reader["NombreEstado"].ToString(),
                                     FCOBRO = reader["FCOBRO"].ToString(),
-                                    OBSERVACIONES = reader["OBSERVACIONES"].ToString()
+                                    OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
+                                    BaseTotal = baseTotal,
+                                    ImporteTotal = baseTotal + ivaTotal
                                 });
                             }
                         }
@@ -81,7 +112,6 @@ namespace Nexeron.Controllers
             }
             return View(lista);
         }
-
 
         [HttpPost]
         public JsonResult BuscarClientes(string term)
@@ -128,7 +158,6 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
-
         [HttpPost]
         public JsonResult BuscarArticulos(string term)
         {
@@ -144,7 +173,6 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        
                         cmd.CommandText = @"SELECT articulo, descripcion, unidad_medida, iva 
                                             FROM articulo 
                                             WHERE (articulo LIKE @term OR descripcion LIKE @term) AND activo = 1 
@@ -170,7 +198,6 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
-
         [HttpPost]
         public JsonResult ObtenerDetalleOferta(string numOferta)
         {
@@ -186,13 +213,15 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        
-                        cmd.CommandText = @"SELECT o.*, 
-                                           c.NOMBRE_FISCAL, c.CIF, c.DIRECCION, c.CP, c.POBLACION, c.PROVINCIA, c.TELEFONO, c.EMAIL
-                                    FROM ofertas o
-                                    LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                    WHERE o.NUMOFERTA = @num 
-                                    ORDER BY o.NUMLINEA ASC";
+                        cmd.CommandText = @"
+                            SELECT o.*, 
+                                   (SELECT IF(COUNT(DISTINCT sub.ESTADOLIN) > 1, '104', o.ESTADO) 
+                                    FROM ofertas sub WHERE sub.NUMOFERTA = o.NUMOFERTA) as ESTADO_CALCULADO,
+                                   c.NOMBRE_FISCAL, c.CIF, c.DIRECCION, c.CP, c.POBLACION, c.PROVINCIA, c.TELEFONO, c.EMAIL
+                            FROM ofertas o
+                            LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                            WHERE o.NUMOFERTA = @num 
+                            ORDER BY o.NUMLINEA ASC";
 
                         cmd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
                         using (var reader = cmd.ExecuteReader())
@@ -210,11 +239,11 @@ namespace Nexeron.Controllers
                                     IVARTI = Convert.ToDecimal(reader["IVARTI"]),
                                     CUENTA = reader["CUENTA"].ToString().Trim(),
                                     FCOBRO = reader["FCOBRO"].ToString().Trim(),
-                                    ESTADO = reader["ESTADO"].ToString().Trim(),
+                                    ESTADO = reader["ESTADO_CALCULADO"].ToString().Trim(),
+                                    ESTADOLIN = reader["ESTADOLIN"].ToString().Trim(),
+                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(), 
                                     FECHA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("yyyy-MM-dd"),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
-
-                                    
                                     NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
                                     CIF = reader["CIF"].ToString().Trim(),
                                     DIRECCION = reader["DIRECCION"].ToString().Trim(),
@@ -232,7 +261,6 @@ namespace Nexeron.Controllers
             }
             return Json(lineas);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -288,7 +316,7 @@ namespace Nexeron.Controllers
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, NUMPEDIDO, OBSERVACIONES
                                 ) VALUES (
                                     @numoferta, @fechoferta, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, '101', '', @observaciones
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, '', @observaciones
                                 )";
 
                                 cmd.Parameters.AddWithValue("@numoferta", numOferta);
@@ -304,6 +332,7 @@ namespace Nexeron.Controllers
                                 cmd.Parameters.AddWithValue("@ivarti", linea.IVARTI);
                                 cmd.Parameters.AddWithValue("@dtoarti", linea.DTOARTI);
                                 cmd.Parameters.AddWithValue("@estado", estadoGlobal);
+                                cmd.Parameters.AddWithValue("@estadolin", string.IsNullOrEmpty(linea.ESTADOLIN) ? estadoGlobal : linea.ESTADOLIN);
                                 cmd.Parameters.AddWithValue("@observaciones", observaciones ?? "");
 
                                 cmd.ExecuteNonQuery();
@@ -324,7 +353,6 @@ namespace Nexeron.Controllers
             }
             return RedirectToAction("Index");
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -368,7 +396,6 @@ namespace Nexeron.Controllers
                         string estadoGlobal = form["ESTADO"];
                         string observaciones = form["OBSERVACIONES"];
 
-                        
                         using (var cmdDelete = conexion.CreateCommand())
                         {
                             cmdDelete.Transaction = transaccion;
@@ -377,7 +404,6 @@ namespace Nexeron.Controllers
                             cmdDelete.ExecuteNonQuery();
                         }
 
-                        
                         int contadorLinea = 10;
                         foreach (var linea in nuevasLineas)
                         {
@@ -389,7 +415,7 @@ namespace Nexeron.Controllers
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, NUMPEDIDO, OBSERVACIONES
                                 ) VALUES (
                                     @numoferta, @fechoferta, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, '101', '', @observaciones
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, '', @observaciones
                                 )";
 
                                 cmdInsert.Parameters.AddWithValue("@numoferta", numOferta);
@@ -405,6 +431,7 @@ namespace Nexeron.Controllers
                                 cmdInsert.Parameters.AddWithValue("@ivarti", linea.IVARTI);
                                 cmdInsert.Parameters.AddWithValue("@dtoarti", linea.DTOARTI);
                                 cmdInsert.Parameters.AddWithValue("@estado", estadoGlobal);
+                                cmdInsert.Parameters.AddWithValue("@estadolin", string.IsNullOrEmpty(linea.ESTADOLIN) ? estadoGlobal : linea.ESTADOLIN);
                                 cmdInsert.Parameters.AddWithValue("@observaciones", observaciones ?? "");
 
                                 cmdInsert.ExecuteNonQuery();
@@ -425,7 +452,6 @@ namespace Nexeron.Controllers
             }
             return RedirectToAction("Index");
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
