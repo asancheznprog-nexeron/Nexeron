@@ -113,11 +113,6 @@
         transform: scale(1.15);
     }
 
-    .btn-tabla-eliminar:hover {
-        color: #dc3545;
-        transform: scale(1.15);
-    }
-
     .badge-estado {
         padding: 0.35rem 0.6rem;
         border-radius: 4px;
@@ -404,7 +399,7 @@
             <h3>Control y Emisión de Facturas</h3>
             <div class="grupo-botones">
                 <button class="btn-nuevo" onclick="abrirModalRectificar()" style="background-color: #dc3545; margin-right: 5px;">Factura Rectificativa</button>
-                <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nueva Factura Directa</button>
+                <button class="btn-nuevo" onclick="abrirModalCrear()">Crear Factura Directa</button>
             </div>
         </div>
 
@@ -439,11 +434,8 @@
                             <td style="text-align: right; font-weight: bold;">@f.BaseTotal.ToString("N2") €</td>
                             <td style="text-align: right; font-weight: bold; color: #155724;">@f.ImporteTotal.ToString("N2") €</td>
                             <td style="text-align: center; white-space: nowrap;">
-                                <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarFactura('@f.NUMFACTURA')" title="Editar Factura">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                </button>
-                                <button type="button" class="btn-tabla btn-tabla-eliminar" onclick="abrirModalEliminar('@f.NUMFACTURA', '@f.NombreCliente')" title="Eliminar Factura">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarFactura('@f.NUMFACTURA')" title="Visualizar Factura">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                 </button>
                             </td>
                         </tr>
@@ -629,7 +621,7 @@
 <div id="modalEditar" class="modal-overlay">
     <div class="modal-content">
         <span class="btn-cerrar" onclick="cerrarModal('modalEditar')">&times;</span>
-        <h3 style="margin-top: 0; color: #007bff; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Factura Existente</h3>
+        <h3 style="margin-top: 0; color: #007bff; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Visualizar Factura Existente</h3>
 
         @using (Html.BeginForm("Actualizar", "Facturas", FormMethod.Post, new { id = "formEditarFactura" }))
         {
@@ -640,9 +632,9 @@
                 <div class="seccion-titulo">Datos del Documento</div>
                 <div class="grid-3-col">
                     <div class="form-group"><label>Número Factura</label><input type="text" name="NUMFACTURA" id="editNumFactura" class="form-control form-control-bloqueado" readonly /></div>
-                    <div class="form-group"><label>Fecha Factura *</label><input type="date" name="FECHFAC" id="editFechFac" class="form-control" required /></div>
+                    <div class="form-group"><label>Fecha Factura</label><input type="date" name="FECHFAC" id="editFechFac" class="form-control" readonly /></div>
                     <div class="form-group">
-                        <label>Estado Global *</label>
+                        <label>Estado Global</label>
                         <select name="ESTADO" id="editEstado" class="form-control slc-estado-global">
                             @if (ViewBag.Estados != null)
                             {
@@ -658,7 +650,7 @@
                 <div class="seccion-titulo">Datos del Cliente</div>
                 <div class="grid-4-col">
                     <div class="form-group">
-                        <label>Código de Cliente *</label><input type="text" name="CUENTA" id="editCuenta" class="form-control txtCuentaCliente" required autocomplete="off" onkeyup="buscarClienteAjax(this)" />
+                        <label>Código de Cliente</label><input type="text" name="CUENTA" id="editCuenta" class="form-control txtCuentaCliente" readonly autocomplete="off" onkeyup="buscarClienteAjax(this)" />
                         <div class="sugerencias-autocompletado boxSugerenciasClientes"></div>
                     </div>
                     <div class="form-group"><label>Nombre Fiscal</label><input type="text" id="editNombreFiscal" class="form-control form-control-bloqueado txtNombreFiscal" readonly /></div>
@@ -694,8 +686,8 @@
                 <div class="seccion-titulo">Conditions de Cobro</div>
                 <div class="grid-fpago">
                     <div class="form-group">
-                        <label>Forma de Pago *</label>
-                        <select name="FCOBRO" id="editFcobro" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                        <label>Forma de Pago</label>
+                        <select name="FCOBRO" id="editFcobro" class="form-control slcFcobro" readonly onchange="sincronizarReglaPago(this)">
                             @if (ViewBag.FormasPago != null)
                             {
                                 foreach (var fp in ViewBag.FormasPago)
@@ -711,27 +703,9 @@
                 </div>
 
                 <div class="seccion-titulo">Observaciones</div>
-                <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control" rows="3" style="resize: none;"></textarea></div>
+                <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control" rows="3" style="resize: none;" readonly></textarea></div>
             </div>
             <button type="submit" id="btnGuardarEditar" class="btn-submit" style="background-color: #007bff;">Guardar Cambios de Factura</button>
-        }
-    </div>
-</div>
-
-<div id="modalEliminar" class="modal-overlay">
-    <div class="modal-content" style="max-width: 450px;">
-        <span class="btn-cerrar" onclick="cerrarModal('modalEliminar')">&times;</span>
-        <h3 style="margin-top: 0; color: #dc3545; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">¿Eliminar Factura?</h3>
-        @using (Html.BeginForm("Eliminar", "Facturas", FormMethod.Post))
-        {
-            @Html.AntiForgeryToken()
-            <p style="color: #666; font-size: 0.95rem; line-height: 1.4;">Se purgarán todas las líneas vinculadas de esta factura en cascada. Esta operación no se puede deshacer.</p>
-            <div style="background-color: #f8f9fa; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545; text-align: left;">
-                Factura Nº: <span id="deleteFacturaSpan" style="font-weight: bold;"></span> <br />
-                Cliente: <span id="deleteClienteSpan"></span>
-            </div>
-            <input type="hidden" id="deleteFacturaHidden" name="id" />
-            <button type="submit" class="btn-submit btn-danger">Confirmar Baja</button>
         }
     </div>
 </div>
@@ -856,8 +830,8 @@
 
                     sincronizarReglaPago(document.getElementById('editFcobro'));
 
-                    var esSoloLecturaGlobal = (primer.ESTADO === "105" || primer.ESTADO === "102" || primer.ESTADO === "103");
-                    var totalLineasARenderizar = esSoloLecturaGlobal ? lineas.length : Math.max(10, lineas.length);
+                    var esSoloLecturaGlobal = true;
+                    var totalLineasARenderizar = lineas.length;
 
                     if (esSoloLecturaGlobal) {
                         $('#tablaArticulosEditar th.col-acciones').hide();
@@ -1063,7 +1037,6 @@
     }
 
     function abrirModalCrear() { var $modal = $('#modalCrear'); $modal.find('input[name="NUMFACTURA"]').val(''); actualizarTotalesGlobales($modal); $modal.css('display', 'flex'); }
-    function abrirModalEliminar(numfactura, cliente) { $('#deleteFacturaHidden').val(numfactura); $('#deleteFacturaSpan').text(numfactura); $('#deleteClienteSpan').text(cliente); $('#modalEliminar').css('display', 'flex'); }
     function cerrarModal(id) { $('#' + id).css('display', 'none'); }
     window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
 
