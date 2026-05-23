@@ -25,6 +25,7 @@
             left: -250px;
             background-color: #2c3e50;
             overflow-x: hidden;
+            overflow-y: auto;
             transition: 0.3s;
             box-shadow: 2px 0 5px rgba(0,0,0,0.2);
             display: flex;
@@ -43,9 +44,16 @@
             text-align: center;
             border-bottom: 1px solid #34495e;
             margin-bottom: 1rem;
+            flex-shrink: 0;
         }
 
-        .sidebar a {
+        .sidebar-menu-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .sidebar a, .sidebar-toggle {
             padding: 1rem 1.5rem;
             text-decoration: none;
             font-size: 1.05rem;
@@ -54,12 +62,57 @@
             align-items: center;
             gap: 12px;
             transition: 0.2s;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            box-sizing: border-box;
+            cursor: pointer;
+            font-family: inherit;
         }
 
-            .sidebar a:hover {
+            .sidebar a:hover, .sidebar-toggle:hover {
                 color: #fff;
                 background-color: #34495e;
-                border-left: 4px solid #007bff;
+            }
+
+            .sidebar-toggle .arrow-icon {
+                margin-left: auto;
+                transition: transform 0.2s;
+            }
+
+        .sidebar-group.active .sidebar-toggle {
+            color: #fff;
+            background-color: #34495e;
+        }
+
+        .sidebar-group.active .arrow-icon {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease-out;
+            background-color: #1a252f;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-group.active .sidebar-submenu {
+            max-height: 450px;
+        }
+
+        .sidebar-submenu a {
+            padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+            font-size: 0.95rem;
+            color: #a0aab2;
+        }
+
+            .sidebar-submenu a:hover {
+                color: #fff;
+                background-color: #243342;
+                padding-left: 2.8rem;
             }
 
         .sidebar-footer {
@@ -70,6 +123,7 @@
             font-size: 0.85rem;
             border-top: 1px solid #34495e;
             background-color: #243342;
+            flex-shrink: 0;
         }
 
         .main-wrapper {
@@ -175,26 +229,128 @@
     <div id="miSidebar" class="sidebar">
         <div class="sidebar-brand">Nexeron ERP</div>
 
-        <a href="@Url.Action("Index", "Home")">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-            Panel Principal
-        </a>
-        <a href="@Url.Action("Index", "Ofertas")">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
-            Ventas
-        </a>
-        <a href="@Url.Action("Index", "Compras")">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-            Compras
-        </a>
-        <a href="@Url.Action("Index", "Referencias")">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-            Referencias
-        </a>
-        <a href="@Url.Action("Index", "Cuentas")">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
-            Contabilidad
-        </a>
+        <div class="sidebar-menu-wrapper">
+            <a href="@Url.Action("Index", "Home")">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                Panel Principal
+            </a>
+
+            <div class="sidebar-group">
+                <button class="sidebar-toggle" onclick="toggleSidebarGroup(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
+                    Ventas
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="sidebar-submenu">
+                    <a href="@Url.Action("Index", "Ofertas")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Ofertas
+                    </a>
+                    <a href="@Url.Action("Index", "Pedidos")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Pedidos
+                    </a>
+                    <a href="@Url.Action("Index", "Albaranes")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Albaranes
+                    </a>
+                    <a href="@Url.Action("Index", "Facturas")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Facturas
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <button class="sidebar-toggle" onclick="toggleSidebarGroup(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                    Compras
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="sidebar-submenu">
+                    <a href="@Url.Action("Index", "OrdenesCompra")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Órdenes de compra
+                    </a>
+                    <a href="@Url.Action("Index", "AlbaranesCompra")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Albaranes
+                    </a>
+                    <a href="@Url.Action("Index", "FacturasCompra")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Facturas
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <button class="sidebar-toggle" onclick="toggleSidebarGroup(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                    Referencias
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="sidebar-submenu">
+                    <a href="@Url.Action("Index", "Referencias")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Artículos
+                    </a>
+                    <a href="@Url.Action("Tipos", "Referencias")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Tipos de artículo
+                    </a>
+                    <a href="@Url.Action("Unidades", "Referencias")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Unidades de medida
+                    </a>
+                    <a href="@Url.Action("Inventario", "Referencias")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Stock
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-group">
+                <button class="sidebar-toggle" onclick="toggleSidebarGroup(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+                    Contabilidad
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="sidebar-submenu">
+                    <a href="@Url.Action("Index", "Cuentas")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Cuentas
+                    </a>
+                    <a href="@Url.Action("Index", "Clientes")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Clientes
+                    </a>
+                    <a href="@Url.Action("Index", "Proveedores")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Proveedores
+                    </a>
+                    <a href="@Url.Action("Index", "Bancos")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Bancos
+                    </a>
+                    <a href="@Url.Action("Index", "FormasPago")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Formas de cobro/pago
+                    </a>
+                    <a href="@Url.Action("Index", "Asientos")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Asientos
+                    </a>
+                    <a href="@Url.Action("Index", "Cobros")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Cobros
+                    </a>
+                    <a href="@Url.Action("Index", "Pagos")">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        Pagos
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <div class="sidebar-footer">
             &copy; Copyright Nexeron 2026
@@ -238,6 +394,20 @@
         function toggleMenu() {
             document.getElementById("miSidebar").classList.toggle("open");
             document.getElementById("mainWrapper").classList.toggle("shifted");
+        }
+
+        function toggleSidebarGroup(buttonElement) {
+            var parentGroup = buttonElement.parentElement;
+            var isAlreadyActive = parentGroup.classList.contains("active");
+            var allGroups = document.querySelectorAll(".sidebar-group");
+
+            for (var i = 0; i < allGroups.length; i++) {
+                allGroups[i].classList.remove("active");
+            }
+
+            if (!isAlreadyActive) {
+                parentGroup.classList.add("active");
+            }
         }
 
         function toggleUserDropdown(event) {
