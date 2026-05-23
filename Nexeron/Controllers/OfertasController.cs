@@ -554,12 +554,16 @@ namespace Nexeron.Controllers
                 conexion.Open();
                 using (var cmd = conexion.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, o.FCOBRO
-                                        FROM ofertas o
-                                        LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                        WHERE o.CUENTA = @cuenta AND o.ESTADO IN ('101','104')
-                                        GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.CUENTA, c.NOMBRE_FISCAL, o.FCOBRO
-                                        ORDER BY o.NUMOFERTA ASC";
+                    cmd.CommandText = @"
+                SELECT o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.FCOBRO,
+                       IFNULL(fp.FORMACOBPAG, o.FCOBRO) as FormaCobroDesc,
+                       SUM(ROUND(o.CANTI * o.EUROS * (1 - (o.DTOARTI / 100)), 2)) as BaseTotal,
+                       SUM(ROUND(ROUND(o.CANTI * o.EUROS * (1 - (o.DTOARTI / 100)), 2) * (1 + (o.IVARTI / 100)), 2)) as Total
+                FROM ofertas o
+                LEFT JOIN fpagcob fp ON o.FCOBRO = fp.CODIGO
+                WHERE o.CUENTA = @cuenta AND o.ESTADO IN ('101','104')
+                GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.FCOBRO, fp.FORMACOBPAG
+                ORDER BY o.NUMOFERTA ASC";
                     cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -570,9 +574,9 @@ namespace Nexeron.Controllers
                                 NUMOFERTA = reader["NUMOFERTA"].ToString().Trim(),
                                 FECHOFERTA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("dd/MM/yyyy"),
                                 ESTADO = reader["ESTADO"].ToString().Trim(),
-                                CUENTA = reader["CUENTA"].ToString().Trim(),
-                                NombreCliente = reader["NombreCliente"].ToString().Trim(),
-                                FCOBRO = reader["FCOBRO"].ToString().Trim()
+                                FCOBRO = reader["FormaCobroDesc"].ToString().Trim(),
+                                BaseTotal = Convert.ToDecimal(reader["BaseTotal"]).ToString("N2"),
+                                Total = Convert.ToDecimal(reader["Total"]).ToString("N2")
                             });
                         }
                     }
