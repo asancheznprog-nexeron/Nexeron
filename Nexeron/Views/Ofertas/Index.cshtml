@@ -584,7 +584,7 @@
                                         {
                                             foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades)
                                             {
-                                <option value="@u.Key" @(u.Key == "UD" ? "selected" : "")>@u.Value</option>}
+                                <option value="@u.Key" label="@u.Key" @(u.Key.Trim().ToUpper() == "UD" ? "selected" : "")>@u.Key - @u.Value</option>}
                                                     }
                                     </select>
                                 </td>
@@ -808,6 +808,8 @@
                         <th>Fecha</th>
                         <th>Estado</th>
                         <th>Forma de cobro</th>
+                        <th style="text-align: right;">Base</th>
+                        <th style="text-align: right;">Total</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -1006,15 +1008,16 @@
                         var importeFila = (parseFloat(item.CANTI) * parseFloat(item.EUROS) * (1 - (parseFloat(item.DTOARTI) / 100))).toFixed(2);
 
                         var lineaTienePedido = item.NUMPEDIDO && item.NUMPEDIDO.trim() !== "";
+                        var lineaRechazada = item.ESTADOLIN == "103";
                         if (lineaTienePedido) { ofertaTienePedido = true; }
 
-                        var bloquearFila = lineaTienePedido || esSoloLecturaGlobal;
+                        var bloquearFila = lineaTienePedido || esSoloLecturaGlobal || lineaRechazada;
                         var readonlyAttr = bloquearFila ? "readonly" : "";
                         var blockedClass = bloquearFila ? "form-control-bloqueado" : "";
 
                         var accionesTdHtml = "";
                         if (!esSoloLecturaGlobal) {
-                            if (lineaTienePedido) {
+                            if (lineaTienePedido || lineaRechazada) {
                                 accionesTdHtml = `<td style="text-align: center;"></td>`;
                             } else {
                                 accionesTdHtml = `
@@ -1354,39 +1357,43 @@
     }
 
     function cargarTablaOfertasPendientes(cuenta) {
-        $.ajax({
-            url: '@Url.Action("ObtenerOfertasPorCliente", "Ofertas")',
-            type: 'POST',
-            data: { cuenta: cuenta },
-            success: function(data) {
-                var $tbody = $('#tablaOfertasPendientes tbody');
-                $tbody.empty();
-                if (data && data.length > 0) {
-                    data.forEach(function(oferta) {
-                        var estadoTexto = oferta.ESTADO == '101' ? 'Pendiente' : 'Parcial';
-                        var row = `<tr onclick="seleccionarOfertaGestion('${oferta.NUMOFERTA}')" style="cursor:pointer;">
-                            <td><strong>${oferta.NUMOFERTA}</strong></td>
-                            <td>${oferta.FECHOFERTA}</td>
-                            <td>${estadoTexto}</td>
-                            <td>${oferta.FCOBRO}</td>
-                        </tr>`;
-                        $tbody.append(row);
-                    });
-                    if ($.fn.DataTable.isDataTable('#tablaOfertasPendientes')) {
-                        $('#tablaOfertasPendientes').DataTable().destroy();
-                    }
-                    $('#tablaOfertasPendientes').DataTable({
-                        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
-                        "pageLength": 5,
-                        "order": [[0, "asc"]],
-                        "columnDefs": [ { "targets": [0,1,2,3], "orderable": true } ]
-                    });
-                } else {
-                    $tbody.append('<tr><td colspan="4" style="text-align:center;">No hay ofertas pendientes para este cliente.</td></tr>');
+    $.ajax({
+        url: '@Url.Action("ObtenerOfertasPorCliente", "Ofertas")',
+        type: 'POST',
+        data: { cuenta: cuenta },
+        success: function(data) {
+            var $tbody = $('#tablaOfertasPendientes tbody');
+            $tbody.empty();
+            if (data && data.length > 0) {
+                data.forEach(function(oferta) {
+                    var estadoTexto = oferta.ESTADO == '101' ? 'Pendiente' : 'Parcial';
+                    var row = `<tr onclick="seleccionarOfertaGestion('${oferta.NUMOFERTA}')" style="cursor:pointer;">
+                        <td><strong>${oferta.NUMOFERTA}</strong></td>
+                        <td>${oferta.FECHOFERTA}</td>
+                        <td>${estadoTexto}</td>
+                        <td>${oferta.FCOBRO}</td>
+                        <td style="text-align: right;">${oferta.BaseTotal} €</td>
+                        <td style="text-align: right; font-weight: bold;">${oferta.Total} €</td>
+                    </tr>`;
+                    $tbody.append(row);
+                });
+                if ($.fn.DataTable.isDataTable('#tablaOfertasPendientes')) {
+                    $('#tablaOfertasPendientes').DataTable().destroy();
                 }
+                $('#tablaOfertasPendientes').DataTable({
+                    "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                    "pageLength": 5,
+                    "order": [[0, "asc"]],
+                    "columnDefs": [
+                        { "targets": [0,1,2,3,4,5], "orderable": true }
+                    ]
+                });
+            } else {
+                $tbody.append('<tr><td colspan="6" style="text-align:center;">No hay ofertas pendientes para este cliente.</td></tr>');
             }
-        });
-    }
+        }
+    });
+}
 
     function seleccionarOfertaGestion(numOferta) {
         ofertaGestionActual = numOferta;
@@ -1507,16 +1514,19 @@
             }
         });
     }
-    function generarOpcionesUnidad(valorSeleccionado) {
+ function generarOpcionesUnidad(valorSeleccionado) {
         var html = "";
+        var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
+
         @if (ViewBag.Unidades != null) {
             foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades) {
                 <text>
-                html += '<option value="@u.Key"' + (valorSeleccionado === '@u.Key' ? ' selected' : '') + '>@u.Value</option>';
+                var keyOpcion = '@u.Key'.trim().toUpperCase();
+                html += '<option value="@u.Key" label="@u.Key"' + (sel === keyOpcion ? ' selected' : '') + '>@u.Key - @u.Value</option>';
                 </text>
             }
         }
-        return html || '<option value="UD">UD</option>';
+        return html || '<option value="UD" label="UD" selected>UD - UNIDADES</option>';
     }
 
 </script>
