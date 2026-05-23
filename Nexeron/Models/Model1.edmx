@@ -39,6 +39,19 @@
           <Property Name="descuento" Type="decimal" Precision="5" Scale="2" />
           <Property Name="unidad" Type="varchar" MaxLength="5" />
         </EntityType>
+        <EntityType Name="asientos">
+          <Key>
+            <PropertyRef Name="CLAVE" />
+          </Key>
+          <Property Name="CONCEPTO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="ASIENTO" Type="decimal" Precision="10" Scale="0" />
+          <Property Name="FECHA_ASIENTO" Type="datetime" Precision="0" />
+          <Property Name="OBSERVACION" Type="char" MaxLength="50" />
+          <Property Name="CUENTA" Type="char" MaxLength="9" />
+          <Property Name="DH" Type="char" MaxLength="1" />
+          <Property Name="EUROS" Type="decimal" Precision="15" Scale="2" />
+          <Property Name="CLAVE" Type="ubigint" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
         <EntityType Name="bancos">
           <Key>
             <PropertyRef Name="CUENTA" />
@@ -74,6 +87,27 @@
           <Property Name="TELEFONO" Type="varchar" MaxLength="30" />
           <Property Name="EMAIL" Type="varchar" MaxLength="30" />
           <Property Name="CIF" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="cobros">
+          <Key>
+            <PropertyRef Name="NUMEFEC" />
+          </Key>
+          <Property Name="FCOBRO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="NUMFAC" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHA_VEN" Type="datetime" Precision="6" />
+          <Property Name="IMPORTE" Type="decimal" Precision="19" Scale="3" />
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="GASTOS" Type="decimal" Precision="19" Scale="3" />
+          <Property Name="BANCO" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHA_LIB" Type="datetime" Precision="6" />
+          <Property Name="FECH_FAC" Type="datetime" Precision="6" />
+          <Property Name="NUMEFEC" Type="char" MaxLength="16" Nullable="false" />
+          <Property Name="FESTADO" Type="datetime" Precision="6" />
+          <Property Name="FRECEP" Type="datetime" Precision="6" />
+          <Property Name="OBSERVACION" Type="longtext" />
+          <Property Name="EMITIDO" Type="bool" />
+          <Property Name="VENCIDO" Type="bool" />
+          <Property Name="NPAGARE" Type="bigint" />
         </EntityType>
         <EntityType Name="cuentas">
           <Key>
@@ -150,6 +184,24 @@
           <Property Name="NUMPEDIDO" Type="char" MaxLength="9" />
           <Property Name="OBSERVACIONES" Type="text" />
         </EntityType>
+        <EntityType Name="pagos">
+          <Key>
+            <PropertyRef Name="CLAVE" />
+          </Key>
+          <Property Name="CLAVE" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FPAGO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="NUMFAC" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHA_VEN" Type="datetime" Precision="0" />
+          <Property Name="IMPORTE" Type="decimal" Precision="15" Scale="2" Nullable="false" />
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHA_LIB" Type="datetime" Precision="0" />
+          <Property Name="FECH_FAC" Type="datetime" Precision="0" />
+          <Property Name="BANCO" Type="char" MaxLength="9" />
+          <Property Name="SFRA" Type="char" MaxLength="25" Nullable="false" />
+          <Property Name="OBSERVACION" Type="text" />
+          <Property Name="EMITIDO" Type="char" MaxLength="1" />
+          <Property Name="VENCIDO" Type="bool" />
+        </EntityType>
         <EntityType Name="paises">
           <Key>
             <PropertyRef Name="codigo" />
@@ -218,13 +270,16 @@
         <EntityContainer Name="cortechecoModelStoreContainer">
           <EntitySet Name="articulo" EntityType="Self.articulo" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="articulo_proveedor" EntityType="Self.articulo_proveedor" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="asientos" EntityType="Self.asientos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="bancos" EntityType="Self.bancos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="clientes" EntityType="Self.clientes" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="cobros" EntityType="Self.cobros" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="cuentas" EntityType="Self.cuentas" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="estados" EntityType="Self.estados" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="facturas" EntityType="Self.facturas" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="fpagcob" EntityType="Self.fpagcob" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="ofertas" EntityType="Self.ofertas" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="pagos" EntityType="Self.pagos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="paises" EntityType="Self.paises" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="proveedores" EntityType="Self.proveedores" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="tipos" EntityType="Self.tipos" Schema="cortecheco" store:Type="Tables" />
@@ -258,6 +313,9 @@
           <EntitySet Name="ofertas" EntityType="cortechecoModel.ofertas" />
           <EntitySet Name="estados" EntityType="cortechecoModel.estados" />
           <EntitySet Name="facturas" EntityType="cortechecoModel.facturas" />
+          <EntitySet Name="asientos" EntityType="cortechecoModel.asientos" />
+          <EntitySet Name="cobros" EntityType="cortechecoModel.cobros" />
+          <EntitySet Name="pagos" EntityType="cortechecoModel.pagos" />
         </EntityContainer>
         <EntityType Name="articulo">
           <Key>
@@ -470,6 +528,58 @@
           <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
           <Property Name="RECTIFICATIVA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="asientos">
+          <Key>
+            <PropertyRef Name="CLAVE" />
+          </Key>
+          <Property Name="CONCEPTO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="ASIENTO" Type="Decimal" />
+          <Property Name="FECHA_ASIENTO" Type="DateTime" />
+          <Property Name="OBSERVACION" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CUENTA" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="DH" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="EUROS" Type="Decimal" />
+          <Property Name="CLAVE" Type="Decimal" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+        </EntityType>
+        <EntityType Name="cobros">
+          <Key>
+            <PropertyRef Name="NUMEFEC" />
+          </Key>
+          <Property Name="FCOBRO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMFAC" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_VEN" Type="DateTime" />
+          <Property Name="IMPORTE" Type="Decimal" />
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="GASTOS" Type="Decimal" />
+          <Property Name="BANCO" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_LIB" Type="DateTime" />
+          <Property Name="FECH_FAC" Type="DateTime" />
+          <Property Name="NUMEFEC" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="FESTADO" Type="DateTime" />
+          <Property Name="FRECEP" Type="DateTime" />
+          <Property Name="OBSERVACION" Type="String" MaxLength="1073741823" FixedLength="false" Unicode="false" />
+          <Property Name="EMITIDO" Type="Boolean" />
+          <Property Name="VENCIDO" Type="Boolean" />
+          <Property Name="NPAGARE" Type="Int64" />
+        </EntityType>
+        <EntityType Name="pagos">
+          <Key>
+            <PropertyRef Name="CLAVE" />
+          </Key>
+          <Property Name="CLAVE" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FPAGO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMFAC" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_VEN" Type="DateTime" />
+          <Property Name="IMPORTE" Type="Decimal" Nullable="false" />
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_LIB" Type="DateTime" />
+          <Property Name="FECH_FAC" Type="DateTime" />
+          <Property Name="BANCO" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="SFRA" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="OBSERVACION" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+          <Property Name="EMITIDO" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="VENCIDO" Type="Boolean" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -684,6 +794,61 @@
                 <ScalarProperty Name="FECHFAC" ColumnName="FECHFAC" />
                 <ScalarProperty Name="NUMFACTURA" ColumnName="NUMFACTURA" />
                 <ScalarProperty Name="clave" ColumnName="clave" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="asientos">
+            <EntityTypeMapping TypeName="cortechecoModel.asientos">
+              <MappingFragment StoreEntitySet="asientos">
+                <ScalarProperty Name="CLAVE" ColumnName="CLAVE" />
+                <ScalarProperty Name="EUROS" ColumnName="EUROS" />
+                <ScalarProperty Name="DH" ColumnName="DH" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+                <ScalarProperty Name="OBSERVACION" ColumnName="OBSERVACION" />
+                <ScalarProperty Name="FECHA_ASIENTO" ColumnName="FECHA_ASIENTO" />
+                <ScalarProperty Name="ASIENTO" ColumnName="ASIENTO" />
+                <ScalarProperty Name="CONCEPTO" ColumnName="CONCEPTO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cobros">
+            <EntityTypeMapping TypeName="cortechecoModel.cobros">
+              <MappingFragment StoreEntitySet="cobros">
+                <ScalarProperty Name="NPAGARE" ColumnName="NPAGARE" />
+                <ScalarProperty Name="VENCIDO" ColumnName="VENCIDO" />
+                <ScalarProperty Name="EMITIDO" ColumnName="EMITIDO" />
+                <ScalarProperty Name="OBSERVACION" ColumnName="OBSERVACION" />
+                <ScalarProperty Name="FRECEP" ColumnName="FRECEP" />
+                <ScalarProperty Name="FESTADO" ColumnName="FESTADO" />
+                <ScalarProperty Name="NUMEFEC" ColumnName="NUMEFEC" />
+                <ScalarProperty Name="FECH_FAC" ColumnName="FECH_FAC" />
+                <ScalarProperty Name="FECHA_LIB" ColumnName="FECHA_LIB" />
+                <ScalarProperty Name="BANCO" ColumnName="BANCO" />
+                <ScalarProperty Name="GASTOS" ColumnName="GASTOS" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+                <ScalarProperty Name="IMPORTE" ColumnName="IMPORTE" />
+                <ScalarProperty Name="FECHA_VEN" ColumnName="FECHA_VEN" />
+                <ScalarProperty Name="NUMFAC" ColumnName="NUMFAC" />
+                <ScalarProperty Name="FCOBRO" ColumnName="FCOBRO" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="pagos">
+            <EntityTypeMapping TypeName="cortechecoModel.pagos">
+              <MappingFragment StoreEntitySet="pagos">
+                <ScalarProperty Name="VENCIDO" ColumnName="VENCIDO" />
+                <ScalarProperty Name="EMITIDO" ColumnName="EMITIDO" />
+                <ScalarProperty Name="OBSERVACION" ColumnName="OBSERVACION" />
+                <ScalarProperty Name="SFRA" ColumnName="SFRA" />
+                <ScalarProperty Name="BANCO" ColumnName="BANCO" />
+                <ScalarProperty Name="FECH_FAC" ColumnName="FECH_FAC" />
+                <ScalarProperty Name="FECHA_LIB" ColumnName="FECHA_LIB" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+                <ScalarProperty Name="IMPORTE" ColumnName="IMPORTE" />
+                <ScalarProperty Name="FECHA_VEN" ColumnName="FECHA_VEN" />
+                <ScalarProperty Name="NUMFAC" ColumnName="NUMFAC" />
+                <ScalarProperty Name="FPAGO" ColumnName="FPAGO" />
+                <ScalarProperty Name="CLAVE" ColumnName="CLAVE" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

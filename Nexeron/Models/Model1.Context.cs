@@ -39,5 +39,8 @@ namespace Nexeron.Models
         public virtual DbSet<ofertas> ofertas { get; set; }
         public virtual DbSet<estados> estados { get; set; }
         public virtual DbSet<facturas> facturas { get; set; }
+        public virtual DbSet<asientos> asientos { get; set; }
+        public virtual DbSet<cobros> cobros { get; set; }
+        public virtual DbSet<pagos> pagos { get; set; }
     }
 }

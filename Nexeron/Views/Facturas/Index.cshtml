@@ -513,12 +513,12 @@
                     </div>
                     <div class="form-group">
                         <label>Estado Inicial *</label>
-                        <select name="ESTADO" class="form-control slc-estado-global">
+                        <select name="ESTADO" class="form-control slc-estado-global form-control-bloqueado" style="pointer-events: none;" tabindex="-1">
                             @if (ViewBag.Estados != null)
                             {
                                 foreach (var est in (List<KeyValuePair<string, string>>)ViewBag.Estados)
                                 {
-                                    <option value="@est.Key">@est.Value</option>
+                                    <option value="@est.Key" @(est.Key == "102" ? "selected" : "")>@est.Value</option>
                                 }
                             }
                         </select>
