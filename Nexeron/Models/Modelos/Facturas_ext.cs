@@ -2,7 +2,7 @@
 
 namespace Nexeron.Models
 {
-    public partial class ofertas
+    public partial class facturas
     {
         public string NombreCliente { get; set; }
         public string NombreEstado { get; set; }

@@ -7,14 +7,14 @@ using Nexeron.Models;
 
 namespace Nexeron.Controllers
 {
-    public class OfertasController : Controller
+    public class FacturasController : Controller
     {
         public ActionResult Index()
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
                 return RedirectToAction("Login", "Home");
 
-            List<ofertas> lista = new List<ofertas>();
+            List<facturas> lista = new List<facturas>();
             string connStr = Session["cadenaConexion"].ToString();
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
@@ -23,6 +23,7 @@ namespace Nexeron.Controllers
                 {
                     conexion.Open();
 
+                    // Cargar Formas de Pago
                     List<fpagcob> formasPago = new List<fpagcob>();
                     using (var cmdFp = conexion.CreateCommand())
                     {
@@ -44,6 +45,7 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.FormasPago = formasPago;
 
+                    // Cargar Estados
                     List<KeyValuePair<string, string>> estadosLista = new List<KeyValuePair<string, string>>();
                     using (var cmdEst = conexion.CreateCommand())
                     {
@@ -61,22 +63,23 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.Estados = estadosLista;
 
+                    // Consulta principal de Facturas
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"
                             SELECT t.*, IFNULL(e.estado, 'Desconocido') as NombreEstado
                             FROM (
-                                SELECT o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
-                                       o.FCOBRO, o.OBSERVACIONES,
-                                       IF(COUNT(DISTINCT o.ESTADOLIN) > 1, '104', MAX(o.ESTADO)) as ESTADO,
-                                       SUM(ROUND(o.CANTI * o.EUROS * (1 - (o.DTOARTI / 100)), 2)) as BaseTotal,
-                                       SUM(ROUND(ROUND(o.CANTI * o.EUROS * (1 - (o.DTOARTI / 100)), 2) * (o.IVARTI / 100), 2)) as IvaTotal
-                                FROM ofertas o
-                                LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.CUENTA, c.NOMBRE_FISCAL, o.FCOBRO, o.OBSERVACIONES
+                                SELECT f.NUMFACTURA, f.FECHFAC, f.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
+                                       f.FCOBRO, f.OBSERVACIONES,
+                                       IF(COUNT(DISTINCT f.ESTADOLIN) > 1, '104', MAX(f.ESTADO)) as ESTADO,
+                                       SUM(ROUND(f.CANTI * f.EUROS * (1 - (f.DTOARTI / 100)), 2)) as BaseTotal,
+                                       SUM(ROUND(ROUND(f.CANTI * f.EUROS * (1 - (f.DTOARTI / 100)), 2) * (f.IVARTI / 100), 2)) as IvaTotal
+                                FROM facturas f
+                                LEFT JOIN clientes c ON f.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                                GROUP BY f.NUMFACTURA, f.FECHFAC, f.CUENTA, c.NOMBRE_FISCAL, f.FCOBRO, f.OBSERVACIONES
                             ) t
                             LEFT JOIN estados e ON t.ESTADO = e.codigo
-                            ORDER BY t.NUMOFERTA ASC";
+                            ORDER BY t.NUMFACTURA DESC";
 
                         using (var reader = cmd.ExecuteReader())
                         {
@@ -85,10 +88,10 @@ namespace Nexeron.Controllers
                                 decimal baseTotal = Convert.ToDecimal(reader["BaseTotal"]);
                                 decimal ivaTotal = Convert.ToDecimal(reader["IvaTotal"]);
 
-                                lista.Add(new ofertas
+                                lista.Add(new facturas
                                 {
-                                    NUMOFERTA = reader["NUMOFERTA"].ToString(),
-                                    FECHOFERTA = Convert.ToDateTime(reader["FECHOFERTA"]),
+                                    NUMFACTURA = reader["NUMFACTURA"].ToString(),
+                                    FECHFAC = Convert.ToDateTime(reader["FECHFAC"]),
                                     CUENTA = reader["CUENTA"].ToString(),
                                     NombreCliente = reader["NombreCliente"].ToString(),
                                     ESTADO = reader["ESTADO"].ToString(),
@@ -104,7 +107,7 @@ namespace Nexeron.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Error = "Error al compilar el panel de ofertas: " + ex.Message;
+                    ViewBag.Error = "Error al compilar el panel de facturas: " + ex.Message;
                 }
             }
             return View(lista);
@@ -196,11 +199,11 @@ namespace Nexeron.Controllers
         }
 
         [HttpPost]
-        public JsonResult ObtenerDetalleOferta(string numOferta)
+        public JsonResult ObtenerDetalleFactura(string numFactura)
         {
             List<object> lineas = new List<object>();
             string connStr = Session["cadenaConexion"]?.ToString();
-            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numOferta))
+            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numFactura))
                 return Json(lineas);
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
@@ -211,16 +214,16 @@ namespace Nexeron.Controllers
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"
-                            SELECT o.*, 
-                                   (SELECT IF(COUNT(DISTINCT sub.ESTADOLIN) > 1, '104', o.ESTADO) 
-                                    FROM ofertas sub WHERE sub.NUMOFERTA = o.NUMOFERTA) as ESTADO_CALCULADO,
+                            SELECT f.*, 
+                                   (SELECT IF(COUNT(DISTINCT sub.ESTADOLIN) > 1, '104', f.ESTADO) 
+                                    FROM facturas sub WHERE sub.NUMFACTURA = f.NUMFACTURA) as ESTADO_CALCULADO,
                                    c.NOMBRE_FISCAL, c.CIF, c.DIRECCION, c.CP, c.POBLACION, c.PROVINCIA, c.TELEFONO, c.EMAIL
-                            FROM ofertas o
-                            LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                            WHERE o.NUMOFERTA = @num 
-                            ORDER BY o.NUMLINEA ASC";
+                            FROM facturas f
+                            LEFT JOIN clientes c ON f.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                            WHERE f.NUMFACTURA = @num 
+                            ORDER BY f.NUMLINEA ASC";
 
-                        cmd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                        cmd.Parameters.AddWithValue("@num", numFactura.PadLeft(9));
                         using (var reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
@@ -238,18 +241,12 @@ namespace Nexeron.Controllers
                                     FCOBRO = reader["FCOBRO"].ToString().Trim(),
                                     ESTADO = reader["ESTADO_CALCULADO"].ToString().Trim(),
                                     ESTADOLIN = reader["ESTADOLIN"].ToString().Trim(),
-                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(),
-                                    FECHA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("yyyy-MM-dd"),
+                                    FECHA = Convert.ToDateTime(reader["FECHFAC"]).ToString("yyyy-MM-dd"),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
                                     NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
                                     NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
                                     CIF = reader["CIF"].ToString().Trim(),
-                                    DIRECCION = reader["DIRECCION"].ToString().Trim(),
-                                    CP = reader["CP"].ToString().Trim(),
-                                    POBLACION = reader["POBLACION"].ToString().Trim(),
-                                    PROVINCIA = reader["PROVINCIA"].ToString().Trim(),
-                                    TELEFONO = reader["TELEFONO"].ToString().Trim(),
-                                    EMAIL = reader["EMAIL"].ToString().Trim()
+                                    DIRECCION = reader["DIRECCION"].ToString().Trim()
                                 });
                             }
                         }
@@ -269,25 +266,23 @@ namespace Nexeron.Controllers
 
             if (string.IsNullOrEmpty(lineasJson))
             {
-                TempData["Error"] = "La oferta debe contener al menos un artículo en las líneas.";
-                TempData["TipoError"] = "Crear";
+                TempData["Error"] = "La factura debe contener al menos una línea de artículo.";
                 return RedirectToAction("Index");
             }
 
-            List<ofertas> lineasArticulos = new List<ofertas>();
+            List<facturas> lineasArticulos = new List<facturas>();
             try
             {
                 var serializer = new JavaScriptSerializer();
-                lineasArticulos = serializer.Deserialize<List<ofertas>>(lineasJson);
+                lineasArticulos = serializer.Deserialize<List<facturas>>(lineasJson);
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error en formato de líneas: " + ex.Message;
-                TempData["TipoError"] = "Crear";
                 return RedirectToAction("Index");
             }
 
-            string numOferta = form["NUMOFERTA"].PadLeft(9);
+            string numFactura = form["NUMFACTURA"].PadLeft(9);
             string connStr = Session["cadenaConexion"].ToString();
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
@@ -296,14 +291,11 @@ namespace Nexeron.Controllers
 
                 using (var cmdCheck = conexion.CreateCommand())
                 {
-                    cmdCheck.CommandText = "SELECT COUNT(*) FROM ofertas WHERE NUMOFERTA = @numCheck";
-                    cmdCheck.Parameters.AddWithValue("@numCheck", numOferta);
-                    long conteo = Convert.ToInt64(cmdCheck.ExecuteScalar());
-
-                    if (conteo > 0)
+                    cmdCheck.CommandText = "SELECT COUNT(*) FROM facturas WHERE NUMFACTURA = @numCheck";
+                    cmdCheck.Parameters.AddWithValue("@numCheck", numFactura);
+                    if (Convert.ToInt64(cmdCheck.ExecuteScalar()) > 0)
                     {
-                        TempData["Error"] = "El número de oferta '" + numOferta.Trim() + "' ya se encuentra registrado en el sistema. Introduzca uno diferente.";
-                        TempData["TipoError"] = "Crear";
+                        TempData["Error"] = "El número de factura '" + numFactura.Trim() + "' ya existe en el sistema.";
                         return RedirectToAction("Index");
                     }
                 }
@@ -312,7 +304,7 @@ namespace Nexeron.Controllers
                 {
                     try
                     {
-                        DateTime fechOferta = Convert.ToDateTime(form["FECHOFERTA"]);
+                        DateTime fechFac = Convert.ToDateTime(form["FECHFAC"]);
                         string cuenta = form["CUENTA"].PadLeft(9);
                         string fcobro = form["FCOBRO"];
                         string estadoGlobal = form["ESTADO"];
@@ -325,22 +317,23 @@ namespace Nexeron.Controllers
                             using (var cmd = conexion.CreateCommand())
                             {
                                 cmd.Transaction = transaccion;
-                                cmd.CommandText = @"INSERT INTO ofertas (
-                                    NUMOFERTA, FECHOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
-                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, NUMPEDIDO, OBSERVACIONES
+                                cmd.CommandText = @"INSERT INTO facturas (
+                                    NUMFACTURA, FECHFAC, NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
+                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
                                 ) VALUES (
-                                    @numoferta, @fechoferta, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, '', @observaciones
+                                    @numfactura, @fechfac, '', '', '', @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, ''
                                 )";
 
-                                cmd.Parameters.AddWithValue("@numoferta", numOferta);
-                                cmd.Parameters.AddWithValue("@fechoferta", fechOferta);
+                                cmd.Parameters.AddWithValue("@numfactura", numFactura);
+                                cmd.Parameters.AddWithValue("@fechfac", fechFac);
+                                cmd.Parameters.AddWithValue("@fechalb", fechFac); // FECHALB es NOT NULL, enviamos fecha de factura por defecto
                                 cmd.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmd.Parameters.AddWithValue("@fcobro", fcobro);
                                 cmd.Parameters.AddWithValue("@numlinea", contadorLinea);
                                 cmd.Parameters.AddWithValue("@arti", linea.ARTI ?? "");
                                 cmd.Parameters.AddWithValue("@desarti", linea.DESARTI ?? "");
-                                cmd.Parameters.AddWithValue("@unidad", linea.UNIDAD ?? "");
+                                cmd.Parameters.AddWithValue("@unidad", linea.UNIDAD ?? "UD");
                                 cmd.Parameters.AddWithValue("@canti", linea.CANTI);
                                 cmd.Parameters.AddWithValue("@euros", linea.EUROS);
                                 cmd.Parameters.AddWithValue("@ivarti", linea.IVARTI);
@@ -355,13 +348,12 @@ namespace Nexeron.Controllers
                         }
 
                         transaccion.Commit();
-                        TempData["MensajeExito"] = "Oferta comercial guardada de forma exitosa.";
+                        TempData["MensajeExito"] = "Factura registrada de forma exitosa.";
                     }
                     catch (Exception ex)
                     {
                         transaccion.Rollback();
-                        TempData["Error"] = "Error al insertar la proforma: " + ex.Message;
-                        TempData["TipoError"] = "Crear";
+                        TempData["Error"] = "Error al insertar la factura: " + ex.Message;
                     }
                 }
             }
@@ -377,21 +369,19 @@ namespace Nexeron.Controllers
 
             if (string.IsNullOrEmpty(lineasJsonModificadas))
             {
-                TempData["Error"] = "La oferta debe contener al menos un artículo válido.";
-                TempData["TipoError"] = "Editar";
+                TempData["Error"] = "La factura debe contener al menos una línea.";
                 return RedirectToAction("Index");
             }
 
-            List<ofertas> nuevasLineas = new List<ofertas>();
+            List<facturas> nuevasLineas = new List<facturas>();
             try
             {
                 var serializer = new JavaScriptSerializer();
-                nuevasLineas = serializer.Deserialize<List<ofertas>>(lineasJsonModificadas);
+                nuevasLineas = serializer.Deserialize<List<facturas>>(lineasJsonModificadas);
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error en análisis de datos comerciales: " + ex.Message;
-                TempData["TipoError"] = "Editar";
                 return RedirectToAction("Index");
             }
 
@@ -403,8 +393,8 @@ namespace Nexeron.Controllers
                 {
                     try
                     {
-                        string numOferta = form["NUMOFERTA"].PadLeft(9);
-                        DateTime fechOferta = Convert.ToDateTime(form["FECHOFERTA"]);
+                        string numFactura = form["NUMFACTURA"].PadLeft(9);
+                        DateTime fechFac = Convert.ToDateTime(form["FECHFAC"]);
                         string cuenta = form["CUENTA"].PadLeft(9);
                         string fcobro = form["FCOBRO"];
                         string estadoGlobal = form["ESTADO"];
@@ -414,7 +404,6 @@ namespace Nexeron.Controllers
                         {
                             string primerEstadoLin = nuevasLineas[0].ESTADOLIN;
                             bool todasLasLineasSonIguales = true;
-
                             foreach (var linea in nuevasLineas)
                             {
                                 if (linea.ESTADOLIN != primerEstadoLin)
@@ -423,23 +412,14 @@ namespace Nexeron.Controllers
                                     break;
                                 }
                             }
-
-                            if (todasLasLineasSonIguales)
-                            {
-                                estadoGlobal = primerEstadoLin;
-                            }
-                            else
-                            {
-                                estadoGlobal = "104";
-                            }
+                            estadoGlobal = todasLasLineasSonIguales ? primerEstadoLin : "104";
                         }
-                        
 
                         using (var cmdDelete = conexion.CreateCommand())
                         {
                             cmdDelete.Transaction = transaccion;
-                            cmdDelete.CommandText = "DELETE FROM ofertas WHERE NUMOFERTA = @numoferta";
-                            cmdDelete.Parameters.AddWithValue("@numoferta", numOferta);
+                            cmdDelete.CommandText = "DELETE FROM facturas WHERE NUMFACTURA = @numfactura";
+                            cmdDelete.Parameters.AddWithValue("@numfactura", numFactura);
                             cmdDelete.ExecuteNonQuery();
                         }
 
@@ -449,32 +429,29 @@ namespace Nexeron.Controllers
                             using (var cmdInsert = conexion.CreateCommand())
                             {
                                 cmdInsert.Transaction = transaccion;
-
-                                cmdInsert.CommandText = @"INSERT INTO ofertas (
-                                    NUMOFERTA, FECHOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
-                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, NUMPEDIDO, OBSERVACIONES
+                                cmdInsert.CommandText = @"INSERT INTO facturas (
+                                    NUMFACTURA, FECHFAC, NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
+                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
                                 ) VALUES (
-                                    @numoferta, @fechoferta, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @numpedido, @observaciones
+                                    @numfactura, @fechfac, '', '', '', @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, ''
                                 )";
 
-                                cmdInsert.Parameters.AddWithValue("@numoferta", numOferta);
-                                cmdInsert.Parameters.AddWithValue("@fechoferta", fechOferta);
+                                cmdInsert.Parameters.AddWithValue("@numfactura", numFactura);
+                                cmdInsert.Parameters.AddWithValue("@fechfac", fechFac);
+                                cmdInsert.Parameters.AddWithValue("@fechalb", fechFac);
                                 cmdInsert.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmdInsert.Parameters.AddWithValue("@fcobro", fcobro);
                                 cmdInsert.Parameters.AddWithValue("@numlinea", contadorLinea);
                                 cmdInsert.Parameters.AddWithValue("@arti", linea.ARTI ?? "");
                                 cmdInsert.Parameters.AddWithValue("@desarti", linea.DESARTI ?? "");
-                                cmdInsert.Parameters.AddWithValue("@unidad", linea.UNIDAD ?? "");
+                                cmdInsert.Parameters.AddWithValue("@unidad", linea.UNIDAD ?? "UD");
                                 cmdInsert.Parameters.AddWithValue("@canti", linea.CANTI);
                                 cmdInsert.Parameters.AddWithValue("@euros", linea.EUROS);
                                 cmdInsert.Parameters.AddWithValue("@ivarti", linea.IVARTI);
                                 cmdInsert.Parameters.AddWithValue("@dtoarti", linea.DTOARTI);
-                                cmdInsert.Parameters.AddWithValue("@estado", estadoGlobal); 
+                                cmdInsert.Parameters.AddWithValue("@estado", estadoGlobal);
                                 cmdInsert.Parameters.AddWithValue("@estadolin", string.IsNullOrEmpty(linea.ESTADOLIN) ? estadoGlobal : linea.ESTADOLIN);
-                                string pedidoFormateado = string.IsNullOrEmpty(linea.NUMPEDIDO) ? "" : linea.NUMPEDIDO.PadLeft(9);
-                                cmdInsert.Parameters.AddWithValue("@numpedido", pedidoFormateado);
-
                                 cmdInsert.Parameters.AddWithValue("@observaciones", observaciones ?? "");
 
                                 cmdInsert.ExecuteNonQuery();
@@ -483,13 +460,12 @@ namespace Nexeron.Controllers
                         }
 
                         transaccion.Commit();
-                        TempData["MensajeExito"] = "Cambios guardados y grilla actualizada con éxito.";
+                        TempData["MensajeExito"] = "Factura modificada con éxito.";
                     }
                     catch (Exception ex)
                     {
                         transaccion.Rollback();
-                        TempData["Error"] = "Fallo crítico al sobreescribir la oferta: " + ex.Message;
-                        TempData["TipoError"] = "Editar";
+                        TempData["Error"] = "Error crítico al guardar cambios: " + ex.Message;
                     }
                 }
             }
@@ -511,212 +487,25 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        cmd.CommandText = "DELETE FROM ofertas WHERE NUMOFERTA = @numoferta";
-                        cmd.Parameters.AddWithValue("@numoferta", id.PadLeft(9));
+                        cmd.CommandText = "DELETE FROM facturas WHERE NUMFACTURA = @numfactura";
+                        cmd.Parameters.AddWithValue("@numfactura", id.PadLeft(9));
                         cmd.ExecuteNonQuery();
                     }
-                    TempData["MensajeExito"] = "La oferta seleccionada ha sido eliminada por completo.";
+                    TempData["MensajeExito"] = "La factura ha sido eliminada por completo.";
                 }
                 catch (Exception ex)
                 {
-                    TempData["Error"] = "No se pudo eliminar el documento de ofertas: " + ex.Message;
+                    TempData["Error"] = "No se pudo eliminar el documento: " + ex.Message;
                 }
             }
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public JsonResult ObtenerOfertasPorCliente(string cuenta)
-        {
-            List<object> ofertasPendientes = new List<object>();
-            string connStr = Session["cadenaConexion"]?.ToString();
-            if (string.IsNullOrEmpty(connStr)) return Json(ofertasPendientes);
-
-            using (MySqlConnection conexion = new MySqlConnection(connStr))
-            {
-                conexion.Open();
-                using (var cmd = conexion.CreateCommand())
-                {
-                    cmd.CommandText = @"SELECT o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.CUENTA, c.NOMBRE_FISCAL as NombreCliente, o.FCOBRO
-                                        FROM ofertas o
-                                        LEFT JOIN clientes c ON o.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                        WHERE o.CUENTA = @cuenta AND o.ESTADO IN ('101','104')
-                                        GROUP BY o.NUMOFERTA, o.FECHOFERTA, o.ESTADO, o.CUENTA, c.NOMBRE_FISCAL, o.FCOBRO
-                                        ORDER BY o.NUMOFERTA ASC";
-                    cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            ofertasPendientes.Add(new
-                            {
-                                NUMOFERTA = reader["NUMOFERTA"].ToString().Trim(),
-                                FECHOFERTA = Convert.ToDateTime(reader["FECHOFERTA"]).ToString("dd/MM/yyyy"),
-                                ESTADO = reader["ESTADO"].ToString().Trim(),
-                                CUENTA = reader["CUENTA"].ToString().Trim(),
-                                NombreCliente = reader["NombreCliente"].ToString().Trim(),
-                                FCOBRO = reader["FCOBRO"].ToString().Trim()
-                            });
-                        }
-                    }
-                }
-            }
-            return Json(ofertasPendientes);
-        }
-
-        [HttpPost]
-        public JsonResult ObtenerClienteCompleto(string cuenta)
+        public JsonResult ExisteNumeroFactura(string numFactura)
         {
             string connStr = Session["cadenaConexion"]?.ToString();
-            if (string.IsNullOrEmpty(connStr)) return Json(null);
-
-            using (MySqlConnection conexion = new MySqlConnection(connStr))
-            {
-                conexion.Open();
-                using (var cmd = conexion.CreateCommand())
-                {
-                    cmd.CommandText = @"SELECT CUENTA, NOMBRE_FISCAL, CIF, DIRECCION, CP, POBLACION, PROVINCIA, TELEFONO, EMAIL
-                                        FROM clientes
-                                        WHERE CUENTA = @cuenta";
-                    cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return Json(new
-                            {
-                                CUENTA = reader["CUENTA"].ToString().Trim(),
-                                NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
-                                CIF = reader["CIF"].ToString().Trim(),
-                                DIRECCION = reader["DIRECCION"].ToString().Trim(),
-                                CP = reader["CP"].ToString().Trim(),
-                                POBLACION = reader["POBLACION"].ToString().Trim(),
-                                PROVINCIA = reader["PROVINCIA"].ToString().Trim(),
-                                TELEFONO = reader["TELEFONO"].ToString().Trim(),
-                                EMAIL = reader["EMAIL"].ToString().Trim()
-                            });
-                        }
-                        else
-                        {
-                            return Json(null);
-                        }
-                    }
-                }
-            }
-        }
-
-        [HttpPost]
-        public JsonResult ProcesarGestionOferta(string numOferta, string lineas)
-        {
-            var serializer = new JavaScriptSerializer();
-            var listaProcesar = serializer.Deserialize<List<Dictionary<string, object>>>(lineas);
-
-            string connStr = Session["cadenaConexion"].ToString();
-            using (MySqlConnection conexion = new MySqlConnection(connStr))
-            {
-                conexion.Open();
-                using (MySqlTransaction transaccion = conexion.BeginTransaction())
-                {
-                    try
-                    {
-                        string cuenta = "", fcobro = "", observaciones = "";
-                        using (var cmdHead = conexion.CreateCommand())
-                        {
-                            cmdHead.Transaction = transaccion;
-                            cmdHead.CommandText = "SELECT CUENTA, FCOBRO, OBSERVACIONES FROM ofertas WHERE NUMOFERTA = @num LIMIT 1";
-                            cmdHead.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                            using (var reader = cmdHead.ExecuteReader())
-                            {
-                                if (reader.Read())
-                                {
-                                    cuenta = reader["CUENTA"].ToString();
-                                    fcobro = reader["FCOBRO"].ToString();
-                                    observaciones = reader["OBSERVACIONES"].ToString();
-                                }
-                            }
-                        }
-
-                        string nuevoNumPedido = "1".PadLeft(9);
-                        using (var cmdMax = conexion.CreateCommand())
-                        {
-                            cmdMax.Transaction = transaccion;
-                            cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMPEDIDO AS UNSIGNED)), 0) + 1 FROM pedidos";
-                            object result = cmdMax.ExecuteScalar();
-                            if (result != null) nuevoNumPedido = result.ToString().PadLeft(9);
-                        }
-
-                        int aceptadas = 0, rechazadas = 0;
-
-                        foreach (var item in listaProcesar)
-                        {
-                            int numLinea = Convert.ToInt32(item["NUMLINEA"]);
-                            string estadoAccion = item["Estado"].ToString();
-
-                            if (estadoAccion == "ACEPTAR")
-                            {
-                                aceptadas++;
-                                using (var cmdIns = conexion.CreateCommand())
-                                {
-                                    cmdIns.Transaction = transaccion;
-                                    cmdIns.CommandText = @"INSERT INTO pedidos (NUMPEDIDO, FECHPED, FECHENT, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES)
-                                                  SELECT @nuevoNumPedido, NOW(), NULL, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, '101', '101', OBSERVACIONES
-                                                  FROM ofertas WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
-                                    cmdIns.Parameters.AddWithValue("@nuevoNumPedido", nuevoNumPedido);
-                                    cmdIns.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                                    cmdIns.Parameters.AddWithValue("@linea", numLinea);
-                                    cmdIns.ExecuteNonQuery();
-                                }
-                                using (var cmdUpd = conexion.CreateCommand())
-                                {
-                                    cmdUpd.Transaction = transaccion;
-                                    cmdUpd.CommandText = "UPDATE ofertas SET ESTADOLIN = '102' WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
-                                    cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                                    cmdUpd.Parameters.AddWithValue("@linea", numLinea);
-                                    cmdUpd.ExecuteNonQuery();
-                                }
-                            }
-                            else
-                            {
-                                rechazadas++;
-                                using (var cmdUpd = conexion.CreateCommand())
-                                {
-                                    cmdUpd.Transaction = transaccion;
-                                    cmdUpd.CommandText = "UPDATE ofertas SET ESTADOLIN = '103' WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
-                                    cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                                    cmdUpd.Parameters.AddWithValue("@linea", numLinea);
-                                    cmdUpd.ExecuteNonQuery();
-                                }
-                            }
-                        }
-
-                        string estadoGlobal = (aceptadas > 0 && rechazadas > 0) ? "104" : (aceptadas > 0 ? "102" : "103");
-                        using (var cmdUpd = conexion.CreateCommand())
-                        {
-                            cmdUpd.Transaction = transaccion;
-                            cmdUpd.CommandText = "UPDATE ofertas SET ESTADO = @estado, NUMPEDIDO = @nuevoNumPedido WHERE NUMOFERTA = @num";
-                            cmdUpd.Parameters.AddWithValue("@estado", estadoGlobal);
-                            cmdUpd.Parameters.AddWithValue("@nuevoNumPedido", (aceptadas > 0 ? nuevoNumPedido : ""));
-                            cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                            cmdUpd.ExecuteNonQuery();
-                        }
-
-                        transaccion.Commit();
-                        return Json(new { success = true });
-                    }
-                    catch (Exception ex)
-                    {
-                        transaccion.Rollback();
-                        return Json(new { success = false, message = ex.Message });
-                    }
-                }
-            }
-        }
-
-        [HttpPost]
-        public JsonResult ExisteNumeroOferta(string numOferta)
-        {
-            string connStr = Session["cadenaConexion"]?.ToString();
-            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numOferta))
+            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numFactura))
                 return Json(new { existe = false });
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
@@ -726,11 +515,9 @@ namespace Nexeron.Controllers
                     conexion.Open();
                     using (var cmd = conexion.CreateCommand())
                     {
-                        // Aplicamos el PadLeft(9) para igualar el formato de la base de datos
-                        cmd.CommandText = "SELECT COUNT(*) FROM ofertas WHERE NUMOFERTA = @numCheck";
-                        cmd.Parameters.AddWithValue("@numCheck", numOferta.PadLeft(9));
+                        cmd.CommandText = "SELECT COUNT(*) FROM facturas WHERE NUMFACTURA = @numCheck";
+                        cmd.Parameters.AddWithValue("@numCheck", numFactura.PadLeft(9));
                         long conteo = Convert.ToInt64(cmd.ExecuteScalar());
-
                         return Json(new { existe = conteo > 0 });
                     }
                 }
