@@ -99,7 +99,7 @@
           <Property Name="NUMOFERTA" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="NUMPEDIDO" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="NUMALBARAN" Type="char" MaxLength="9" Nullable="false" />
-          <Property Name="FECHALB" Type="datetime" Precision="0" Nullable="false" />
+          <Property Name="FECHALB" Type="datetime" Precision="0" />
           <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="FCOBRO" Type="char" MaxLength="3" Nullable="false" />
           <Property Name="NUMLINEA" Type="int" Nullable="false" />
@@ -455,7 +455,7 @@
           <Property Name="NUMOFERTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
           <Property Name="NUMPEDIDO" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
           <Property Name="NUMALBARAN" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="FECHALB" Type="DateTime" Nullable="false" />
+          <Property Name="FECHALB" Type="DateTime" />
           <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
           <Property Name="FCOBRO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="NUMLINEA" Type="Int32" Nullable="false" />

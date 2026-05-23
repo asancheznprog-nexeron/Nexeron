@@ -9,6 +9,7 @@ namespace Nexeron.Controllers
 {
     public class FacturasController : Controller
     {
+        
         public ActionResult Index()
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
@@ -23,7 +24,7 @@ namespace Nexeron.Controllers
                 {
                     conexion.Open();
 
-                    // Cargar Formas de Pago
+                    
                     List<fpagcob> formasPago = new List<fpagcob>();
                     using (var cmdFp = conexion.CreateCommand())
                     {
@@ -45,7 +46,7 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.FormasPago = formasPago;
 
-                    // Cargar Estados
+                    
                     List<KeyValuePair<string, string>> estadosLista = new List<KeyValuePair<string, string>>();
                     using (var cmdEst = conexion.CreateCommand())
                     {
@@ -63,7 +64,22 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.Estados = estadosLista;
 
-                    // Consulta principal de Facturas
+                    
+                    HashSet<string> facturasRectificadas = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    using (var cmdRec = conexion.CreateCommand())
+                    {
+                        cmdRec.CommandText = "SELECT DISTINCT TRIM(RECTIFICATIVA) FROM facturas WHERE RECTIFICATIVA IS NOT NULL AND RECTIFICATIVA <> ''";
+                        using (var readerRec = cmdRec.ExecuteReader())
+                        {
+                            while (readerRec.Read())
+                            {
+                                facturasRectificadas.Add(readerRec[0].ToString().Trim());
+                            }
+                        }
+                    }
+                    ViewBag.FacturasRectificadas = facturasRectificadas;
+
+                    
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"
@@ -113,6 +129,7 @@ namespace Nexeron.Controllers
             return View(lista);
         }
 
+       
         [HttpPost]
         public JsonResult BuscarClientes(string term)
         {
@@ -158,6 +175,7 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
+        
         [HttpPost]
         public JsonResult BuscarArticulos(string term)
         {
@@ -198,6 +216,7 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
+        
         [HttpPost]
         public JsonResult ObtenerDetalleFactura(string numFactura)
         {
@@ -246,7 +265,10 @@ namespace Nexeron.Controllers
                                     NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
                                     NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
                                     CIF = reader["CIF"].ToString().Trim(),
-                                    DIRECCION = reader["DIRECCION"].ToString().Trim()
+                                    DIRECCION = reader["DIRECCION"].ToString().Trim(),
+                                    NUMOFERTA = reader["NUMOFERTA"].ToString().Trim(),
+                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(),
+                                    NUMALBARAN = reader["NUMALBARAN"].ToString().Trim()
                                 });
                             }
                         }
@@ -257,6 +279,7 @@ namespace Nexeron.Controllers
             return Json(lineas);
         }
 
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Crear(FormCollection form, string lineasJson)
@@ -327,7 +350,7 @@ namespace Nexeron.Controllers
 
                                 cmd.Parameters.AddWithValue("@numfactura", numFactura);
                                 cmd.Parameters.AddWithValue("@fechfac", fechFac);
-                                cmd.Parameters.AddWithValue("@fechalb", fechFac); // FECHALB es NOT NULL, enviamos fecha de factura por defecto
+                                cmd.Parameters.AddWithValue("@fechalb", DBNull.Value);
                                 cmd.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmd.Parameters.AddWithValue("@fcobro", fcobro);
                                 cmd.Parameters.AddWithValue("@numlinea", contadorLinea);
@@ -360,6 +383,7 @@ namespace Nexeron.Controllers
             return RedirectToAction("Index");
         }
 
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Actualizar(FormCollection form, string lineasJsonModificadas)
@@ -400,6 +424,34 @@ namespace Nexeron.Controllers
                         string estadoGlobal = form["ESTADO"];
                         string observaciones = form["OBSERVACIONES"];
 
+                        
+                        string numOferta = "";
+                        string numPedido = "";
+                        string numAlbaran = "";
+                        string rectificativa = "";
+                        object fechAlb = DBNull.Value;
+
+                        using (var cmdRead = conexion.CreateCommand())
+                        {
+                            cmdRead.Transaction = transaccion;
+                            cmdRead.CommandText = "SELECT NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, RECTIFICATIVA FROM facturas WHERE NUMFACTURA = @numCheck LIMIT 1";
+                            cmdRead.Parameters.AddWithValue("@numCheck", numFactura);
+                            using (var reader = cmdRead.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    numOferta = reader["NUMOFERTA"]?.ToString() ?? "";
+                                    numPedido = reader["NUMPEDIDO"]?.ToString() ?? "";
+                                    numAlbaran = reader["NUMALBARAN"]?.ToString() ?? "";
+                                    rectificativa = reader["RECTIFICATIVA"]?.ToString() ?? "";
+                                    if (reader["FECHALB"] != DBNull.Value)
+                                    {
+                                        fechAlb = Convert.ToDateTime(reader["FECHALB"]);
+                                    }
+                                }
+                            }
+                        }
+
                         if (nuevasLineas.Count > 0)
                         {
                             string primerEstadoLin = nuevasLineas[0].ESTADOLIN;
@@ -433,13 +485,16 @@ namespace Nexeron.Controllers
                                     NUMFACTURA, FECHFAC, NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
                                 ) VALUES (
-                                    @numfactura, @fechfac, '', '', '', @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, ''
+                                    @numfactura, @fechfac, @numoferta, @numpedido, @numalbaran, @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, @rectificativa
                                 )";
 
                                 cmdInsert.Parameters.AddWithValue("@numfactura", numFactura);
                                 cmdInsert.Parameters.AddWithValue("@fechfac", fechFac);
-                                cmdInsert.Parameters.AddWithValue("@fechalb", fechFac);
+                                cmdInsert.Parameters.AddWithValue("@numoferta", numOferta);
+                                cmdInsert.Parameters.AddWithValue("@numpedido", numPedido);
+                                cmdInsert.Parameters.AddWithValue("@numalbaran", numAlbaran);
+                                cmdInsert.Parameters.AddWithValue("@fechalb", fechAlb);
                                 cmdInsert.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmdInsert.Parameters.AddWithValue("@fcobro", fcobro);
                                 cmdInsert.Parameters.AddWithValue("@numlinea", contadorLinea);
@@ -453,6 +508,7 @@ namespace Nexeron.Controllers
                                 cmdInsert.Parameters.AddWithValue("@estado", estadoGlobal);
                                 cmdInsert.Parameters.AddWithValue("@estadolin", string.IsNullOrEmpty(linea.ESTADOLIN) ? estadoGlobal : linea.ESTADOLIN);
                                 cmdInsert.Parameters.AddWithValue("@observaciones", observaciones ?? "");
+                                cmdInsert.Parameters.AddWithValue("@rectificativa", rectificativa);
 
                                 cmdInsert.ExecuteNonQuery();
                             }
@@ -472,6 +528,7 @@ namespace Nexeron.Controllers
             return RedirectToAction("Index");
         }
 
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(string id)
@@ -501,6 +558,7 @@ namespace Nexeron.Controllers
             return RedirectToAction("Index");
         }
 
+        
         [HttpPost]
         public JsonResult ExisteNumeroFactura(string numFactura)
         {
@@ -524,6 +582,80 @@ namespace Nexeron.Controllers
                 catch
                 {
                     return Json(new { existe = false });
+                }
+            }
+        }
+
+        
+        [HttpPost]
+        public JsonResult CrearRectificativa(string numFacturaOriginal)
+        {
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numFacturaOriginal))
+                return Json(new { success = false, message = "Parámetros inválidos." });
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (MySqlTransaction transaccion = conexion.BeginTransaction())
+                {
+                    try
+                    {
+                        
+                        string nuevoNumFactura = "1".PadLeft(9);
+                        using (var cmdMax = conexion.CreateCommand())
+                        {
+                            cmdMax.Transaction = transaccion;
+                            cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMFACTURA AS UNSIGNED)), 0) + 1 FROM facturas";
+                            object result = cmdMax.ExecuteScalar();
+                            if (result != null) nuevoNumFactura = result.ToString().PadLeft(9);
+                        }
+
+                        
+                        using (var cmdClone = conexion.CreateCommand())
+                        {
+                            cmdClone.Transaction = transaccion;
+                            cmdClone.CommandText = @"
+                                INSERT INTO facturas (
+                                    NUMFACTURA, FECHFAC, NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, 
+                                    CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, 
+                                    IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
+                                )
+                                SELECT 
+                                    @nuevoNum, NOW(), NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, 
+                                    CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, (CANTI * -1), EUROS, 
+                                    IVARTI, DTOARTI, '105', '105', CONCAT('Rectificación de factura ', @original), @original
+                                FROM facturas 
+                                WHERE NUMFACTURA = @original";
+
+                            cmdClone.Parameters.AddWithValue("@nuevoNum", nuevoNumFactura);
+                            cmdClone.Parameters.AddWithValue("@original", numFacturaOriginal.PadLeft(9));
+
+                            int creadas = cmdClone.ExecuteNonQuery();
+                            if (creadas == 0)
+                            {
+                                return Json(new { success = false, message = "No se localizaron líneas en el documento origen." });
+                            }
+                        }
+
+                        
+                        using (var cmdUpdateOriginal = conexion.CreateCommand())
+                        {
+                            cmdUpdateOriginal.Transaction = transaccion;
+                            cmdUpdateOriginal.CommandText = "UPDATE facturas SET ESTADO = '103', ESTADOLIN = '103' WHERE NUMFACTURA = @original";
+                            cmdUpdateOriginal.Parameters.AddWithValue("@original", numFacturaOriginal.PadLeft(9));
+                            cmdUpdateOriginal.ExecuteNonQuery();
+                        }
+
+                        transaccion.Commit();
+                        TempData["MensajeExito"] = "Factura rectificativa " + nuevoNumFactura.Trim() + " generada. Documento de origen revocado.";
+                        return Json(new { success = true });
+                    }
+                    catch (Exception ex)
+                    {
+                        transaccion.Rollback();
+                        return Json(new { success = false, message = "Error de consistencia: " + ex.Message });
+                    }
                 }
             }
         }

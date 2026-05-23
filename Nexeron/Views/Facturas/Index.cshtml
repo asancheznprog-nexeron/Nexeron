@@ -141,6 +141,16 @@
         color: #383d41;
     }
 
+    .estado-rectificativa {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .estado-rechazada {
+        background-color: #e2e3e5;
+        color: #6c757d;
+    }
+
     .modal-overlay {
         display: none;
         position: fixed;
@@ -393,6 +403,7 @@
         <div class="header-acciones">
             <h3>Control y Emisión de Facturas</h3>
             <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalRectificar()" style="background-color: #dc3545; margin-right: 5px;">Factura Rectificativa</button>
                 <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nueva Factura Directa</button>
             </div>
         </div>
@@ -421,7 +432,7 @@
                             <td>@f.CUENTA</td>
                             <td>@f.NombreCliente</td>
                             <td>
-                                <span class="badge-estado @(f.ESTADO == "102" ? "estado-aceptada" : f.ESTADO == "104" ? "estado-parcial" : "estado-pendiente")">
+                                <span class="badge-estado @(f.ESTADO == "105" ? "estado-rectificativa" : f.ESTADO == "103" ? "estado-rechazada" : f.ESTADO == "102" ? "estado-aceptada" : f.ESTADO == "104" ? "estado-parcial" : "estado-pendiente")">
                                     @f.NombreEstado
                                 </span>
                             </td>
@@ -440,6 +451,52 @@
                 }
             </tbody>
         </table>
+    </div>
+</div>
+
+<div id="modalSeleccionarFacturaRectificar" class="modal-overlay">
+    <div class="modal-content" style="max-width: 900px;">
+        <span class="btn-cerrar" onclick="cerrarModal('modalSeleccionarFacturaRectificar')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Emitir Abono / Factura Rectificativa</h3>
+        <p style="color: #666; font-size: 0.9rem;">Seleccione la factura de origen sobre la cual desea generar el contra-asiento en negativo.</p>
+
+        <div style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+            <table id="tablaSeleccionarFactura" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Número Factura</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th style="text-align: right;">Total</th>
+                        <th style="text-align: center;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        var rectificadas = ViewBag.FacturasRectificadas as HashSet<string> ?? new HashSet<string>();
+
+                        foreach (var f in Model)
+                        {
+                            // Corrección Aplicada: Excluye las de estado 105 (Rectificativa), las de estado 103 (Rechazada/Ya rectificada)
+                            // Y las que consten en el HashSet mapeado desde la base de datos por el campo RECTIFICATIVA.
+                            if (f.ESTADO != "105" && f.ESTADO != "103" && !rectificadas.Contains(f.NUMFACTURA.Trim()))
+                            {
+                                <tr>
+                                    <td><strong>@f.NUMFACTURA</strong></td>
+                                    <td>@f.FECHFAC.ToString("dd/MM/yyyy")</td>
+                                    <td>@f.NombreCliente</td>
+                                    <td style="text-align: right; font-weight: bold;">@f.ImporteTotal.ToString("N2") €</td>
+                                    <td style="text-align: center;">
+                                        <button type="button" class="btn-nuevo" style="background-color: #dc3545; padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="procesarRectificativa('@f.NUMFACTURA')">Rectificar</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -684,7 +741,8 @@
         @if (TempData["MensajeExito"] != null) { <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "success");</text> }
         @if (TempData["Error"] != null) { <text>crearToast("@Html.Raw(TempData["Error"])", "error");</text> }
 
-        $('#formCreateFactura, #formCrearFactura').submit(function (e) {
+        // Interceptor y validador preventivo de altas contra duplicados
+        $('#formCrearFactura').submit(function (e) {
             e.preventDefault();
             var $form = $(this);
             if (!empaquetarArticulosJson('modalCrear', 'lineasJson')) return false;
@@ -725,6 +783,38 @@
         });
     });
 
+    function abrirModalRectificar() {
+        $('#modalSeleccionarFacturaRectificar').css('display', 'flex');
+        if (!$.fn.DataTable.isDataTable('#tablaSeleccionarFactura')) {
+            var tableSel = $('#tablaSeleccionarFactura').DataTable({
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                "pageLength": 5,
+                "order": [[0, "desc"]]
+            });
+            setTimeout(function() { tableSel.columns.adjust().draw(); }, 180);
+        }
+    }
+
+    function procesarRectificativa(numFactura) {
+        if (!confirm("¿Confirma que desea generar un abono completo (Factura Rectificativa) para el documento " + numFactura.trim() + "?")) return;
+
+        $.ajax({
+            url: '@Url.Action("CrearRectificativa", "Facturas")',
+            type: 'POST',
+            data: { numFacturaOriginal: numFactura },
+            success: function(res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    crearToast(res.message, "error");
+                }
+            },
+            error: function() {
+                crearToast("Fallo de comunicación con el servidor.", "error");
+            }
+        });
+    }
+
     function crearToast(mensaje, tipo) {
         var container = document.getElementById('toastContainer');
         if (!container) return;
@@ -738,6 +828,7 @@
         }, 4000);
     }
 
+    // Cargador con Regla Estricta de Bloqueo UI (Estados: 105, 102, 103)
     function cargarYEditarFactura(numFactura) {
         $.ajax({
             url: '@Url.Action("ObtenerDetalleFactura", "Facturas")',
@@ -759,26 +850,45 @@
 
                     sincronizarReglaPago(document.getElementById('editFcobro'));
 
+                    // Regla de Negocio: Si la factura ya es Rectificativa (105), Aceptada (102) o Rechazada (103), es inmutable.
+                    var esSoloLecturaGlobal = (primer.ESTADO === "105" || primer.ESTADO === "102" || primer.ESTADO === "103");
+
+                    if (esSoloLecturaGlobal) {
+                        $('#tablaArticulosEditar th.col-acciones').hide();
+                        $('#btnGuardarEditar').hide();
+                        $('#editFechFac, #editEstado, #editFcobro, #editObservaciones, #editCuenta').addClass('form-control-bloqueado').attr('readonly', true).css('pointer-events', 'none');
+                    } else {
+                        $('#tablaArticulosEditar th.col-acciones').show();
+                        $('#btnGuardarEditar').show();
+                        $('#editFechFac, #editEstado, #editFcobro, #editObservaciones, #editCuenta').removeClass('form-control-bloqueado').removeAttr('readonly').css('pointer-events', 'auto');
+                    }
+
                     var $tbody = $('#tablaArticulosEditar tbody').empty();
                     for (var i = 0; i < Math.max(10, lineas.length); i++) {
                         var item = lineas[i] || { ARTI: '', DESARTI: '', CANTI: '1.00', UNIDAD: 'UD', EUROS: '0.0000', DTOARTI: '0.00', IVARTI: '0.00', ESTADOLIN: primer.ESTADO };
                         var importeFila = (parseFloat(item.CANTI) * parseFloat(item.EUROS) * (1 - (parseFloat(item.DTOARTI) / 100))).toFixed(2);
 
-                        var trHtml = `
-                        <tr class="fila-articulo" data-estadolin="${item.ESTADOLIN}">
-                            <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti" maxlength="13" onkeyup="buscarArticuloAjax(this)" autocomplete="off" value="${item.ARTI}" />
-                                <div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
-                            <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
-                            <td><input type="number" class="input-tabla num-canti" value="${parseFloat(item.CANTI).toFixed(2)}" min="0.01" step="0.01" /></td>
-                            <td><input type="text" class="input-tabla txt-unidad" maxlength="2" value="${item.UNIDAD}" /></td>
-                            <td><input type="number" class="input-tabla num-euros" value="${parseFloat(item.EUROS).toFixed(4)}" step="0.0001" /></td>
-                            <td><input type="number" class="input-tabla num-dtoarti" value="${parseFloat(item.DTOARTI).toFixed(2)}" step="0.01" /></td>
-                            <td><input type="text" class="input-tabla num-importe" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
-                            <td><input type="number" class="input-tabla num-ivarti" value="${parseFloat(item.IVARTI).toFixed(2)}" step="0.01" /></td>
+                        var blockedClass = esSoloLecturaGlobal ? "form-control-bloqueado" : "";
+                        var readonlyAttr = esSoloLecturaGlobal ? "readonly" : "";
+
+                        var accionesTdHtml = esSoloLecturaGlobal ? "" : `
                             <td style="text-align: center;">
                                 <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button>
                                 <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">&times;</button>
-                            </td>
+                            </td>`;
+
+                        var trHtml = `
+                        <tr class="fila-articulo" data-estadolin="${item.ESTADOLIN}">
+                            <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti ${blockedClass}" ${readonlyAttr} maxlength="13" onkeyup="buscarArticuloAjax(this)" autocomplete="off" value="${item.ARTI}" />
+                                <div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
+                            <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
+                            <td><input type="number" class="input-tabla num-canti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.CANTI).toFixed(2)}" min="0.01" step="0.01" /></td>
+                            <td><input type="text" class="input-tabla txt-unidad ${blockedClass}" ${readonlyAttr} maxlength="2" value="${item.UNIDAD}" /></td>
+                            <td><input type="number" class="input-tabla num-euros ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.EUROS).toFixed(4)}" step="0.0001" /></td>
+                            <td><input type="number" class="input-tabla num-dtoarti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.DTOARTI).toFixed(2)}" step="0.01" /></td>
+                            <td><input type="text" class="input-tabla num-importe" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+                            <td><input type="number" class="input-tabla num-ivarti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.IVARTI).toFixed(2)}" step="0.01" /></td>
+                            ${accionesTdHtml}
                         </tr>`;
                         $tbody.append(trHtml);
                     }
@@ -866,6 +976,7 @@
         }
     }
 
+    // Motor de cálculo numérico exacto redondeado
     function calcularImporteFila($fila) {
         var canti = parseFloat($fila.find('.num-canti').val()) || 0;
         var euros = parseFloat($fila.find('.num-euros').val()) || 0;

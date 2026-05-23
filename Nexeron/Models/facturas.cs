@@ -20,7 +20,7 @@ namespace Nexeron.Models
         public string NUMOFERTA { get; set; }
         public string NUMPEDIDO { get; set; }
         public string NUMALBARAN { get; set; }
-        public System.DateTime FECHALB { get; set; }
+        public Nullable<System.DateTime> FECHALB { get; set; }
         public string CUENTA { get; set; }
         public string FCOBRO { get; set; }
         public int NUMLINEA { get; set; }
