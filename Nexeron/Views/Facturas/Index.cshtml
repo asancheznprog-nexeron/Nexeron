@@ -478,8 +478,6 @@
 
                         foreach (var f in Model)
                         {
-                            // Corrección Aplicada: Excluye las de estado 105 (Rectificativa), las de estado 103 (Rechazada/Ya rectificada)
-                            // Y las que consten en el HashSet mapeado desde la base de datos por el campo RECTIFICATIVA.
                             if (f.ESTADO != "105" && f.ESTADO != "103" && !rectificadas.Contains(f.NUMFACTURA.Trim()))
                             {
                                 <tr>
@@ -569,7 +567,17 @@
                                 <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti" maxlength="13" onkeyup="buscarArticuloAjax(this)" autocomplete="off" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
                                 <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly /></td>
                                 <td><input type="number" class="input-tabla num-canti" value="1.00" min="0.01" step="0.01" /></td>
-                                <td><input type="text" class="input-tabla txt-unidad" maxlength="2" placeholder="UD" /></td>
+                                <td>
+                                    <select class="input-tabla txt-unidad">
+                                        @if (ViewBag.Unidades != null)
+                                        {
+                                            foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades)
+                                            {
+                                                <option value="@u.Key" @(u.Key == "UD" ? "selected" : "")>@u.Value</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
                                 <td><input type="number" class="input-tabla num-euros" value="0.0000" step="0.0001" /></td>
                                 <td><input type="number" class="input-tabla num-dtoarti" value="0.00" step="0.01" /></td>
                                 <td><input type="text" class="input-tabla num-importe" value="0.00" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
@@ -741,7 +749,6 @@
         @if (TempData["MensajeExito"] != null) { <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "success");</text> }
         @if (TempData["Error"] != null) { <text>crearToast("@Html.Raw(TempData["Error"])", "error");</text> }
 
-        // Interceptor y validador preventivo de altas contra duplicados
         $('#formCrearFactura').submit(function (e) {
             e.preventDefault();
             var $form = $(this);
@@ -828,7 +835,6 @@
         }, 4000);
     }
 
-    // Cargador con Regla Estricta de Bloqueo UI (Estados: 105, 102, 103)
     function cargarYEditarFactura(numFactura) {
         $.ajax({
             url: '@Url.Action("ObtenerDetalleFactura", "Facturas")',
@@ -850,8 +856,8 @@
 
                     sincronizarReglaPago(document.getElementById('editFcobro'));
 
-                    // Regla de Negocio: Si la factura ya es Rectificativa (105), Aceptada (102) o Rechazada (103), es inmutable.
                     var esSoloLecturaGlobal = (primer.ESTADO === "105" || primer.ESTADO === "102" || primer.ESTADO === "103");
+                    var totalLineasARenderizar = esSoloLecturaGlobal ? lineas.length : Math.max(10, lineas.length);
 
                     if (esSoloLecturaGlobal) {
                         $('#tablaArticulosEditar th.col-acciones').hide();
@@ -864,12 +870,11 @@
                     }
 
                     var $tbody = $('#tablaArticulosEditar tbody').empty();
-                    for (var i = 0; i < Math.max(10, lineas.length); i++) {
+                    for (var i = 0; i < totalLineasARenderizar; i++) {
                         var item = lineas[i] || { ARTI: '', DESARTI: '', CANTI: '1.00', UNIDAD: 'UD', EUROS: '0.0000', DTOARTI: '0.00', IVARTI: '0.00', ESTADOLIN: primer.ESTADO };
                         var importeFila = (parseFloat(item.CANTI) * parseFloat(item.EUROS) * (1 - (parseFloat(item.DTOARTI) / 100))).toFixed(2);
 
                         var blockedClass = esSoloLecturaGlobal ? "form-control-bloqueado" : "";
-                        var readonlyAttr = esSoloLecturaGlobal ? "readonly" : "";
 
                         var accionesTdHtml = esSoloLecturaGlobal ? "" : `
                             <td style="text-align: center;">
@@ -879,15 +884,15 @@
 
                         var trHtml = `
                         <tr class="fila-articulo" data-estadolin="${item.ESTADOLIN}">
-                            <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti ${blockedClass}" ${readonlyAttr} maxlength="13" onkeyup="buscarArticuloAjax(this)" autocomplete="off" value="${item.ARTI}" />
+                            <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti ${blockedClass}" ${esSoloLecturaGlobal ? "readonly" : ""} maxlength="13" onkeyup="buscarArticuloAjax(this)" autocomplete="off" value="${item.ARTI}" />
                                 <div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
                             <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
-                            <td><input type="number" class="input-tabla num-canti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.CANTI).toFixed(2)}" min="0.01" step="0.01" /></td>
-                            <td><input type="text" class="input-tabla txt-unidad ${blockedClass}" ${readonlyAttr} maxlength="2" value="${item.UNIDAD}" /></td>
-                            <td><input type="number" class="input-tabla num-euros ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.EUROS).toFixed(4)}" step="0.0001" /></td>
-                            <td><input type="number" class="input-tabla num-dtoarti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.DTOARTI).toFixed(2)}" step="0.01" /></td>
+                            <td><input type="number" class="input-tabla num-canti ${blockedClass}" ${esSoloLecturaGlobal ? "readonly" : ""} value="${parseFloat(item.CANTI).toFixed(2)}" min="0.01" step="0.01" /></td>
+                            <td><select class="input-tabla txt-unidad ${blockedClass}" ${esSoloLecturaGlobal ? "disabled" : ""}>${generarOpcionesUnidad(item.UNIDAD)}</select></td>
+                            <td><input type="number" class="input-tabla num-euros ${blockedClass}" ${esSoloLecturaGlobal ? "readonly" : ""} value="${parseFloat(item.EUROS).toFixed(4)}" step="0.0001" /></td>
+                            <td><input type="number" class="input-tabla num-dtoarti ${blockedClass}" ${esSoloLecturaGlobal ? "readonly" : ""} value="${parseFloat(item.DTOARTI).toFixed(2)}" step="0.01" /></td>
                             <td><input type="text" class="input-tabla num-importe" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
-                            <td><input type="number" class="input-tabla num-ivarti ${blockedClass}" ${readonlyAttr} value="${parseFloat(item.IVARTI).toFixed(2)}" step="0.01" /></td>
+                            <td><input type="number" class="input-tabla num-ivarti ${blockedClass}" ${esSoloLecturaGlobal ? "readonly" : ""} value="${parseFloat(item.IVARTI).toFixed(2)}" step="0.01" /></td>
                             ${accionesTdHtml}
                         </tr>`;
                         $tbody.append(trHtml);
@@ -976,7 +981,6 @@
         }
     }
 
-    // Motor de cálculo numérico exacto redondeado
     function calcularImporteFila($fila) {
         var canti = parseFloat($fila.find('.num-canti').val()) || 0;
         var euros = parseFloat($fila.find('.num-euros').val()) || 0;
@@ -1012,7 +1016,7 @@
             <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti" maxlength="13" autocomplete="off" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
             <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly /></td>
             <td><input type="number" class="input-tabla num-canti" value="1.00" min="0.01" step="0.01" /></td>
-            <td><input type="text" class="input-tabla txt-unidad" maxlength="2" placeholder="UD" /></td>
+            <td><select class="input-tabla txt-unidad">${generarOpcionesUnidad('UD')}</select></td>
             <td><input type="number" class="input-tabla num-euros" value="0.0000" step="0.0001" /></td>
             <td><input type="number" class="input-tabla num-dtoarti" value="0.00" step="0.01" /></td>
             <td><input type="text" class="input-tabla num-importe" value="0.00" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
@@ -1045,7 +1049,7 @@
                     ARTI: arti,
                     DESARTI: $f.find('.txt-desarti').val().trim(),
                     CANTI: parseFloat($f.find('.num-canti').val()) || 0,
-                    UNIDAD: $f.find('.txt-unidad').val().trim() || "UD",
+                    UNIDAD: ($f.find('.txt-unidad').val() || "UD").trim(),
                     EUROS: parseFloat($f.find('.num-euros').val()) || 0,
                     DTOARTI: parseFloat($f.find('.num-dtoarti').val()) || 0,
                     IVARTI: parseFloat($f.find('.num-ivarti').val()) || 0,
@@ -1062,4 +1066,16 @@
     function abrirModalEliminar(numfactura, cliente) { $('#deleteFacturaHidden').val(numfactura); $('#deleteFacturaSpan').text(numfactura); $('#deleteClienteSpan').text(cliente); $('#modalEliminar').css('display', 'flex'); }
     function cerrarModal(id) { $('#' + id).css('display', 'none'); }
     window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
+
+    function generarOpcionesUnidad(valorSeleccionado) {
+        var html = "";
+        @if (ViewBag.Unidades != null) {
+            foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades) {
+                <text>
+                html += '<option value="@u.Key"' + (valorSeleccionado === '@u.Key' ? ' selected' : '') + '>@u.Value</option>';
+                </text>
+            }
+        }
+        return html || '<option value="UD">UD</option>';
+    }
 </script>

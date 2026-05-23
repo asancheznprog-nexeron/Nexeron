@@ -64,7 +64,24 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.Estados = estadosLista;
 
-                    
+                    List<KeyValuePair<string, string>> unidadesLista = new List<KeyValuePair<string, string>>();
+                    using (var cmdUni = conexion.CreateCommand())
+                    {
+                        cmdUni.CommandText = "SELECT codigo, descripcion FROM unidades ORDER BY codigo ASC";
+                        using (var readerUni = cmdUni.ExecuteReader())
+                        {
+                            while (readerUni.Read())
+                            {
+                                unidadesLista.Add(new KeyValuePair<string, string>(
+                                    readerUni["codigo"].ToString().Trim(),
+                                    readerUni["descripcion"].ToString().Trim()
+                                ));
+                            }
+                        }
+                    }
+                    ViewBag.Unidades = unidadesLista;
+
+
                     HashSet<string> facturasRectificadas = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     using (var cmdRec = conexion.CreateCommand())
                     {
