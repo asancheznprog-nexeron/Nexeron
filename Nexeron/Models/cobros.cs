@@ -30,5 +30,6 @@ namespace Nexeron.Models
         public Nullable<bool> EMITIDO { get; set; }
         public Nullable<bool> VENCIDO { get; set; }
         public Nullable<long> NPAGARE { get; set; }
+        public string ESTADO { get; set; }
     }
 }

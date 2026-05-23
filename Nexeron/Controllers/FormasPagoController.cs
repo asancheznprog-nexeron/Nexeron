@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Web.Mvc;
-using System.Web.Script.Serialization;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
 using MySql.Data.MySqlClient;
 using Nexeron.Models;
 
@@ -12,7 +8,6 @@ namespace Nexeron.Controllers
 {
     public class FormasPagoController : Controller
     {
-
         public ActionResult Index()
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
@@ -165,7 +160,7 @@ namespace Nexeron.Controllers
                         cmd.Parameters.AddWithValue("@codigo", id);
                         cmd.ExecuteNonQuery();
                     }
-                    TempData["MensajeExito"] = "Forma de pago eliminada correctamente.";
+                    TempData["MensajeExito"] = "Forma de pago registrada correctamente."; 
                 }
                 catch (MySqlException ex)
                 {
@@ -180,86 +175,6 @@ namespace Nexeron.Controllers
                 }
             }
             return RedirectToAction("Index");
-        }
-        [HttpPost]
-        public ActionResult DescargarInforme(string datosFiltradosJson)
-        {
-            if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
-                return RedirectToAction("Login", "Home");
-
-            List<fpagcob> lista = new List<fpagcob>();
-
-            try
-            {
-                if (!string.IsNullOrEmpty(datosFiltradosJson))
-                {
-                    var serializer = new JavaScriptSerializer();
-                    lista = serializer.Deserialize<List<fpagcob>>(datosFiltradosJson);
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error al procesar los datos del filtro: " + ex.Message;
-                return RedirectToAction("Index");
-            }
-
-            if (lista == null || lista.Count == 0)
-            {
-                TempData["Error"] = "No hay datos disponibles para imprimir con el filtro actual.";
-                return RedirectToAction("Index");
-            }
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                Document documento = new Document(PageSize.A4.Rotate(), 20f, 20f, 20f, 20f);
-                PdfWriter writer = PdfWriter.GetInstance(documento, ms);
-                documento.Open();
-
-                Font fuenteTitulo = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.BLACK);
-                Font fuenteCabecera = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9, BaseColor.WHITE);
-                Font fuenteDatos = FontFactory.GetFont(FontFactory.HELVETICA, 9, BaseColor.BLACK);
-
-                Paragraph titulo = new Paragraph("INFORME FILTRADO DE FORMAS DE PAGO Y COBRO", fuenteTitulo);
-                titulo.Alignment = Element.ALIGN_CENTER;
-                titulo.SpacingAfter = 15f;
-                documento.Add(titulo);
-
-                PdfPTable tabla = new PdfPTable(8);
-                tabla.WidthPercentage = 100;
-                float[] anchosColumnas = { 8f, 28f, 10f, 12f, 12f, 10f, 10f, 10f };
-                tabla.SetWidths(anchosColumnas);
-
-                string[] cabeceras = { "Código", "Forma de cobro", "Aceptable", "Remesa cobros", "Remesa pagos", "Nº de cobros", "Primer vencimiento", "Dias entre vtos" };
-                foreach (string cab in cabeceras)
-                {
-                    PdfPCell celda = new PdfPCell(new Phrase(cab, fuenteCabecera))
-                    {
-                        BackgroundColor = new BaseColor(0, 123, 255),
-                        HorizontalAlignment = Element.ALIGN_CENTER,
-                        VerticalAlignment = Element.ALIGN_MIDDLE,
-                        Padding = 6f
-                    };
-                    tabla.AddCell(celda);
-                }
-
-                foreach (var item in lista)
-                {
-                    tabla.AddCell(new PdfPCell(new Phrase(item.CODIGO, fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.FORMACOBPAG, fuenteDatos)) { Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.ACEPTO, fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.REMESACOBRO, fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.REMESAPAGO, fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.NUMCOBROS.ToString(), fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.PRIMVENCI.ToString(), fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                    tabla.AddCell(new PdfPCell(new Phrase(item.DIASVENCI.ToString(), fuenteDatos)) { HorizontalAlignment = Element.ALIGN_CENTER, Padding = 5f });
-                }
-
-                documento.Add(tabla);
-                documento.Close();
-
-                string nombreArchivo = "Informe_FormasPago_" + DateTime.Now.ToString("yyyyMMdd") + ".pdf";
-                return File(ms.ToArray(), "application/pdf", nombreArchivo);
-            }
         }
     }
 }

@@ -207,6 +207,7 @@
     <Compile Include="App_Start\BundleConfig2.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AsientosController.cs" />
     <Compile Include="Controllers\FacturasController.cs" />
     <Compile Include="Controllers\OfertasController.cs" />
     <Compile Include="Controllers\FormasPagoController.cs" />
@@ -220,6 +221,9 @@
     <Compile Include="Controllers\ReferenciasController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Models\albaranes.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\articulo.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -266,8 +270,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\Pedidos_ext.cs" />
     <Compile Include="Models\Modelos\Facturas_ext.cs" />
-    <Compile Include="Models\Modelos\pedidosModel.cs" />
+    <Compile Include="Models\Modelos\Asientos_ext.cs" />
     <Compile Include="Models\Modelos\Ofertas_ext.cs" />
     <Compile Include="Models\Modelos\ArticuloProveedorModel.cs" />
     <Compile Include="Models\Modelos\UnidadModel.cs" />
@@ -282,6 +287,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\paises.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\pedidos.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\proveedores.cs">
@@ -379,6 +387,7 @@
     <Content Include="Views\Ofertas\Index.cshtml" />
     <Content Include="Views\Pedidos\Index.cshtml" />
     <Content Include="Views\Facturas\Index.cshtml" />
+    <Content Include="Views\Asientos\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -5,6 +5,29 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="cortechecoModel.Store" Provider="MySql.Data.MySqlClient" ProviderManifestToken="8.0" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="albaranes">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NUMALB" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHALB" Type="datetime" Precision="0" Nullable="false" />
+          <Property Name="NUMPEDIDO" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="NUMLINEAPED" Type="int" Nullable="false" />
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FCOBRO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="NUMLINEA" Type="int" Nullable="false" />
+          <Property Name="ARTI" Type="char" MaxLength="13" />
+          <Property Name="DESARTI" Type="char" MaxLength="75" />
+          <Property Name="UNIDAD" Type="char" MaxLength="3" />
+          <Property Name="CANTI" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="EUROS" Type="decimal" Precision="12" Scale="4" />
+          <Property Name="IVARTI" Type="decimal" Precision="6" Scale="2" />
+          <Property Name="DTOARTI" Type="decimal" Precision="6" Scale="2" />
+          <Property Name="ESTADO" Type="char" MaxLength="3" />
+          <Property Name="ESTADOLIN" Type="char" MaxLength="3" />
+          <Property Name="OBSERVACIONES" Type="text" />
+        </EntityType>
         <EntityType Name="articulo">
           <Key>
             <PropertyRef Name="codigo" />
@@ -108,6 +131,7 @@
           <Property Name="EMITIDO" Type="bool" />
           <Property Name="VENCIDO" Type="bool" />
           <Property Name="NPAGARE" Type="bigint" />
+          <Property Name="ESTADO" Type="char" MaxLength="3" />
         </EntityType>
         <EntityType Name="cuentas">
           <Key>
@@ -209,6 +233,30 @@
           <Property Name="codigo" Type="varchar" MaxLength="3" Nullable="false" />
           <Property Name="descripcion" Type="varchar" MaxLength="50" Nullable="false" />
         </EntityType>
+        <EntityType Name="pedidos">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NUMPEDIDO" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FECHPED" Type="datetime" Precision="0" Nullable="false" />
+          <Property Name="FECHENT" Type="datetime" Precision="0" />
+          <Property Name="NUMOFERTA" Type="char" MaxLength="9" />
+          <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="FCOBRO" Type="char" MaxLength="3" Nullable="false" />
+          <Property Name="NUMLINEA" Type="int" Nullable="false" />
+          <Property Name="ARTI" Type="char" MaxLength="13" />
+          <Property Name="DESARTI" Type="char" MaxLength="75" />
+          <Property Name="UNIDAD" Type="char" MaxLength="3" />
+          <Property Name="CANTI" Type="decimal" Precision="12" Scale="2" />
+          <Property Name="EUROS" Type="decimal" Precision="12" Scale="4" />
+          <Property Name="IVARTI" Type="decimal" Precision="6" Scale="2" />
+          <Property Name="DTOARTI" Type="decimal" Precision="6" Scale="2" />
+          <Property Name="ALBARANADO" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="ESTADO" Type="char" MaxLength="3" />
+          <Property Name="ESTADOLIN" Type="char" MaxLength="3" />
+          <Property Name="OBSERVACIONES" Type="text" />
+        </EntityType>
         <EntityType Name="proveedores">
           <Key>
             <PropertyRef Name="CUENTA" />
@@ -268,6 +316,7 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="cortechecoModelStoreContainer">
+          <EntitySet Name="albaranes" EntityType="Self.albaranes" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="articulo" EntityType="Self.articulo" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="articulo_proveedor" EntityType="Self.articulo_proveedor" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="asientos" EntityType="Self.asientos" Schema="cortecheco" store:Type="Tables" />
@@ -281,6 +330,7 @@
           <EntitySet Name="ofertas" EntityType="Self.ofertas" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="pagos" EntityType="Self.pagos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="paises" EntityType="Self.paises" Schema="cortecheco" store:Type="Tables" />
+          <EntitySet Name="pedidos" EntityType="Self.pedidos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="proveedores" EntityType="Self.proveedores" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="tipos" EntityType="Self.tipos" Schema="cortecheco" store:Type="Tables" />
           <EntitySet Name="unidades" EntityType="Self.unidades" Schema="cortecheco" store:Type="Tables" />
@@ -314,8 +364,10 @@
           <EntitySet Name="estados" EntityType="cortechecoModel.estados" />
           <EntitySet Name="facturas" EntityType="cortechecoModel.facturas" />
           <EntitySet Name="asientos" EntityType="cortechecoModel.asientos" />
-          <EntitySet Name="cobros" EntityType="cortechecoModel.cobros" />
           <EntitySet Name="pagos" EntityType="cortechecoModel.pagos" />
+          <EntitySet Name="cobros" EntityType="cortechecoModel.cobros" />
+          <EntitySet Name="albaranes" EntityType="cortechecoModel.albaranes" />
+          <EntitySet Name="pedidos" EntityType="cortechecoModel.pedidos" />
         </EntityContainer>
         <EntityType Name="articulo">
           <Key>
@@ -542,6 +594,24 @@
           <Property Name="EUROS" Type="Decimal" />
           <Property Name="CLAVE" Type="Decimal" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
         </EntityType>
+        <EntityType Name="pagos">
+          <Key>
+            <PropertyRef Name="CLAVE" />
+          </Key>
+          <Property Name="CLAVE" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FPAGO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMFAC" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_VEN" Type="DateTime" />
+          <Property Name="IMPORTE" Type="Decimal" Nullable="false" />
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHA_LIB" Type="DateTime" />
+          <Property Name="FECH_FAC" Type="DateTime" />
+          <Property Name="BANCO" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="SFRA" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="OBSERVACION" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+          <Property Name="EMITIDO" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="VENCIDO" Type="Boolean" />
+        </EntityType>
         <EntityType Name="cobros">
           <Key>
             <PropertyRef Name="NUMEFEC" />
@@ -562,24 +632,54 @@
           <Property Name="EMITIDO" Type="Boolean" />
           <Property Name="VENCIDO" Type="Boolean" />
           <Property Name="NPAGARE" Type="Int64" />
+          <Property Name="ESTADO" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
         </EntityType>
-        <EntityType Name="pagos">
+        <EntityType Name="albaranes">
           <Key>
-            <PropertyRef Name="CLAVE" />
+            <PropertyRef Name="clave" />
           </Key>
-          <Property Name="CLAVE" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="FPAGO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="NUMFAC" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="FECHA_VEN" Type="DateTime" />
-          <Property Name="IMPORTE" Type="Decimal" Nullable="false" />
+          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NUMALB" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHALB" Type="DateTime" Nullable="false" />
+          <Property Name="NUMPEDIDO" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="NUMLINEAPED" Type="Int32" Nullable="false" />
           <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="FECHA_LIB" Type="DateTime" />
-          <Property Name="FECH_FAC" Type="DateTime" />
-          <Property Name="BANCO" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="SFRA" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="false" />
-          <Property Name="OBSERVACION" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
-          <Property Name="EMITIDO" Type="String" MaxLength="1" FixedLength="false" Unicode="false" />
-          <Property Name="VENCIDO" Type="Boolean" />
+          <Property Name="FCOBRO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMLINEA" Type="Int32" Nullable="false" />
+          <Property Name="ARTI" Type="String" MaxLength="13" FixedLength="false" Unicode="false" />
+          <Property Name="DESARTI" Type="String" MaxLength="75" FixedLength="false" Unicode="false" />
+          <Property Name="UNIDAD" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CANTI" Type="Decimal" />
+          <Property Name="EUROS" Type="Decimal" />
+          <Property Name="IVARTI" Type="Decimal" />
+          <Property Name="DTOARTI" Type="Decimal" />
+          <Property Name="ESTADO" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="pedidos">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NUMPEDIDO" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FECHPED" Type="DateTime" Nullable="false" />
+          <Property Name="FECHENT" Type="DateTime" />
+          <Property Name="NUMOFERTA" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="FCOBRO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="NUMLINEA" Type="Int32" Nullable="false" />
+          <Property Name="ARTI" Type="String" MaxLength="13" FixedLength="false" Unicode="false" />
+          <Property Name="DESARTI" Type="String" MaxLength="75" FixedLength="false" Unicode="false" />
+          <Property Name="UNIDAD" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="CANTI" Type="Decimal" />
+          <Property Name="EUROS" Type="Decimal" />
+          <Property Name="IVARTI" Type="Decimal" />
+          <Property Name="DTOARTI" Type="Decimal" />
+          <Property Name="ALBARANADO" Type="String" Nullable="false" MaxLength="1" FixedLength="false" Unicode="false" />
+          <Property Name="ESTADO" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+          <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -811,9 +911,29 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="pagos">
+            <EntityTypeMapping TypeName="cortechecoModel.pagos">
+              <MappingFragment StoreEntitySet="pagos">
+                <ScalarProperty Name="VENCIDO" ColumnName="VENCIDO" />
+                <ScalarProperty Name="EMITIDO" ColumnName="EMITIDO" />
+                <ScalarProperty Name="OBSERVACION" ColumnName="OBSERVACION" />
+                <ScalarProperty Name="SFRA" ColumnName="SFRA" />
+                <ScalarProperty Name="BANCO" ColumnName="BANCO" />
+                <ScalarProperty Name="FECH_FAC" ColumnName="FECH_FAC" />
+                <ScalarProperty Name="FECHA_LIB" ColumnName="FECHA_LIB" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+                <ScalarProperty Name="IMPORTE" ColumnName="IMPORTE" />
+                <ScalarProperty Name="FECHA_VEN" ColumnName="FECHA_VEN" />
+                <ScalarProperty Name="NUMFAC" ColumnName="NUMFAC" />
+                <ScalarProperty Name="FPAGO" ColumnName="FPAGO" />
+                <ScalarProperty Name="CLAVE" ColumnName="CLAVE" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="cobros">
             <EntityTypeMapping TypeName="cortechecoModel.cobros">
               <MappingFragment StoreEntitySet="cobros">
+                <ScalarProperty Name="ESTADO" ColumnName="ESTADO" />
                 <ScalarProperty Name="NPAGARE" ColumnName="NPAGARE" />
                 <ScalarProperty Name="VENCIDO" ColumnName="VENCIDO" />
                 <ScalarProperty Name="EMITIDO" ColumnName="EMITIDO" />
@@ -833,22 +953,52 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="pagos">
-            <EntityTypeMapping TypeName="cortechecoModel.pagos">
-              <MappingFragment StoreEntitySet="pagos">
-                <ScalarProperty Name="VENCIDO" ColumnName="VENCIDO" />
-                <ScalarProperty Name="EMITIDO" ColumnName="EMITIDO" />
-                <ScalarProperty Name="OBSERVACION" ColumnName="OBSERVACION" />
-                <ScalarProperty Name="SFRA" ColumnName="SFRA" />
-                <ScalarProperty Name="BANCO" ColumnName="BANCO" />
-                <ScalarProperty Name="FECH_FAC" ColumnName="FECH_FAC" />
-                <ScalarProperty Name="FECHA_LIB" ColumnName="FECHA_LIB" />
+          <EntitySetMapping Name="albaranes">
+            <EntityTypeMapping TypeName="cortechecoModel.albaranes">
+              <MappingFragment StoreEntitySet="albaranes">
+                <ScalarProperty Name="OBSERVACIONES" ColumnName="OBSERVACIONES" />
+                <ScalarProperty Name="ESTADOLIN" ColumnName="ESTADOLIN" />
+                <ScalarProperty Name="ESTADO" ColumnName="ESTADO" />
+                <ScalarProperty Name="DTOARTI" ColumnName="DTOARTI" />
+                <ScalarProperty Name="IVARTI" ColumnName="IVARTI" />
+                <ScalarProperty Name="EUROS" ColumnName="EUROS" />
+                <ScalarProperty Name="CANTI" ColumnName="CANTI" />
+                <ScalarProperty Name="UNIDAD" ColumnName="UNIDAD" />
+                <ScalarProperty Name="DESARTI" ColumnName="DESARTI" />
+                <ScalarProperty Name="ARTI" ColumnName="ARTI" />
+                <ScalarProperty Name="NUMLINEA" ColumnName="NUMLINEA" />
+                <ScalarProperty Name="FCOBRO" ColumnName="FCOBRO" />
                 <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
-                <ScalarProperty Name="IMPORTE" ColumnName="IMPORTE" />
-                <ScalarProperty Name="FECHA_VEN" ColumnName="FECHA_VEN" />
-                <ScalarProperty Name="NUMFAC" ColumnName="NUMFAC" />
-                <ScalarProperty Name="FPAGO" ColumnName="FPAGO" />
-                <ScalarProperty Name="CLAVE" ColumnName="CLAVE" />
+                <ScalarProperty Name="NUMLINEAPED" ColumnName="NUMLINEAPED" />
+                <ScalarProperty Name="NUMPEDIDO" ColumnName="NUMPEDIDO" />
+                <ScalarProperty Name="FECHALB" ColumnName="FECHALB" />
+                <ScalarProperty Name="NUMALB" ColumnName="NUMALB" />
+                <ScalarProperty Name="clave" ColumnName="clave" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="pedidos">
+            <EntityTypeMapping TypeName="cortechecoModel.pedidos">
+              <MappingFragment StoreEntitySet="pedidos">
+                <ScalarProperty Name="OBSERVACIONES" ColumnName="OBSERVACIONES" />
+                <ScalarProperty Name="ESTADOLIN" ColumnName="ESTADOLIN" />
+                <ScalarProperty Name="ESTADO" ColumnName="ESTADO" />
+                <ScalarProperty Name="ALBARANADO" ColumnName="ALBARANADO" />
+                <ScalarProperty Name="DTOARTI" ColumnName="DTOARTI" />
+                <ScalarProperty Name="IVARTI" ColumnName="IVARTI" />
+                <ScalarProperty Name="EUROS" ColumnName="EUROS" />
+                <ScalarProperty Name="CANTI" ColumnName="CANTI" />
+                <ScalarProperty Name="UNIDAD" ColumnName="UNIDAD" />
+                <ScalarProperty Name="DESARTI" ColumnName="DESARTI" />
+                <ScalarProperty Name="ARTI" ColumnName="ARTI" />
+                <ScalarProperty Name="NUMLINEA" ColumnName="NUMLINEA" />
+                <ScalarProperty Name="FCOBRO" ColumnName="FCOBRO" />
+                <ScalarProperty Name="CUENTA" ColumnName="CUENTA" />
+                <ScalarProperty Name="NUMOFERTA" ColumnName="NUMOFERTA" />
+                <ScalarProperty Name="FECHENT" ColumnName="FECHENT" />
+                <ScalarProperty Name="FECHPED" ColumnName="FECHPED" />
+                <ScalarProperty Name="NUMPEDIDO" ColumnName="NUMPEDIDO" />
+                <ScalarProperty Name="clave" ColumnName="clave" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

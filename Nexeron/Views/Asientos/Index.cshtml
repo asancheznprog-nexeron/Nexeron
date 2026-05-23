@@ -1,0 +1,372 @@
+﻿@model IEnumerable<Nexeron.Models.asientos>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Consultas de Asientos";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .wrap-ventas {
+        max-width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
+
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .header-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 1rem;
+    }
+
+        .header-acciones h3 {
+            margin: 0;
+            color: #495057;
+        }
+
+    .btn-tabla {
+        background: none;
+        border: none;
+        padding: 4px 6px;
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-tabla-editar:hover {
+        color: #0056b3;
+        transform: scale(1.15);
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 1150px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: abrirPopup 0.3s ease-out;
+    }
+
+    @@keyframes abrirPopup {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .btn-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .seccion-titulo {
+        margin: 1.2rem 0 0.5rem 0;
+        color: #007bff;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.3rem;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .grid-3-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+    .form-control {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 0.9rem;
+    }
+
+    .form-control-bloqueado {
+        background-color: #e9ecef !important;
+        color: #495057 !important;
+        pointer-events: none;
+    }
+
+    .tabla-interna {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+        margin-bottom: 1.2rem;
+    }
+
+        .tabla-interna th {
+            background-color: #f8f9fa;
+            color: #495057;
+            padding: 8px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+        }
+
+        .tabla-interna td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+</style>
+
+<div class="wrap-ventas">
+    <div class="submenu-container">
+        <a href="@Url.Action("Index", "Cuentas")" class="btn-submenu">Plan de Cuentas</a>
+        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
+        <a href="@Url.Action("Index", "Proveedores")" class="btn-submenu">Proveedores</a>
+        <a href="@Url.Action("Index", "Bancos")" class="btn-submenu">Bancos</a>
+        <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu">Formas de Cobro/Pago</a>
+        <a href="@Url.Action("Index", "Asientos")" class="btn-submenu active">Asientos</a>
+    </div>
+
+    <div class="card">
+        <div class="header-acciones">
+            <h3>Consulta del Libro Diario Contable</h3>
+        </div>
+
+        <table id="tablaAsientos" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Asiento</th>
+                    <th>Fecha</th>
+                    <th>Cuenta</th>
+                    <th>Cliente / Descripción</th>
+                    <th>Concepto</th>
+                    <th>Observaciones</th>
+                    <th style="text-align: right;">Debe</th>
+                    <th style="text-align: right;">Haber</th>
+                    <th style="text-align: center; width: 5%;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var a in Model)
+                    {
+                        <tr>
+                            <td><strong>@a.ASIENTO</strong></td>
+                            <td>@string.Format("{0:dd/MM/yyyy}", a.FECHA_ASIENTO)</td>
+                            <td>@a.CUENTA</td>
+                            <td>@a.NombreCliente</td>
+                            <td>@a.CONCEPTO</td>
+                            <td>@a.OBSERVACION</td>
+                            <td style="text-align: right; font-weight: bold; color: @(a.Debe > 0 ? "#0056b3" : "#6c757d")">@(a.Debe > 0 ? a.Debe.ToString("N2") + " €" : "-")</td>
+                            <td style="text-align: right; font-weight: bold; color: @(a.Haber > 0 ? "#155724" : "#6c757d")">@(a.Haber > 0 ? a.Haber.ToString("N2") + " €" : "-")</td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn-tabla btn-tabla-editar" onclick="visualizarAsientoContable('@a.ASIENTO')" title="Visualizar Asiento Compuesto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalVisualizar" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal()">&times;</span>
+        <h3 style="margin-top: 0; color: #007bff; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Visualizar Asiento Contable</h3>
+
+        <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
+            <div class="seccion-titulo">Cabecera del Asiento</div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>Número Asiento</label><input type="text" id="viewNumAsiento" class="form-control form-control-bloqueado" readonly /></div>
+                <div class="form-group"><label>Fecha Contable</label><input type="date" id="viewFechaAsiento" class="form-control form-control-bloqueado" readonly /></div>
+                <div class="form-group"><label>Concepto Principal</label><input type="text" id="viewConceptoAsiento" class="form-control form-control-bloqueado" readonly /></div>
+            </div>
+
+            <div class="seccion-titulo">Apuntes del Asiento (Partida Doble)</div>
+            <table class="tabla-interna" id="tablaApuntesDetalle">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Cuenta</th>
+                        <th style="width: 35%;">Descripción / Titular</th>
+                        <th style="width: 30%;">Concepto / Descripción Apunte</th>
+                        <th style="width: 10%; text-align: right;">Debe</th>
+                        <th style="width: 10%; text-align: right;">Haber</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="seccion-titulo">Cuadrante Balanceado</div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>Total Debe</label><input type="text" id="totalDebeModal" class="form-control form-control-bloqueado" readonly style="text-align: right; font-weight: bold; color: #0056b3;" /></div>
+                <div class="form-group"><label>Total Haber</label><input type="text" id="totalHaberModal" class="form-control form-control-bloqueado" readonly style="text-align: right; font-weight: bold; color: #155724;" /></div>
+                <div class="form-group"><label>Descuadre</label><input type="text" id="totalDiferenciaModal" class="form-control form-control-bloqueado" readonly style="text-align: right; font-weight: bold;" /></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#tablaAsientos').DataTable({
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            "pageLength": 15,
+            "order": [[0, "desc"]],
+            "scrollY": "500px",
+            "columnDefs": [ { "targets": 8, "orderable": false } ]
+        });
+    });
+
+    function visualizarAsientoContable(numAsiento) {
+        $.ajax({
+            url: '@Url.Action("ObtenerDetalleAsiento", "Asientos")',
+            type: 'POST',
+            data: { numAsiento: numAsiento },
+            success: function(lineas) {
+                if(lineas && lineas.length > 0) {
+                    var primer = lineas[0];
+                    $('#viewNumAsiento').val(numAsiento);
+                    $('#viewFechaAsiento').val(primer.FECHA);
+                    $('#viewConceptoAsiento').val(primer.CONCEPTO);
+
+                    var $tbody = $('#tablaApuntesDetalle tbody').empty();
+                    var sumDebe = 0;
+                    var sumHaber = 0;
+
+                    for (var i = 0; i < lineas.length; i++) {
+                        var item = lineas[i];
+                        sumDebe += parseFloat(item.Debe);
+                        sumHaber += parseFloat(item.Haber);
+
+                        var valDebe = item.Debe > 0 ? parseFloat(item.Debe).toFixed(2) + " €" : "-";
+                        var valHaber = item.Haber > 0 ? parseFloat(item.Haber).toFixed(2) + " €" : "-";
+
+                        var trHtml = `
+                        <tr>
+                            <td><strong>${item.CUENTA}</strong></td>
+                            <td>${item.NOMBRE_FISCAL}</td>
+                            <td>${item.OBSERVACION}</td>
+                            <td style="text-align: right; font-weight: bold; color: ${item.Debe > 0 ? '#0056b3' : '#6c757d'}">${valDebe}</td>
+                            <td style="text-align: right; font-weight: bold; color: ${item.Haber > 0 ? '#155724' : '#6c757d'}">${valHaber}</td>
+                        </tr>`;
+                        $tbody.append(trHtml);
+                    }
+
+                    var dif = Math.abs(sumDebe - sumHaber);
+
+                    $('#totalDebeModal').val(sumDebe.toFixed(2) + " €");
+                    $('#totalHaberModal').val(sumHaber.toFixed(2) + " €");
+                    $('#totalDiferenciaModal').val(dif.toFixed(2) + " €");
+
+                    if(dif > 0.01) {
+                        $('#totalDiferenciaModal').css('background-color', '#f8d7da').css('color', '#721c24');
+                    } else {
+                        $('#totalDiferenciaModal').css('background-color', '#d4edda').css('color', '#155724');
+                    }
+
+                    $('#modalVisualizar').css('display', 'flex');
+                }
+            }
+        });
+    }
+
+    function cerrarModal() {
+        $('#modalVisualizar').css('display', 'none');
+    }
+
+    window.onclick = function(e) {
+        if ($(e.target).hasClass('modal-overlay')) {
+            $('.modal-overlay').css('display', 'none');
+        }
+    }
+</script>

@@ -137,7 +137,7 @@
         animation: abrirPopup 0.3s ease-out;
     }
 
-    @@keyframes abrirPopup {
+    @keyframes abrirPopup {
         from {
             transform: translateY(-20px);
             opacity: 0;
@@ -280,18 +280,9 @@
         <div class="header-acciones">
             <h3>Formas de Pago y Cobro</h3>
             <div style="display: flex; gap: 0.5rem;">
-
-                <button type="button" class="btn-nuevo" onclick="imprimirTablaFiltrada()" style="background-color: #6c757d; border:none;">
-                    Imprimir PDF
-                </button>
-
                 <button class="btn-nuevo" onclick="abrirModalCrear()">+ Nueva Forma Pago/Cobro</button>
             </div>
         </div>
-
-        <form id="formImprimirPdf" action="@Url.Action("DescargarInforme", "FormasPago")" method="post" style="display:none;">
-            <input type="hidden" id="datosFiltradosJson" name="datosFiltradosJson" />
-        </form>
 
         <table id="tablaFormas" class="display" style="width:100%">
             <thead>
@@ -537,36 +528,6 @@
         $('#deleteCodigoSpan').text(codigo);
         $('#deleteNombreSpan').text(formacobpag);
         $('#modalEliminar').css('display', 'flex');
-    }
-
-    function imprimirTablaFiltrada() {
-        var table = $('#tablaFormas').DataTable();
-
-        var datosFiltrados = [];
-
-        table.rows({ search: 'applied' }).every(function () {
-            var nodo = $(this.node());
-
-            var fila = {
-                CODIGO: nodo.find('td').eq(0).text().trim(),
-                FORMACOBPAG: nodo.find('td').eq(1).text().trim(),
-                ACEPTO: nodo.find('td').eq(2).text().trim(),
-                REMESACOBRO: nodo.find('td').eq(3).text().trim(),
-                REMESAPAGO: nodo.find('td').eq(4).text().trim(),
-                NUMCOBROS: parseInt(nodo.find('td').eq(5).text().trim()) || 0,
-                PRIMVENCI: parseInt(nodo.find('td').eq(6).text().trim()) || 0,
-                DIASVENCI: parseInt(nodo.find('td').eq(7).text().trim()) || 0
-            };
-            datosFiltrados.push(fila);
-        });
-
-        if (datosFiltrados.length === 0) {
-            crearToast("No hay registros que coincidan con la búsqueda para generar el PDF.", "error");
-            return;
-        }
-
-        $('#datosFiltradosJson').val(JSON.stringify(datosFiltrados));
-        $('#formImprimirPdf').submit();
     }
 
     function cerrarModal(idModal) { $('#' + idModal).css('display', 'none'); }

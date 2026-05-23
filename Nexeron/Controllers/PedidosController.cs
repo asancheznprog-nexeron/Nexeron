@@ -19,54 +19,63 @@ namespace Nexeron.Controllers
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
-                conexion.Open();
-
-                List<fpagcob> formasPago = new List<fpagcob>();
-                using (var cmdFp = conexion.CreateCommand())
+                try
                 {
-                    cmdFp.CommandText = "SELECT CODIGO, FORMACOBPAG, NUMCOBROS, PRIMVENCI, DIASVENCI FROM fpagcob ORDER BY CODIGO ASC";
-                    using (var readerFp = cmdFp.ExecuteReader())
+                    conexion.Open();
+
+                    
+                    List<fpagcob> formasPago = new List<fpagcob>();
+                    using (var cmdFp = conexion.CreateCommand())
                     {
-                        while (readerFp.Read())
+                        cmdFp.CommandText = "SELECT CODIGO, FORMACOBPAG, NUMCOBROS, PRIMVENCI, DIASVENCI FROM fpagcob ORDER BY CODIGO ASC";
+                        using (var readerFp = cmdFp.ExecuteReader())
                         {
-                            formasPago.Add(new fpagcob
+                            while (readerFp.Read())
                             {
-                                CODIGO = readerFp["CODIGO"].ToString().Trim(),
-                                FORMACOBPAG = readerFp["FORMACOBPAG"].ToString().Trim(),
-                                NUMCOBROS = Convert.ToInt32(readerFp["NUMCOBROS"]),
-                                PRIMVENCI = Convert.ToInt32(readerFp["PRIMVENCI"]),
-                                DIASVENCI = Convert.ToInt32(readerFp["DIASVENCI"])
-                            });
+                                formasPago.Add(new fpagcob
+                                {
+                                    CODIGO = readerFp["CODIGO"].ToString().Trim(),
+                                    FORMACOBPAG = readerFp["FORMACOBPAG"].ToString().Trim(),
+                                    NUMCOBROS = Convert.ToInt32(readerFp["NUMCOBROS"]),
+                                    PRIMVENCI = Convert.ToInt32(readerFp["PRIMVENCI"]),
+                                    DIASVENCI = Convert.ToInt32(readerFp["DIASVENCI"])
+                                });
+                            }
+                        }
+                    }
+                    ViewBag.FormasPago = formasPago;
+
+                    
+                    using (var cmd = conexion.CreateCommand())
+                    {
+                        cmd.CommandText = @"SELECT p.NUMPEDIDO, p.FECHPED, p.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
+                                            p.ESTADO, p.FCOBRO, p.OBSERVACIONES
+                                            FROM pedidos p
+                                            LEFT JOIN clientes c ON p.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                                            GROUP BY p.NUMPEDIDO, p.FECHPED, p.CUENTA, c.NOMBRE_FISCAL, p.ESTADO, p.FCOBRO, p.OBSERVACIONES
+                                            ORDER BY p.NUMPEDIDO DESC";
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                lista.Add(new pedidos
+                                {
+                                    NUMPEDIDO = reader["NUMPEDIDO"].ToString(),
+                                    FECHPED = Convert.ToDateTime(reader["FECHPED"]),
+                                    CUENTA = reader["CUENTA"].ToString(),
+                                    NombreCliente = reader["NombreCliente"].ToString(), 
+                                    ESTADO = reader["ESTADO"].ToString(),
+                                    FCOBRO = reader["FCOBRO"].ToString(),
+                                    OBSERVACIONES = reader["OBSERVACIONES"].ToString()
+                                });
+                            }
                         }
                     }
                 }
-                ViewBag.FormasPago = formasPago;
-
-                using (var cmd = conexion.CreateCommand())
+                catch (Exception ex)
                 {
-                    cmd.CommandText = @"SELECT p.NUMPEDIDO, p.FECHPED, p.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
-                                        p.ESTADO, p.FCOBRO, p.OBSERVACIONES
-                                        FROM pedidos p
-                                        LEFT JOIN clientes c ON p.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                        GROUP BY p.NUMPEDIDO, p.FECHPED, p.CUENTA, c.NOMBRE_FISCAL, p.ESTADO, p.FCOBRO, p.OBSERVACIONES
-                                        ORDER BY p.NUMPEDIDO DESC";
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            lista.Add(new pedidos
-                            {
-                                NUMPEDIDO = reader["NUMPEDIDO"].ToString(),
-                                FECHPED = Convert.ToDateTime(reader["FECHPED"]),
-                                CUENTA = reader["CUENTA"].ToString(),
-                                NombreCliente = reader["NombreCliente"].ToString(),
-                                ESTADO = reader["ESTADO"].ToString(),
-                                FCOBRO = reader["FCOBRO"].ToString(),
-                                OBSERVACIONES = reader["OBSERVACIONES"].ToString()
-                            });
-                        }
-                    }
+                    ViewBag.Error = "Error al cargar datos del pedido: " + ex.Message;
                 }
             }
             return View(lista);
@@ -167,46 +176,50 @@ namespace Nexeron.Controllers
 
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
-                conexion.Open();
-                using (var cmd = conexion.CreateCommand())
+                try
                 {
-                    cmd.CommandText = @"SELECT p.*, c.NOMBRE_FISCAL, c.CIF, c.DIRECCION, c.CP, c.POBLACION, c.PROVINCIA, c.TELEFONO, c.EMAIL
-                                        FROM pedidos p
-                                        LEFT JOIN clientes c ON p.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                        WHERE p.NUMPEDIDO = @num
-                                        ORDER BY p.NUMLINEA ASC";
-                    cmd.Parameters.AddWithValue("@num", numPedido.PadLeft(9));
-                    using (var reader = cmd.ExecuteReader())
+                    conexion.Open();
+                    using (var cmd = conexion.CreateCommand())
                     {
-                        while (reader.Read())
+                        cmd.CommandText = @"SELECT p.*, c.NOMBRE_FISCAL, c.CIF, c.DIRECCION, c.CP, c.POBLACION, c.PROVINCIA, c.TELEFONO, c.EMAIL
+                                            FROM pedidos p
+                                            LEFT JOIN clientes c ON p.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                                            WHERE p.NUMPEDIDO = @num
+                                            ORDER BY p.NUMLINEA ASC";
+                        cmd.Parameters.AddWithValue("@num", numPedido.PadLeft(9));
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            lineas.Add(new
+                            while (reader.Read())
                             {
-                                ARTI = reader["ARTI"].ToString().Trim(),
-                                DESARTI = reader["DESARTI"].ToString().Trim(),
-                                CANTI = Convert.ToDecimal(reader["CANTI"]),
-                                UNIDAD = reader["UNIDAD"].ToString().Trim(),
-                                EUROS = Convert.ToDecimal(reader["EUROS"]),
-                                DTOARTI = Convert.ToDecimal(reader["DTOARTI"]),
-                                IVARTI = Convert.ToDecimal(reader["IVARTI"]),
-                                CUENTA = reader["CUENTA"].ToString().Trim(),
-                                FCOBRO = reader["FCOBRO"].ToString().Trim(),
-                                ESTADO = reader["ESTADO"].ToString().Trim(),
-                                FECHA = Convert.ToDateTime(reader["FECHPED"]).ToString("yyyy-MM-dd"),
-                                OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
-                                NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
-                                NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
-                                CIF = reader["CIF"].ToString().Trim(),
-                                DIRECCION = reader["DIRECCION"].ToString().Trim(),
-                                CP = reader["CP"].ToString().Trim(),
-                                POBLACION = reader["POBLACION"].ToString().Trim(),
-                                PROVINCIA = reader["PROVINCIA"].ToString().Trim(),
-                                TELEFONO = reader["TELEFONO"].ToString().Trim(),
-                                EMAIL = reader["EMAIL"].ToString().Trim()
-                            });
+                                lineas.Add(new
+                                {
+                                    ARTI = reader["ARTI"].ToString().Trim(),
+                                    DESARTI = reader["DESARTI"].ToString().Trim(),
+                                    CANTI = Convert.ToDecimal(reader["CANTI"]),
+                                    UNIDAD = reader["UNIDAD"].ToString().Trim(),
+                                    EUROS = Convert.ToDecimal(reader["EUROS"]),
+                                    DTOARTI = Convert.ToDecimal(reader["DTOARTI"]),
+                                    IVARTI = Convert.ToDecimal(reader["IVARTI"]),
+                                    CUENTA = reader["CUENTA"].ToString().Trim(),
+                                    FCOBRO = reader["FCOBRO"].ToString().Trim(),
+                                    ESTADO = reader["ESTADO"].ToString().Trim(),
+                                    FECHA = Convert.ToDateTime(reader["FECHPED"]).ToString("yyyy-MM-dd"),
+                                    OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
+                                    NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
+                                    NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
+                                    CIF = reader["CIF"].ToString().Trim(),
+                                    DIRECCION = reader["DIRECCION"].ToString().Trim(),
+                                    CP = reader["CP"].ToString().Trim(),
+                                    POBLACION = reader["POBLACION"].ToString().Trim(),
+                                    PROVINCIA = reader["PROVINCIA"].ToString().Trim(),
+                                    TELEFONO = reader["TELEFONO"].ToString().Trim(),
+                                    EMAIL = reader["EMAIL"].ToString().Trim()
+                                });
+                            }
                         }
                     }
                 }
+                catch { }
             }
             return Json(lineas);
         }
@@ -403,15 +416,26 @@ namespace Nexeron.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(string id)
         {
+            if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
+                return RedirectToAction("Login", "Home");
+
             string connStr = Session["cadenaConexion"].ToString();
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
-                conexion.Open();
-                using (var cmd = conexion.CreateCommand())
+                try
                 {
-                    cmd.CommandText = "DELETE FROM pedidos WHERE NUMPEDIDO = @num";
-                    cmd.Parameters.AddWithValue("@num", id.PadLeft(9));
-                    cmd.ExecuteNonQuery();
+                    conexion.Open();
+                    using (var cmd = conexion.CreateCommand())
+                    {
+                        cmd.CommandText = "DELETE FROM pedidos WHERE NUMPEDIDO = @num";
+                        cmd.Parameters.AddWithValue("@num", id.PadLeft(9));
+                        cmd.ExecuteNonQuery();
+                    }
+                    TempData["MensajeExito"] = "Pedido eliminado correctamente.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "Error al eliminar el pedido: " + ex.Message;
                 }
             }
             return RedirectToAction("Index");
