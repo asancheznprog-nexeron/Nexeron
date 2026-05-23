@@ -90,9 +90,9 @@
         font-size: 1rem;
     }
 
-        .btn-nuevo:hover {
-            background-color: #218838;
-        }
+    .btn-nuevo:hover {
+        background-color: #218838;
+    }
 
     .btn-tabla {
         background: none;
@@ -331,6 +331,29 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+    }
+
+    .toast-alerta {
+        background-color: #28a745;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 300px;
+        transform: translateX(120%);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast-alerta.toast-error {
+        background-color: #dc3545;
+    }
+
+    .toast-alerta.mostrar {
+        transform: translateX(0);
     }
 </style>
 
@@ -620,6 +643,13 @@
             "scrollY": "400px",
             "columnDefs": [ { "targets": 6, "orderable": false } ]
         });
+
+        @if (TempData["MensajeExito"] != null) {
+            <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "exito");</text>
+        }
+        @if (TempData["Error"] != null) {
+            <text>crearToast("@Html.Raw(TempData["Error"])", "error");</text>
+        }
 
         $(document).on('input', '.num-canti, .num-euros, .num-dtoarti', function() {
             calcularImporteFila($(this).closest('tr'));
