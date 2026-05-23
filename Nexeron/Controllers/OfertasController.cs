@@ -61,6 +61,23 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.Estados = estadosLista;
 
+                    List<KeyValuePair<string, string>> unidadesLista = new List<KeyValuePair<string, string>>();
+                    using (var cmdUni = conexion.CreateCommand())
+                    {
+                        cmdUni.CommandText = "SELECT codigo, descripcion FROM unidades ORDER BY codigo ASC";
+                        using (var readerUni = cmdUni.ExecuteReader())
+                        {
+                            while (readerUni.Read())
+                            {
+                                unidadesLista.Add(new KeyValuePair<string, string>(
+                                    readerUni["codigo"].ToString().Trim(),
+                                    readerUni["descripcion"].ToString().Trim()
+                                ));
+                            }
+                        }
+                    }
+                    ViewBag.Unidades = unidadesLista;
+
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"
@@ -619,34 +636,19 @@ namespace Nexeron.Controllers
                 {
                     try
                     {
-                        string cuenta = "", fcobro = "", observaciones = "";
-                        using (var cmdHead = conexion.CreateCommand())
+                        string nuevoNumPedido = "";
+                        bool hayAceptadas = listaProcesar.Exists(l => l["Estado"].ToString() == "ACEPTAR");
+
+                        if (hayAceptadas)
                         {
-                            cmdHead.Transaction = transaccion;
-                            cmdHead.CommandText = "SELECT CUENTA, FCOBRO, OBSERVACIONES FROM ofertas WHERE NUMOFERTA = @num LIMIT 1";
-                            cmdHead.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                            using (var reader = cmdHead.ExecuteReader())
+                            using (var cmdMax = conexion.CreateCommand())
                             {
-                                if (reader.Read())
-                                {
-                                    cuenta = reader["CUENTA"].ToString();
-                                    fcobro = reader["FCOBRO"].ToString();
-                                    observaciones = reader["OBSERVACIONES"].ToString();
-                                }
+                                cmdMax.Transaction = transaccion;
+                                cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMPEDIDO AS UNSIGNED)), 0) + 1 FROM pedidos";
+                                object result = cmdMax.ExecuteScalar();
+                                if (result != null) nuevoNumPedido = result.ToString().PadLeft(9, '0');
                             }
                         }
-
-                        string nuevoNumPedido = "1".PadLeft(9);
-                        using (var cmdMax = conexion.CreateCommand())
-                        {
-                            cmdMax.Transaction = transaccion;
-                            cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMPEDIDO AS UNSIGNED)), 0) + 1 FROM pedidos";
-                            object result = cmdMax.ExecuteScalar();
-                            if (result != null) nuevoNumPedido = result.ToString().PadLeft(9);
-                        }
-
-                        int aceptadas = 0, rechazadas = 0;
-
                         foreach (var item in listaProcesar)
                         {
                             int numLinea = Convert.ToInt32(item["NUMLINEA"]);
@@ -654,13 +656,12 @@ namespace Nexeron.Controllers
 
                             if (estadoAccion == "ACEPTAR")
                             {
-                                aceptadas++;
                                 using (var cmdIns = conexion.CreateCommand())
                                 {
                                     cmdIns.Transaction = transaccion;
                                     cmdIns.CommandText = @"INSERT INTO pedidos (NUMPEDIDO, FECHPED, FECHENT, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES)
-                                                  SELECT @nuevoNumPedido, NOW(), NULL, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, '101', '101', OBSERVACIONES
-                                                  FROM ofertas WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
+                                                   SELECT @nuevoNumPedido, NOW(), NULL, NUMOFERTA, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, '101', '101', OBSERVACIONES
+                                                   FROM ofertas WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
                                     cmdIns.Parameters.AddWithValue("@nuevoNumPedido", nuevoNumPedido);
                                     cmdIns.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
                                     cmdIns.Parameters.AddWithValue("@linea", numLinea);
@@ -669,15 +670,15 @@ namespace Nexeron.Controllers
                                 using (var cmdUpd = conexion.CreateCommand())
                                 {
                                     cmdUpd.Transaction = transaccion;
-                                    cmdUpd.CommandText = "UPDATE ofertas SET ESTADOLIN = '102' WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
+                                    cmdUpd.CommandText = "UPDATE ofertas SET ESTADOLIN = '102', NUMPEDIDO = @nuevoNumPedido WHERE NUMOFERTA = @num AND NUMLINEA = @linea";
+                                    cmdUpd.Parameters.AddWithValue("@nuevoNumPedido", nuevoNumPedido);
                                     cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
                                     cmdUpd.Parameters.AddWithValue("@linea", numLinea);
                                     cmdUpd.ExecuteNonQuery();
                                 }
                             }
-                            else
+                            else if (estadoAccion == "RECHAZAR")
                             {
-                                rechazadas++;
                                 using (var cmdUpd = conexion.CreateCommand())
                                 {
                                     cmdUpd.Transaction = transaccion;
@@ -688,20 +689,54 @@ namespace Nexeron.Controllers
                                 }
                             }
                         }
-
-                        string estadoGlobal = (aceptadas > 0 && rechazadas > 0) ? "104" : (aceptadas > 0 ? "102" : "103");
-                        using (var cmdUpd = conexion.CreateCommand())
+                        string estadoGlobalFinal = "101";
+                        using (var cmdEst = conexion.CreateCommand())
                         {
-                            cmdUpd.Transaction = transaccion;
-                            cmdUpd.CommandText = "UPDATE ofertas SET ESTADO = @estado, NUMPEDIDO = @nuevoNumPedido WHERE NUMOFERTA = @num";
-                            cmdUpd.Parameters.AddWithValue("@estado", estadoGlobal);
-                            cmdUpd.Parameters.AddWithValue("@nuevoNumPedido", (aceptadas > 0 ? nuevoNumPedido : ""));
-                            cmdUpd.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
-                            cmdUpd.ExecuteNonQuery();
+                            cmdEst.Transaction = transaccion;
+                            cmdEst.CommandText = @"SELECT 
+                                            SUM(CASE WHEN ESTADOLIN = '101' THEN 1 ELSE 0 END) as Pendientes,
+                                            SUM(CASE WHEN ESTADOLIN = '102' THEN 1 ELSE 0 END) as Aceptadas,
+                                            SUM(CASE WHEN ESTADOLIN = '103' THEN 1 ELSE 0 END) as Rechazadas,
+                                            COUNT(*) as Total
+                                           FROM ofertas WHERE NUMOFERTA = @num";
+                            cmdEst.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+
+                            using (var reader = cmdEst.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    int pendientes = Convert.ToInt32(reader["Pendientes"]);
+                                    int aceptadas = Convert.ToInt32(reader["Aceptadas"]);
+                                    int rechazadas = Convert.ToInt32(reader["Rechazadas"]);
+                                    int total = Convert.ToInt32(reader["Total"]);
+
+                                    if (pendientes > 0 || (aceptadas > 0 && rechazadas > 0))
+                                    {
+                                        estadoGlobalFinal = "104";
+                                    }
+                                    else if (aceptadas == total)
+                                    {
+                                        estadoGlobalFinal = "102";
+                                    }
+                                    else if (rechazadas == total)
+                                    {
+                                        estadoGlobalFinal = "103";
+                                    }
+                                }
+                            }
+                        }
+
+                        using (var cmdGlobal = conexion.CreateCommand())
+                        {
+                            cmdGlobal.Transaction = transaccion;
+                            cmdGlobal.CommandText = "UPDATE ofertas SET ESTADO = @estado WHERE NUMOFERTA = @num";
+                            cmdGlobal.Parameters.AddWithValue("@estado", estadoGlobalFinal);
+                            cmdGlobal.Parameters.AddWithValue("@num", numOferta.PadLeft(9));
+                            cmdGlobal.ExecuteNonQuery();
                         }
 
                         transaccion.Commit();
-                        return Json(new { success = true });
+                        return Json(new { success = true, mensaje = hayAceptadas ? $"Pedido {nuevoNumPedido} generado con éxito" : "Líneas rechazadas procesadas correctamente" });
                     }
                     catch (Exception ex)
                     {
