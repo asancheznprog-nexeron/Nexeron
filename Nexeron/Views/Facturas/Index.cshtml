@@ -572,7 +572,7 @@
                                         {
                                             foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades)
                                             {
-                                                <option value="@u.Key" @(u.Key == "UD" ? "selected" : "")>@u.Value</option>
+                                                <option value="@u.Key" label="@u.Key" @(u.Key.Trim().ToUpper() == "UD" ? "selected" : "")>@u.Key - @u.Value</option>
                                             }
                                         }
                                     </select>
@@ -1051,13 +1051,17 @@
 
     function generarOpcionesUnidad(valorSeleccionado) {
         var html = "";
+        var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
+
         @if (ViewBag.Unidades != null) {
             foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades) {
                 <text>
-                html += '<option value="@u.Key"' + (valorSeleccionado === '@u.Key' ? ' selected' : '') + '>@u.Value</option>';
+                var keyOpcion = '@u.Key'.trim().toUpperCase();
+                html += '<option value="@u.Key" label="@u.Key"' + (sel === keyOpcion ? ' selected' : '') + '>@u.Key - @u.Value</option>';
                 </text>
             }
         }
-        return html || '<option value="UD">UD</option>';
+
+        return html || '<option value="UD" label="UD" selected>UD - UNIDADES</option>';
     }
 </script>
