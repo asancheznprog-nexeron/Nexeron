@@ -35,5 +35,6 @@ namespace Nexeron.Models
         public string ESTADOLIN { get; set; }
         public string OBSERVACIONES { get; set; }
         public string RECTIFICATIVA { get; set; }
+        public string SFRA { get; set; }
     }
 }

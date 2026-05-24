@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
     .wrap-ventas {
@@ -39,16 +40,16 @@
         font-size: 0.95rem;
     }
 
-        .btn-submenu:hover {
-            background-color: #e2e6ea;
-            color: #333;
-        }
+    .btn-submenu:hover {
+        background-color: #e2e6ea;
+        color: #333;
+    }
 
-        .btn-submenu.active {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
+    .btn-submenu.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
 
     .card {
         background: #fff;
@@ -68,10 +69,10 @@
         padding-bottom: 1rem;
     }
 
-        .header-acciones h3 {
-            margin: 0;
-            color: #495057;
-        }
+    .header-acciones h3 {
+        margin: 0;
+        color: #495057;
+    }
 
     .grupo-botones {
         display: flex;
@@ -90,9 +91,9 @@
         font-size: 1rem;
     }
 
-        .btn-nuevo:hover {
-            background-color: #218838;
-        }
+    .btn-nuevo:hover {
+        background-color: #218838;
+    }
 
     .btn-tabla {
         background: none;
@@ -168,7 +169,6 @@
             transform: translateY(-20px);
             opacity: 0;
         }
-
         to {
             transform: translateY(0);
             opacity: 1;
@@ -218,12 +218,12 @@
         position: relative;
     }
 
-        .form-group label {
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 0.3rem;
-            font-size: 0.85rem;
-        }
+    .form-group label {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 0.3rem;
+        font-size: 0.85rem;
+    }
 
     .form-control {
         padding: 0.5rem;
@@ -233,10 +233,10 @@
         font-size: 0.9rem;
     }
 
-        .form-control:focus {
-            outline: none;
-            border-color: #007bff;
-        }
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+    }
 
     .form-control-bloqueado {
         background-color: #e9ecef !important;
@@ -268,10 +268,10 @@
         text-align: left;
     }
 
-        .sugerencia-item:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
+    .sugerencia-item:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
 
     .tabla-interna {
         width: 100%;
@@ -280,19 +280,19 @@
         margin-bottom: 1.2rem;
     }
 
-        .tabla-interna th {
-            background-color: #f8f9fa;
-            color: #495057;
-            padding: 8px;
-            font-size: 0.85rem;
-            border-bottom: 2px solid #dee2e6;
-            text-align: left;
-        }
+    .tabla-interna th {
+        background-color: #f8f9fa;
+        color: #495057;
+        padding: 8px;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #dee2e6;
+        text-align: left;
+    }
 
-        .tabla-interna td {
-            padding: 5px 3px;
-            border-bottom: 1px solid #eee;
-        }
+    .tabla-interna td {
+        padding: 5px 3px;
+        border-bottom: 1px solid #eee;
+    }
 
     .input-tabla {
         width: 100%;
@@ -316,22 +316,17 @@
         margin-top: 1rem;
     }
 
-        .btn-submit:hover {
-            background-color: #0056b3;
-        }
+    .btn-submit:hover {
+        background-color: #0056b3;
+    }
 
-        .btn-submit.btn-danger {
-            background-color: #dc3545;
-        }
+    .btn-submit.btn-danger {
+        background-color: #dc3545;
+    }
 
-    .toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 3000;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+    .modal-content-grande {
+        max-width: 950px;
+        width: 95%;
     }
 
     .tabla-ofertas-pendientes {
@@ -340,23 +335,23 @@
         margin-top: 1rem;
     }
 
-        .tabla-ofertas-pendientes th {
-            background-color: #f8f9fa;
-            text-align: left;
-            padding: 0.6rem;
-            border-bottom: 2px solid #dee2e6;
-            cursor: pointer;
-        }
+    .tabla-ofertas-pendientes th {
+        background-color: #f8f9fa;
+        text-align: left;
+        padding: 0.6rem;
+        border-bottom: 2px solid #dee2e6;
+        cursor: pointer;
+    }
 
-        .tabla-ofertas-pendientes td {
-            padding: 0.5rem;
-            border-bottom: 1px solid #eee;
-        }
+    .tabla-ofertas-pendientes td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
 
-        .tabla-ofertas-pendientes tr:hover {
-            background-color: #f1f3f5;
-            cursor: pointer;
-        }
+    .tabla-ofertas-pendientes tr:hover {
+        background-color: #f1f3f5;
+        cursor: pointer;
+    }
 
     .fila-seleccionada {
         background-color: #cce5ff !important;
@@ -386,7 +381,6 @@
             transform: translateX(100%);
             opacity: 0;
         }
-
         to {
             transform: translateX(0);
             opacity: 1;
@@ -398,11 +392,185 @@
             opacity: 1;
             transform: scale(1);
         }
-
         to {
             opacity: 0;
             transform: scale(0.9);
         }
+    }
+
+    .invoice-pdf {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: #334155;
+        padding: 20px;
+        background: #fff;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .inv-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .inv-empresa h2 {
+        color: #1e293b;
+        margin: 0 0 5px 0;
+        font-size: 1.4rem;
+        letter-spacing: -0.5px;
+    }
+
+    .inv-empresa p {
+        margin: 2px 0;
+        color: #64748b;
+    }
+
+    .inv-p-mini {
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    .inv-metadata h1 {
+        margin: 0 0 8px 0;
+        color: #0f172a;
+        font-size: 1.8rem;
+        text-align: right;
+        letter-spacing: 1px;
+    }
+
+    .tbl-meta {
+        border-collapse: collapse;
+    }
+
+    .tbl-meta td {
+        padding: 3px 8px;
+        font-size: 0.85rem;
+    }
+
+    .text-right {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .inv-divider {
+        height: 3px;
+        background-color: #1e293b;
+        margin: 15px 0;
+    }
+
+    .inv-addresses {
+        margin-bottom: 25px;
+    }
+
+    .inv-address-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .inv-address-box h3 {
+        margin: 0 0 8px 0;
+        font-size: 0.8rem;
+        color: #64748b;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 4px;
+    }
+
+    .inv-address-box p {
+        margin: 4px 0;
+        color: #475569;
+    }
+
+    .inv-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+    }
+
+    .inv-table th {
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 8px 10px;
+        font-weight: 600;
+        text-align: left;
+        font-size: 0.78rem;
+    }
+
+    .inv-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    .inv-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    .inv-footer-block {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-top: 15px;
+        page-break-inside: avoid;
+    }
+
+    .inv-notas {
+        width: 50%;
+    }
+
+    .inv-notas h4 {
+        margin: 0 0 5px 0;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .inv-notas p {
+        margin: 3px 0;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .inv-totales-box {
+        width: 40%;
+    }
+
+    .tbl-totales {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tbl-totales td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+    }
+
+    .row-gran-total {
+        background-color: #0f172a;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .row-gran-total td {
+        padding: 8px !important;
+        border: none !important;
+        font-size: 1rem !important;
+    }
+
+    .inv-legal-footer {
+        margin-top: 50px;
+        text-align: center;
+        border-top: 1px dashed #cbd5e1;
+        padding-top: 15px;
+        color: #94a3b8;
+        font-size: 0.7rem;
     }
 </style>
 
@@ -436,7 +604,7 @@
                     <th>Estado</th>
                     <th style="text-align: right;">Base</th>
                     <th style="text-align: right;">Total</th>
-                    <th style="text-align: center; width: 10%;">Acciones</th>
+                    <th style="text-align: center; width: 14%;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -456,6 +624,14 @@
                             <td style="text-align: center; white-space: nowrap;">
                                 <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarPedido('@p.NUMPEDIDO')" title="Editar Pedido">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button type="button" class="btn-tabla" onclick="exportarPedidoPdf('@p.NUMPEDIDO')" title="Descargar Pedido PDF" style="color: #dc3545; margin-left: 2px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                                        <polyline points="9 15 12 18 15 15"></polyline>
+                                    </svg>
                                 </button>
                                 <button type="button" class="btn-tabla btn-tabla-eliminar" onclick="abrirModalEliminar('@p.NUMPEDIDO', '@p.NombreCliente')" title="Eliminar Pedido">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
@@ -778,6 +954,85 @@
         </div>
     </div>
 </div>
+
+<div id="invoice-container" style="display: none; position: absolute; left: -9999px;">
+    <div id="invoice-template" class="invoice-pdf">
+        <div class="inv-header">
+            <div class="inv-empresa">
+                <h2>NEXERON DIGITAL S.L.</h2>
+                <p class="inv-p-mini">CIF:</p>
+                <p>Av. de la Innovación, Edif 3B - Planta 2</p>
+                <p>Tel: 900 123 456 | nexeronprog@gmail.com</p>
+            </div>
+            <div class="inv-metadata">
+                <h1>PEDIDO DE VENTA</h1>
+                <table class="tbl-meta">
+                    <tr>
+                        <td><strong>Nº Pedido:</strong></td>
+                        <td id="pdf-num-pedido" class="text-right">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fecha:</strong></td>
+                        <td id="pdf-fecha" class="text-right">-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>F. Entrega:</strong></td>
+                        <td id="pdf-fecha-entrega" class="text-right">-</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="inv-divider"></div>
+        <div class="inv-addresses">
+            <div class="inv-address-box">
+                <h3>CLIENTE / FACTURADO A</h3>
+                <p><strong id="pdf-cliente-nombre" style="color: #0f172a; font-size: 0.95rem;">-</strong></p>
+                <p><strong>CIF/NIF:</strong> <span id="pdf-cliente-cif">-</span></p>
+                <p><strong>Código Cuenta:</strong> <span id="pdf-cliente-cuenta">-</span></p>
+                <p><strong>Dirección:</strong> <span id="pdf-cliente-direccion">-</span></p>
+            </div>
+        </div>
+        <table class="inv-table" id="pdf-tabla-lineas">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">Código</th>
+                    <th style="width: 36%;">Descripción</th>
+                    <th style="text-align: right; width: 10%;">Cant.</th>
+                    <th style="text-align: center; width: 8%;">Ud.</th>
+                    <th style="text-align: right; width: 17%;">Precio</th>
+                    <th style="text-align: right; width: 17%;">Importe</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="inv-footer-block">
+            <div class="inv-notas">
+                <h4>Condiciones y Métodos de Pago</h4>
+                <p><strong>Forma de pago:</strong> <span id="pdf-forma-pago">-</span></p>
+                <p id="pdf-observaciones-wrap" style="margin-top: 10px; display:none;">
+                    <strong>Observaciones:</strong> <span id="pdf-observaciones">-</span>
+                </p>
+            </div>
+            <div class="inv-totales-box">
+                <table class="tbl-totales">
+                    <tr>
+                        <td>Base Imponible:</td>
+                        <td id="pdf-total-base" class="text-right">0.00 €</td>
+                    </tr>
+                    <tr class="row-gran-total">
+                        <td>TOTAL PEDIDO:</td>
+                        <td id="pdf-total-general" class="text-right">0.00 €</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="inv-legal-footer">
+            <p>Reg. Mercantil de Madrid, Tomo 12345, Folio 88, Sección 8, Hoja M-999999, Inscripción 1ª.</p>
+            <p>Gracias por su confianza en Nexeron.</p>
+        </div>
+    </div>
+</div>
+
 <script>
     var cacheUltimoFiltroCliente = "";
 
@@ -1013,10 +1268,10 @@
         var importe = canti * euros * (1 - (dto / 100));
         $fila.find('.num-importe').val(importe.toFixed(2));
     }
+
     function generarOpcionesUnidad(valorSeleccionado) {
         var html = "";
         var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
-
         @if (ViewBag.Unidades != null) {
             foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades) {
                 <text>
@@ -1025,9 +1280,9 @@
                 </text>
             }
         }
-
         return html || '<option value="UD" label="UD" selected>UD - UNIDADES</option>';
     }
+
     function agregarFilaArticulo(boton) {
         var nuevaFila = `
         <tr class="fila-articulo">
@@ -1107,24 +1362,6 @@
     }
     function cerrarModal(id) { $('#' + id).css('display', 'none'); }
     window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
-
-    function crearToast(mensaje, tipo) {
-        var container = document.getElementById('toastContainer');
-        if (!container) return;
-
-        var toast = document.createElement('div');
-        toast.className = 'custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error');
-        toast.innerText = mensaje;
-
-        container.appendChild(toast);
-
-        setTimeout(function() {
-            toast.style.animation = 'fadeOutToast 0.3s ease-out forwards';
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
-        }, 4000);
-    }
 
     function abrirModalAlbaranar() {
         $('#modalAlbaranar').css('display', 'flex');
@@ -1287,6 +1524,88 @@
             },
             error: function() {
                 crearToast("Error de comunicación.", "error");
+            }
+        });
+    }
+
+    function exportarPedidoPdf(numPedido) {
+        if (!numPedido) return;
+        $.ajax({
+            url: '@Url.Action("ObtenerDetallePedido", "Pedidos")',
+            type: 'POST',
+            data: { numPedido: numPedido },
+            success: function(lineas) {
+                if (!lineas || lineas.length === 0) {
+                    crearToast("No se encontraron datos para procesar el PDF.", "error");
+                    return;
+                }
+                var primerRegistro = lineas[0];
+                $('#pdf-num-pedido').text(numPedido.trim());
+                $('#pdf-fecha').text(primerRegistro.FECHA);
+                $('#pdf-fecha-entrega').text(primerRegistro.FECHENT || '-');
+                $('#pdf-cliente-nombre').text(primerRegistro.NOMBRE_FISCAL);
+                $('#pdf-cliente-cif').text(primerRegistro.CIF);
+                $('#pdf-cliente-cuenta').text(primerRegistro.CUENTA);
+                $('#pdf-cliente-direccion').text(primerRegistro.DIRECCION + ' ' + (primerRegistro.CP || '') + ' ' + (primerRegistro.POBLACION || '') + ' ' + (primerRegistro.PROVINCIA || ''));
+                $('#pdf-forma-pago').text(primerRegistro.FCOBRO);
+
+                if (primerRegistro.OBSERVACIONES && primerRegistro.OBSERVACIONES.trim() !== "") {
+                    $('#pdf-observaciones').text(primerRegistro.OBSERVACIONES);
+                    $('#pdf-observaciones-wrap').show();
+                } else {
+                    $('#pdf-observaciones-wrap').hide();
+                }
+
+                var $tbody = $('#pdf-tabla-lineas tbody').empty();
+                var acumuladoBase = 0;
+                var totalIvaAcumulado = 0;
+
+                lineas.forEach(function(item) {
+                    var cant = parseFloat(item.CANTI) || 0;
+                    var euros = parseFloat(item.EUROS) || 0;
+                    var dto = parseFloat(item.DTOARTI) || 0;
+                    var ivarti = parseFloat(item.IVARTI) || 0;
+                    var baseLinea = Math.round((cant * euros * (1 - (dto / 100))) * 100) / 100;
+                    var ivaLinea = Math.round((baseLinea * (ivarti / 100)) * 100) / 100;
+
+                    acumuladoBase += baseLinea;
+                    totalIvaAcumulado += ivaLinea;
+
+                    var filaHtml = `
+                        <tr>
+                            <td>${item.ARTI}</td>
+                            <td style="white-space: normal;">${item.DESARTI}</td>
+                            <td class="text-right">${cant.toFixed(2)}</td>
+                            <td style="text-align:center;">${item.UNIDAD || 'UD'}</td>
+                            <td class="text-right">${euros.toFixed(4)} €</td>
+                            <td class="text-right" style="font-weight:600;">${baseLinea.toFixed(2)} €</td>
+                        </tr>`;
+                    $tbody.append(filaHtml);
+                });
+
+                $('#pdf-total-base').text(acumuladoBase.toFixed(2) + " €");
+                var totalDocumento = acumuladoBase + totalIvaAcumulado;
+                $('#pdf-total-general').text(totalDocumento.toFixed(2) + " €");
+
+                var element = document.getElementById('invoice-template');
+                var opcionesConfig = {
+                    margin:       12,
+                    filename:     'Pedido_' + numPedido.trim() + '.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, logging: false, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                $('#invoice-container').show();
+                html2pdf().set(opcionesConfig).from(element).save().then(function() {
+                    $('#invoice-container').hide();
+                }).catch(function(err) {
+                    $('#invoice-container').hide();
+                    crearToast("Error al procesar la maquetación del PDF", "error");
+                });
+            },
+            error: function() {
+                crearToast("No se pudo conectar con el servidor para extraer el detalle.", "error");
             }
         });
     }

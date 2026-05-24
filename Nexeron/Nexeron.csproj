@@ -211,6 +211,7 @@
     <Compile Include="Controllers\ComprasFacturasController.cs" />
     <Compile Include="Controllers\ComprasPedidosController.cs" />
     <Compile Include="Controllers\InventarioController.cs" />
+    <Compile Include="Controllers\UsuariosController.cs" />
     <Compile Include="Controllers\PagosController.cs" />
     <Compile Include="Controllers\CobrosController.cs" />
     <Compile Include="Controllers\AlbaranesController.cs" />
@@ -430,6 +431,7 @@
     <Content Include="Views\ComprasFacturas\Index.cshtml" />
     <Content Include="Views\ComprasPedidos\Index.cshtml" />
     <Content Include="Views\Inventario\Index.cshtml" />
+    <Content Include="Views\Usuarios\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
