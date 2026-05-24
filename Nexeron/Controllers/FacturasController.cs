@@ -9,7 +9,6 @@ namespace Nexeron.Controllers
 {
     public class FacturasController : Controller
     {
-        
         public ActionResult Index()
         {
             if (Session["Usuario"] == null || Session["cadenaConexion"] == null)
@@ -24,7 +23,6 @@ namespace Nexeron.Controllers
                 {
                     conexion.Open();
 
-                    
                     List<fpagcob> formasPago = new List<fpagcob>();
                     using (var cmdFp = conexion.CreateCommand())
                     {
@@ -46,7 +44,6 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.FormasPago = formasPago;
 
-                    
                     List<KeyValuePair<string, string>> estadosLista = new List<KeyValuePair<string, string>>();
                     using (var cmdEst = conexion.CreateCommand())
                     {
@@ -81,7 +78,6 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.Unidades = unidadesLista;
 
-
                     HashSet<string> facturasRectificadas = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     using (var cmdRec = conexion.CreateCommand())
                     {
@@ -96,20 +92,19 @@ namespace Nexeron.Controllers
                     }
                     ViewBag.FacturasRectificadas = facturasRectificadas;
 
-                    
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"
                             SELECT t.*, IFNULL(e.estado, 'Desconocido') as NombreEstado
                             FROM (
-                                SELECT f.NUMFACTURA, f.FECHFAC, f.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
+                                SELECT f.NUMFACTURA, f.FECHFAC, f.NUMALBARAN, f.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
                                        f.FCOBRO, f.OBSERVACIONES,
                                        IF(COUNT(DISTINCT f.ESTADOLIN) > 1, '104', MAX(f.ESTADO)) as ESTADO,
                                        SUM(ROUND(f.CANTI * f.EUROS * (1 - (f.DTOARTI / 100)), 2)) as BaseTotal,
                                        SUM(ROUND(ROUND(f.CANTI * f.EUROS * (1 - (f.DTOARTI / 100)), 2) * (f.IVARTI / 100), 2)) as IvaTotal
                                 FROM facturas f
                                 LEFT JOIN clientes c ON f.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                GROUP BY f.NUMFACTURA, f.FECHFAC, f.CUENTA, c.NOMBRE_FISCAL, f.FCOBRO, f.OBSERVACIONES
+                                GROUP BY f.NUMFACTURA, f.FECHFAC, f.NUMALBARAN, f.CUENTA, c.NOMBRE_FISCAL, f.FCOBRO, f.OBSERVACIONES
                             ) t
                             LEFT JOIN estados e ON t.ESTADO = e.codigo
                             ORDER BY t.NUMFACTURA DESC";
@@ -125,6 +120,7 @@ namespace Nexeron.Controllers
                                 {
                                     NUMFACTURA = reader["NUMFACTURA"].ToString(),
                                     FECHFAC = Convert.ToDateTime(reader["FECHFAC"]),
+                                    NUMALBARAN = reader["NUMALBARAN"].ToString(),
                                     CUENTA = reader["CUENTA"].ToString(),
                                     NombreCliente = reader["NombreCliente"].ToString(),
                                     ESTADO = reader["ESTADO"].ToString(),
@@ -146,7 +142,6 @@ namespace Nexeron.Controllers
             return View(lista);
         }
 
-       
         [HttpPost]
         public JsonResult BuscarClientes(string term)
         {
@@ -192,7 +187,6 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
-        
         [HttpPost]
         public JsonResult BuscarArticulos(string term)
         {
@@ -233,7 +227,6 @@ namespace Nexeron.Controllers
             return Json(resultado);
         }
 
-        
         [HttpPost]
         public JsonResult ObtenerDetalleFactura(string numFactura)
         {
@@ -296,7 +289,6 @@ namespace Nexeron.Controllers
             return Json(lineas);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Crear(FormCollection form, string lineasJson)
@@ -345,6 +337,7 @@ namespace Nexeron.Controllers
                     try
                     {
                         DateTime fechFac = Convert.ToDateTime(form["FECHFAC"]);
+                        string numAlbaran = form["NUMALBARAN"];
                         string cuenta = form["CUENTA"].PadLeft(9);
                         string fcobro = form["FCOBRO"];
                         string observaciones = form["OBSERVACIONES"];
@@ -387,15 +380,16 @@ namespace Nexeron.Controllers
                             {
                                 cmd.Transaction = transaccion;
                                 cmd.CommandText = @"INSERT INTO facturas (
-                            NUMFACTURA, FECHFAC, NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
-                            UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
-                        ) VALUES (
-                            @numfactura, @fechfac, '', '', '', @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                            @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, ''
-                        )";
+                                    NUMFACTURA, FECHFAC, NUMOFERTA, NUMPEDIDO, NUMALBARAN, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
+                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
+                                ) VALUES (
+                                    @numfactura, @fechfac, '', '', @numalbaran, @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                                    @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, ''
+                                )";
 
                                 cmd.Parameters.AddWithValue("@numfactura", numFactura);
                                 cmd.Parameters.AddWithValue("@fechfac", fechFac);
+                                cmd.Parameters.AddWithValue("@numalbaran", numAlbaran ?? "");
                                 cmd.Parameters.AddWithValue("@fechalb", DBNull.Value);
                                 cmd.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmd.Parameters.AddWithValue("@fcobro", fcobro);
@@ -455,7 +449,7 @@ namespace Nexeron.Controllers
                         {
                             cmdDebeCliente.Transaction = transaccion;
                             cmdDebeCliente.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
-                                                   VALUES ('FV', @asiento, @fechaAs, @obs, @cuenta, 'D', @euros)";
+                                                           VALUES ('FV', @asiento, @fechaAs, @obs, @cuenta, 'D', @euros)";
                             cmdDebeCliente.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
                             cmdDebeCliente.Parameters.AddWithValue("@fechaAs", DateTime.Now);
                             cmdDebeCliente.Parameters.AddWithValue("@obs", textoObservacion);
@@ -468,7 +462,7 @@ namespace Nexeron.Controllers
                         {
                             cmdHaberVentas.Transaction = transaccion;
                             cmdHaberVentas.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
-                                                   VALUES ('FV', @asiento, @fechaAs, @obs, '7000000', 'H', @euros)";
+                                                           VALUES ('FV', @asiento, @fechaAs, @obs, '7000000', 'H', @euros)";
                             cmdHaberVentas.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
                             cmdHaberVentas.Parameters.AddWithValue("@fechaAs", DateTime.Now);
                             cmdHaberVentas.Parameters.AddWithValue("@obs", textoObservacion);
@@ -484,7 +478,7 @@ namespace Nexeron.Controllers
                             {
                                 cmdHaberIva.Transaction = transaccion;
                                 cmdHaberIva.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
-                                                       VALUES ('FV', @asiento, @fechaAs, @obs, @cuentaIva, 'H', @euros)";
+                                                               VALUES ('FV', @asiento, @fechaAs, @obs, @cuentaIva, 'H', @euros)";
                                 cmdHaberIva.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
                                 cmdHaberIva.Parameters.AddWithValue("@fechaAs", DateTime.Now);
                                 cmdHaberIva.Parameters.AddWithValue("@obs", textoObservacion);
@@ -499,12 +493,12 @@ namespace Nexeron.Controllers
                         {
                             cmdCobro.Transaction = transaccion;
                             cmdCobro.CommandText = @"INSERT INTO cobros (
-                        FCOBRO, NUMFAC, FECHA_VEN, IMPORTE, CUENTA, GASTOS, BANCO, FECHA_LIB, FECH_FAC, 
-                        NUMEFEC, FESTADO, FRECEP, OBSERVACION, EMITIDO, VENCIDO, NPAGARE, ESTADO
-                    ) VALUES (
-                        @fcobro, @numfac, @fecha_ven, @importe, @cuenta, @gastos, @banco, @fecha_lib, @fech_fac, 
-                        @numefec, @festado, @frecep, @observacion, @emitido, @vencido, @npagare, @estado
-                    )";
+                                FCOBRO, NUMFAC, FECHA_VEN, IMPORTE, CUENTA, GASTOS, BANCO, FECHA_LIB, FECH_FAC, 
+                                NUMEFEC, FESTADO, FRECEP, OBSERVACION, EMITIDO, VENCIDO, NPAGARE, ESTADO
+                            ) VALUES (
+                                @fcobro, @numfac, @fecha_ven, @importe, @cuenta, @gastos, @banco, @fecha_lib, @fech_fac, 
+                                @numefec, @festado, @frecep, @observacion, @emitido, @vencido, @npagare, @estado
+                            )";
 
                             cmdCobro.Parameters.AddWithValue("@fcobro", fcobro);
                             cmdCobro.Parameters.AddWithValue("@numfac", numFactura);
@@ -540,10 +534,6 @@ namespace Nexeron.Controllers
             return RedirectToAction("Index");
         }
 
-
-
-
-
         [HttpPost]
         public JsonResult ExisteNumeroFactura(string numFactura)
         {
@@ -571,7 +561,6 @@ namespace Nexeron.Controllers
             }
         }
 
-        
         [HttpPost]
         public JsonResult CrearRectificativa(string numFacturaOriginal)
         {
@@ -586,7 +575,6 @@ namespace Nexeron.Controllers
                 {
                     try
                     {
-                        
                         string nuevoNumFactura = "1".PadLeft(9);
                         using (var cmdMax = conexion.CreateCommand())
                         {
@@ -596,7 +584,6 @@ namespace Nexeron.Controllers
                             if (result != null) nuevoNumFactura = result.ToString().PadLeft(9);
                         }
 
-                        
                         using (var cmdClone = conexion.CreateCommand())
                         {
                             cmdClone.Transaction = transaccion;
@@ -623,7 +610,6 @@ namespace Nexeron.Controllers
                             }
                         }
 
-                        
                         using (var cmdUpdateOriginal = conexion.CreateCommand())
                         {
                             cmdUpdateOriginal.Transaction = transaccion;
