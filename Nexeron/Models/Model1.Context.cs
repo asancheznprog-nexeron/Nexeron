@@ -42,7 +42,7 @@ namespace Nexeron.Models
         public virtual DbSet<asientos> asientos { get; set; }
         public virtual DbSet<pagos> pagos { get; set; }
         public virtual DbSet<cobros> cobros { get; set; }
-        public virtual DbSet<albaranes> albaranes { get; set; }
         public virtual DbSet<pedidos> pedidos { get; set; }
+        public virtual DbSet<albaranes> albaranes { get; set; }
     }
 }

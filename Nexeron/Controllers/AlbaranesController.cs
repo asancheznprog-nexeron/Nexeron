@@ -470,15 +470,39 @@ namespace Nexeron.Controllers
             using (MySqlConnection conexion = new MySqlConnection(connStr))
             {
                 conexion.Open();
+
+                string numAlb = form["NUMALB"].PadLeft(9);
+
+                using (var cmdCheck = conexion.CreateCommand())
+                {
+                    cmdCheck.CommandText = "SELECT COUNT(*) FROM albaranes WHERE NUMALB = @num AND FACTURADO IN ('P','S')";
+                    cmdCheck.Parameters.AddWithValue("@num", numAlb);
+                    if (Convert.ToInt32(cmdCheck.ExecuteScalar()) > 0)
+                    {
+                        TempData["Error"] = "No se puede modificar un albarán que ya ha sido facturado total o parcialmente.";
+                        TempData["TipoError"] = "Editar";
+                        return RedirectToAction("Index");
+                    }
+                }
+
                 using (MySqlTransaction transaccion = conexion.BeginTransaction())
                 {
                     try
                     {
-                        string numAlb = form["NUMALB"].PadLeft(9);
                         DateTime fechAlb = Convert.ToDateTime(form["FECHALB"]);
                         string cuenta = form["CUENTA"].PadLeft(9);
                         string fcobro = form["FCOBRO"];
                         string observaciones = form["OBSERVACIONES"];
+
+                        string estadoOriginal = "101";
+                        using (var cmdGetEstado = conexion.CreateCommand())
+                        {
+                            cmdGetEstado.Transaction = transaccion;
+                            cmdGetEstado.CommandText = "SELECT MAX(ESTADO) FROM albaranes WHERE NUMALB = @num";
+                            cmdGetEstado.Parameters.AddWithValue("@num", numAlb);
+                            var res = cmdGetEstado.ExecuteScalar();
+                            if (res != null && res != DBNull.Value) estadoOriginal = res.ToString();
+                        }
 
                         using (var cmdDelete = conexion.CreateCommand())
                         {
@@ -495,12 +519,12 @@ namespace Nexeron.Controllers
                             {
                                 cmdInsert.Transaction = transaccion;
                                 cmdInsert.CommandText = @"INSERT INTO albaranes (
-                                    NUMALB, FECHALB, NUMPEDIDO, NUMLINEAPED, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
-                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES
-                                ) VALUES (
-                                    @numalb, @fechalb, @numpedido, @numlineaped, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, '101', '101', @observaciones
-                                )";
+                            NUMALB, FECHALB, NUMPEDIDO, NUMLINEAPED, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
+                            UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, FACTURADO, OBSERVACIONES
+                        ) VALUES (
+                            @numalb, @fechalb, @numpedido, @numlineaped, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                            @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, 'N', @observaciones
+                        )";
 
                                 cmdInsert.Parameters.AddWithValue("@numalb", numAlb);
                                 cmdInsert.Parameters.AddWithValue("@fechalb", fechAlb);
@@ -516,6 +540,8 @@ namespace Nexeron.Controllers
                                 cmdInsert.Parameters.AddWithValue("@euros", linea.EUROS);
                                 cmdInsert.Parameters.AddWithValue("@ivarti", linea.IVARTI);
                                 cmdInsert.Parameters.AddWithValue("@dtoarti", linea.DTOARTI);
+                                cmdInsert.Parameters.AddWithValue("@estado", estadoOriginal);
+                                cmdInsert.Parameters.AddWithValue("@estadolin", estadoOriginal);
                                 cmdInsert.Parameters.AddWithValue("@observaciones", observaciones ?? "");
 
                                 cmdInsert.ExecuteNonQuery();
@@ -848,14 +874,14 @@ namespace Nexeron.Controllers
                 {
                     cmd.CommandText = @"
                 SELECT a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO,
-                       c.NOMBRE_FISCAL as NombreCliente
+                       IFNULL(fp.FORMACOBPAG, a.FCOBRO) as FormaCobroDesc
                 FROM albaranes a
-                LEFT JOIN clientes c ON a.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                LEFT JOIN fpagcob fp ON a.FCOBRO = fp.CODIGO
                 WHERE a.CUENTA = @cuenta AND EXISTS (
                     SELECT 1 FROM albaranes sub 
                     WHERE sub.NUMALB = a.NUMALB AND sub.FACTURADO IN ('N', 'P')
                 )
-                GROUP BY a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO, c.NOMBRE_FISCAL
+                GROUP BY a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO, fp.FORMACOBPAG
                 ORDER BY a.NUMALB ASC";
                     cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
                     using (var reader = cmd.ExecuteReader())
@@ -865,10 +891,9 @@ namespace Nexeron.Controllers
                             albaranesPendientes.Add(new
                             {
                                 NUMALB = reader["NUMALB"].ToString().Trim(),
-                                FECHAALB = Convert.ToDateTime(reader["FECHALB"]).ToString("dd/MM/yyyy"),
+                                FECHALB = Convert.ToDateTime(reader["FECHALB"]).ToString("dd/MM/yyyy"),
                                 ESTADO = reader["ESTADO"].ToString().Trim(),
-                                FCOBRO = reader["FCOBRO"].ToString().Trim(),
-                                NombreCliente = reader["NombreCliente"].ToString().Trim()
+                                FCOBRO = reader["FormaCobroDesc"].ToString().Trim()
                             });
                         }
                     }
@@ -890,7 +915,6 @@ namespace Nexeron.Controllers
                 conexion.Open();
                 using (var cmd = conexion.CreateCommand())
                 {
-                    // Traemos las líneas del albarán y calculamos la cantidad ya facturada
                     cmd.CommandText = @"
                 SELECT a.NUMLINEA, a.ARTI, a.DESARTI, a.CANTI as CantidadOriginal, 
                        a.UNIDAD, a.EUROS, a.DTOARTI, a.IVARTI, a.FACTURADO,

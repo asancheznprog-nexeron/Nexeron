@@ -31,6 +31,7 @@ namespace Nexeron.Models
         public Nullable<decimal> DTOARTI { get; set; }
         public string ESTADO { get; set; }
         public string ESTADOLIN { get; set; }
+        public string FACTURADO { get; set; }
         public string OBSERVACIONES { get; set; }
     }
 }
