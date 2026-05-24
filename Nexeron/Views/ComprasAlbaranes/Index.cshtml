@@ -1,0 +1,1212 @@
+﻿@model IEnumerable<Nexeron.Models.compras_albaranes>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Gestión de Albaranes de Compra";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .wrap-ventas {
+        max-width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
+
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .header-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 1rem;
+    }
+
+        .header-acciones h3 {
+            margin: 0;
+            color: #495057;
+        }
+
+    .grupo-botones {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 1rem;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .btn-tabla {
+        background: none;
+        border: none;
+        padding: 4px 6px;
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.2s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-tabla-editar:hover {
+        color: #0056b3;
+        transform: scale(1.15);
+    }
+
+    .btn-tabla-eliminar:hover {
+        color: #dc3545;
+        transform: scale(1.15);
+    }
+
+    .badge-estado {
+        padding: 0.35rem 0.6rem;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .estado-pendiente {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .estado-parcial {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .estado-completado {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 1150px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: abrirPopup 0.3s ease-out;
+    }
+
+    .modal-content-grande {
+        max-width: 950px;
+        width: 95%;
+    }
+
+    @@keyframes abrirPopup {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .btn-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .seccion-titulo {
+        margin: 1.2rem 0 0.5rem 0;
+        color: #007bff;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.3rem;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .grid-3-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .grid-4-col {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr 1fr 2fr;
+        gap: 0.8rem;
+    }
+
+    .grid-fpago {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 0.6rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+    .form-control {
+        padding: 0.55rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+    .form-control-bloqueado {
+        background-color: #e9ecef !important;
+        color: #495057 !important;
+        pointer-events: none;
+    }
+
+    .sugerencias-autocompletado {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        max-height: 180px;
+        overflow-y: auto;
+        z-index: 2500;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        display: none;
+    }
+
+    .sugerencia-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #f1f3f5;
+        color: #495057;
+        text-align: left;
+    }
+
+        .sugerencia-item:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+    .tabla-interna {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+        margin-bottom: 1.2rem;
+    }
+
+        .tabla-interna th {
+            background-color: #f8f9fa;
+            color: #495057;
+            padding: 8px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+        }
+
+        .tabla-interna td {
+            padding: 5px 3px;
+            border-bottom: 1px solid #eee;
+        }
+
+    .input-tabla {
+        width: 100%;
+        padding: 0.4rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 0.85rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-submit.btn-danger {
+            background-color: #dc3545;
+        }
+
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .custom-toast {
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 320px;
+        font-family: system-ui, sans-serif;
+        animation: slideInToast 0.3s ease-out forwards;
+    }
+
+    .toast-success {
+        background-color: #28a745;
+    }
+
+    .toast-error {
+        background-color: #dc3545;
+    }
+
+    .tabla-documentos-pendientes {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+        .tabla-documentos-pendientes th {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 0.6rem;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .tabla-documentos-pendientes td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tabla-documentos-pendientes tr:hover {
+            background-color: #f1f3f5;
+            cursor: pointer;
+        }
+
+    .fila-seleccionada {
+        background-color: #cce5ff !important;
+    }
+</style>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="wrap-ventas">
+    <div class="submenu-container">
+        <a href="@Url.Action("Index", "ComprasPedidos")" class="btn-submenu">Pedidos</a>
+        <a href="@Url.Action("Index", "ComprasAlbaranes")" class="btn-submenu active">Albaranes</a>
+        <a href="@Url.Action("Index", "ComprasFacturas")" class="btn-submenu">Facturas</a>
+    </div>
+
+    <div class="card">
+        <div class="header-acciones">
+            <h3>Gestión de Albaranes de Compra</h3>
+            <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalFacturar()" style="background-color: #007bff; color: white;">Facturar Albarán</button>
+                <button class="btn-nuevo" onclick="abrirModalCrear()">Crear Albarán</button>
+            </div>
+        </div>
+
+        <table id="tablaAlbaranes" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nº Albarán</th>
+                    <th>Fecha</th>
+                    <th>Nº Pedido</th>
+                    <th>Proveedor</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Base</th>
+                    <th style="text-align: right;">Total</th>
+                    <th style="text-align: center; width: 10%;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var a in Model)
+                    {
+                        <tr>
+                            <td><strong>@a.NUMALB</strong></td>
+                            <td>@a.FECHALB.ToString("dd/MM/yyyy")</td>
+                            <td>@a.NUMPEDIDO</td>
+                            <td>@a.NombreProveedor</td>
+                            <td>
+                                <span class="badge-estado @(a.ESTADO == "102" ? "estado-completado" : a.ESTADO == "104" ? "estado-parcial" : "estado-pendiente")">
+                                    @a.NombreEstado
+                                </span>
+                            </td>
+                            <td style="text-align: right; font-weight: bold;">@a.BaseTotal.ToString("N2") €</td>
+                            <td style="text-align: right; font-weight: bold; color: #155724;">@a.ImporteTotal.ToString("N2") €</td>
+                            <td style="text-align: center; white-space: nowrap;">
+                                @if (a.ESTADO != "102")
+                                {
+                                    <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarAlbaran('@a.NUMALB')" title="Editar Albarán">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarAlbaran('@a.NUMALB')" title="Ver Albarán" style="color:#17a2b8;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                }
+                                <button type="button" class="btn-tabla btn-tabla-eliminar" onclick="abrirModalEliminar('@a.NUMALB', '@a.NombreProveedor')" title="Eliminar Albarán">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Crear -->
+<div id="modalCrear" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalCrear')">&times;</span>
+        <h3 style="margin-top: 0; color: #495057; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Alta de Albarán Manual de Compra</h3>
+        @using (Html.BeginForm("Crear", "ComprasAlbaranes", FormMethod.Post, new { id = "formCrearAlbaran" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="lineasJson" name="lineasJson" />
+            <input type="hidden" name="NUMPEDIDO" value="" />
+            <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
+                <div class="seccion-titulo">Datos del Documento</div>
+                <div class="grid-3-col">
+                    <div class="form-group">
+                        <label>Número Albarán *</label>
+                        <input type="text" name="NUMALB" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: 000000001" />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha *</label>
+                        <input type="date" name="FECHALB" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+
+                <div class="seccion-titulo">Proveedor</div>
+                <div class="grid-4-col">
+                    <div class="form-group">
+                        <label>Código Proveedor *</label>
+                        <input type="text" name="CUENTA" class="form-control txtCuentaProveedor" required autocomplete="off" maxlength="9" placeholder="Código o nombre..." onkeyup="buscarProveedorAjax(this)" />
+                        <div class="sugerencias-autocompletado boxSugerenciasProveedores"></div>
+                    </div>
+                    <div class="form-group"><label>Nombre Fiscal</label><input type="text" class="form-control form-control-bloqueado txtNombreFiscal" readonly /></div>
+                    <div class="form-group"><label>CIF/NIF</label><input type="text" class="form-control form-control-bloqueado txtCif" readonly /></div>
+                    <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado txtDireccion" readonly /></div>
+                </div>
+                <div class="grid-3-col" style="margin-top:0.6rem;">
+                    <div class="form-group"><label>CP</label><input type="text" class="form-control form-control-bloqueado txtCp" readonly /></div>
+                    <div class="form-group"><label>Población</label><input type="text" class="form-control form-control-bloqueado txtPoblacion" readonly /></div>
+                    <div class="form-group"><label>Provincia</label><input type="text" class="form-control form-control-bloqueado txtProvincia" readonly /></div>
+                </div>
+
+                <div class="seccion-titulo">Líneas de Albarán</div>
+                <table class="tabla-interna tblArticulos">
+                    <thead>
+                        <tr>
+                            <th>Artículo</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Tarifa</th>
+                            <th>%Dto</th>
+                            <th>Importe</th>
+                            <th>%IVA</th>
+                            <th style="text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            <tr class="fila-articulo">
+                                <td><div style="position:relative;"><input type="text" class="input-tabla txt-arti" maxlength="50" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
+                                <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly /></td>
+                                <td><input type="number" class="input-tabla num-canti" value="1.00" min="0.01" step="0.01" /></td>
+                                <td><select class="input-tabla txt-unidad">@Html.Raw(ViewBag.Unidades != null ? string.Join("", ((List<KeyValuePair<string, string>>)ViewBag.Unidades).Select(u => $"<option value=\"{u.Key}\" label=\"{u.Key}\" {(u.Key.Trim().ToUpper() == "UD" ? "selected" : "")}>{u.Key} - {u.Value}</option>")) : "<option>UD</option>")</select></td>
+                                <td><input type="number" class="input-tabla num-euros" value="0.0000" step="0.0001" /></td>
+                                <td><input type="number" class="input-tabla num-dtoarti" value="0.00" step="0.01" /></td>
+                                <td><input type="text" class="input-tabla num-importe" value="0.00" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+                                <td><input type="number" class="input-tabla num-ivarti" value="0.00" step="0.01" /></td>
+                                <td style="text-align:center;">
+                                    <button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button>
+                                    <button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">×</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="seccion-titulo">Resumen</div>
+                <div class="grid-3-col">
+                    <div class="form-group"><label>Base Imponible</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align:right;font-weight:bold;" /></div>
+                    <div class="form-group"><label>Total IVA</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align:right;font-weight:bold;" /></div>
+                    <div class="form-group"><label>Total Albarán</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align:right;font-weight:bold;background-color:#e2f0d9;color:#385723;" /></div>
+                </div>
+
+                <div class="seccion-titulo">Forma de Pago</div>
+                <div class="grid-fpago">
+                    <div class="form-group">
+                        <label>Forma de Pago *</label>
+                        <select name="FCOBRO" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                            <option value="">Seleccione...</option>
+                            @if (ViewBag.FormasPago != null)
+                            {
+                                foreach (var fp in (List<Nexeron.Models.fpagcob>)ViewBag.FormasPago)
+                                {
+                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nº cobros</label><input type="number" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
+                    <div class="form-group"><label>1er vto</label><input type="number" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
+                    <div class="form-group"><label>Días entre vtos</label><input type="number" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
+                </div>
+
+                <div class="seccion-titulo">Observaciones</div>
+                <div class="form-group"><textarea name="OBSERVACIONES" class="form-control txtObservaciones" rows="3"></textarea></div>
+            </div>
+            <button type="submit" class="btn-submit">Guardar Albarán de Compra</button>
+        }
+    </div>
+</div>
+
+<!-- Modal Editar -->
+<div id="modalEditar" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEditar')">&times;</span>
+        <h3 style="margin-top: 0; color: #007bff; border-bottom: 2px solid #f1f3f5; padding-bottom: 0.5rem;">Modificar Albarán de Compra</h3>
+        @using (Html.BeginForm("Actualizar", "ComprasAlbaranes", FormMethod.Post, new { id = "formEditarAlbaran" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="lineasJsonModificadas" name="lineasJsonModificadas" />
+            <input type="hidden" name="NUMALB" id="editNumAlb" />
+            <input type="hidden" name="NUMPEDIDO" id="editNumPedido" />
+
+            <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
+                <div class="seccion-titulo">Datos del Documento</div>
+                <div class="grid-3-col">
+                    <div class="form-group">
+                        <label>Número Albarán</label>
+                        <input type="text" id="editNumAlbView" class="form-control form-control-bloqueado" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha *</label>
+                        <input type="date" name="FECHALB" id="editFechAlb" class="form-control" required />
+                    </div>
+                </div>
+
+                <div class="seccion-titulo">Proveedor</div>
+                <div class="grid-4-col">
+                    <div class="form-group">
+                        <label>Código Proveedor</label>
+                        <input type="text" name="CUENTA" id="editCuenta" class="form-control form-control-bloqueado" readonly />
+                    </div>
+                    <div class="form-group"><label>Nombre Fiscal</label><input type="text" id="editNombreFiscal" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>CIF/NIF</label><input type="text" id="editCif" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>Dirección</label><input type="text" id="editDireccion" class="form-control form-control-bloqueado" readonly /></div>
+                </div>
+                <div class="grid-3-col" style="margin-top:0.6rem;">
+                    <div class="form-group"><label>CP</label><input type="text" id="editCp" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>Población</label><input type="text" id="editPoblacion" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>Provincia</label><input type="text" id="editProvincia" class="form-control form-control-bloqueado" readonly /></div>
+                </div>
+
+                <div class="seccion-titulo">Líneas</div>
+                <table class="tabla-interna tblArticulos" id="tablaArticulosEditar">
+                    <thead>
+                        <tr>
+                            <th>Artículo</th>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Tarifa</th>
+                            <th>%Dto</th>
+                            <th>Importe</th>
+                            <th>%IVA</th>
+                            <th style="text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <div class="seccion-titulo">Resumen</div>
+                <div class="grid-3-col">
+                    <div class="form-group"><label>Base</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align:right;" /></div>
+                    <div class="form-group"><label>IVA</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align:right;" /></div>
+                    <div class="form-group"><label>Total</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align:right;font-weight:bold;background:#e2f0d9;" /></div>
+                </div>
+
+                <div class="seccion-titulo">Forma de Pago</div>
+                <div class="grid-fpago">
+                    <div class="form-group">
+                        <label>Forma de Pago</label>
+                        <select name="FCOBRO" id="editFcobro" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                            <option value="">Seleccione...</option>
+                            @if (ViewBag.FormasPago != null)
+                            {
+                                foreach (var fp in (List<Nexeron.Models.fpagcob>)ViewBag.FormasPago)
+                                {
+                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nº cobros</label><input type="number" id="editNcb" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>1er vto</label><input type="number" id="editVto" class="form-control form-control-bloqueado" readonly /></div>
+                    <div class="form-group"><label>Días</label><input type="number" id="editDvto" class="form-control form-control-bloqueado" readonly /></div>
+                </div>
+
+                <div class="seccion-titulo">Observaciones</div>
+                <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control txtObservaciones" rows="3"></textarea></div>
+            </div>
+            <button type="submit" id="btnGuardarEditar" class="btn-submit" style="background-color:#007bff;">Guardar Cambios</button>
+        }
+    </div>
+</div>
+
+<!-- Modal Eliminar -->
+<div id="modalEliminar" class="modal-overlay">
+    <div class="modal-content" style="max-width:450px;">
+        <span class="btn-cerrar" onclick="cerrarModal('modalEliminar')">&times;</span>
+        <h3 style="color:#dc3545;">¿Eliminar Albarán de Compra?</h3>
+        @using (Html.BeginForm("Eliminar", "ComprasAlbaranes", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <p style="color:#666;">Se eliminarán todas las líneas de forma definitiva.</p>
+            <div style="background:#f8f9fa;padding:1rem;border-radius:4px;margin-bottom:1.5rem;border-left:4px solid #dc3545;">
+                Albarán Nº: <span id="deleteAlbaranSpan" style="font-weight:bold;"></span><br />
+                Proveedor: <span id="deleteClienteSpan"></span>
+            </div>
+            <input type="hidden" id="deleteAlbaranHidden" name="id" />
+            <button type="submit" class="btn-submit btn-danger">Confirmar Baja</button>
+        }
+    </div>
+</div>
+
+<!-- Modal Facturar -->
+<div id="modalFacturar" class="modal-overlay">
+    <div class="modal-content modal-content-grande">
+        <span class="btn-cerrar" onclick="cerrarModal('modalFacturar')">&times;</span>
+        <h3 style="margin-top:0; color:#495057; border-bottom:2px solid #f1f3f5; padding-bottom:0.5rem;">Generar Factura desde Albarán</h3>
+
+        <div class="grid-3-col" style="margin-bottom:1rem;">
+            <div class="form-group">
+                <label>Buscar Proveedor</label>
+                <input type="text" class="form-control" id="buscarProveedorFac" onkeyup="buscarProveedorFacturar(this)" placeholder="Código o nombre..." autocomplete="off" />
+                <div class="sugerencias-autocompletado" id="sugerenciasProveedorFac"></div>
+            </div>
+            <div class="form-group">
+                <label>Proveedor seleccionado</label>
+                <input type="text" class="form-control form-control-bloqueado" id="proveedorFacNombre" readonly />
+            </div>
+            <div class="form-group">
+                <label>Código</label>
+                <input type="text" class="form-control form-control-bloqueado" id="proveedorFacCodigo" readonly />
+            </div>
+        </div>
+
+        <div id="datosProveedorFacturar" style="display:none; margin-top:1rem;">
+            <div class="seccion-titulo">Datos del Proveedor</div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>CIF/NIF</label><input type="text" class="form-control form-control-bloqueado" id="proveedorFacCif" readonly /></div>
+                <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado" id="proveedorFacDireccion" readonly /></div>
+                <div class="form-group"><label>CP</label><input type="text" class="form-control form-control-bloqueado" id="proveedorFacCp" readonly /></div>
+            </div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>Población</label><input type="text" class="form-control form-control-bloqueado" id="proveedorFacPoblacion" readonly /></div>
+                <div class="form-group"><label>Provincia</label><input type="text" class="form-control form-control-bloqueado" id="proveedorFacProvincia" readonly /></div>
+            </div>
+
+            <div class="seccion-titulo" style="margin-top:1.5rem;">Albaranes pendientes de facturar</div>
+            <table class="tabla-documentos-pendientes display" id="tablaAlbaranesFacturar">
+                <thead>
+                    <tr>
+                        <th>Número Albarán</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="lineasAlbaranFacturar" style="display:none; margin-top:1.5rem;">
+                <div class="seccion-titulo">Líneas del Albarán <span id="albaranSeleccionadoTitulo"></span></div>
+                <div style="max-height:400px;overflow-y:auto;">
+                    <table class="tabla-interna" id="tablaLineasFacturar">
+                        <thead>
+                            <tr>
+                                <th>Artículo</th>
+                                <th>Descripción</th>
+                                <th>Cantidad Original</th>
+                                <th>Ya Facturado</th>
+                                <th>Pendiente</th>
+                                <th>Cantidad a Facturar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-submit" onclick="procesarFacturaDesdeAlbaran()">Crear Factura</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var cacheUltimoFiltroCliente = "";
+
+    $(document).ready(function () {
+        $('#tablaAlbaranes').DataTable({
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            "pageLength": 10,
+            "order": [[0, "asc"]],
+            "scrollY": "400px",
+            "columnDefs": [{ "targets": 7, "orderable": false }]
+        });
+
+        @if (TempData["MensajeExito"] != null) {
+            <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "success");</text>
+        }
+        @if (TempData["Error"] != null) {
+            <text>crearToast("@Html.Raw(TempData["Error"])", "error");</text>
+        }
+
+        $(document).on('input', '.num-canti, .num-euros, .num-dtoarti, .num-ivarti', function () {
+            calcularImporteFila($(this).closest('tr'));
+            actualizarTotalesGlobales($(this).closest('.modal-overlay'));
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.txtCuentaProveedor, .boxSugerenciasProveedores').length) $('.boxSugerenciasProveedores').hide();
+            if (!$(e.target).closest('.txt-arti, .boxSugerenciasArticulos').length) $('.boxSugerenciasArticulos').hide();
+            if (!$(e.target).closest('#buscarProveedorFac, #sugerenciasProveedorFac').length) { $('#sugerenciasProveedorFac').hide(); }
+        });
+
+        $('#formCrearAlbaran').submit(function (e) {
+            e.preventDefault();
+            if (!empaquetarArticulosJson('modalCrear', 'lineasJson')) return false;
+            var numAlb = $('input[name="NUMALB"]').val().trim();
+            if (numAlb === "") { crearToast("Número de albarán requerido.", "error"); return false; }
+            $.ajax({
+                url: '@Url.Action("ExisteNumeroAlbaran", "ComprasAlbaranes")',
+                type: 'POST',
+                data: { numAlb: numAlb },
+                success: function(res) {
+                    if (res.existe) {
+                        crearToast("El número de albarán ya existe.", "error");
+                    } else {
+                        $('#formCrearAlbaran')[0].submit();
+                    }
+                }
+            });
+        });
+
+        $('#formEditarAlbaran').submit(function (e) {
+            if (!empaquetarArticulosJson('modalEditar', 'lineasJsonModificadas')) e.preventDefault();
+        });
+    });
+
+    function crearToast(mensaje, tipo) {
+        var toast = $('<div class="custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error') + '">' + mensaje + '</div>');
+        $('#toastContainer').append(toast);
+        setTimeout(function() { toast.fadeOut(300, function() { $(this).remove(); }); }, 4000);
+    }
+
+    function buscarProveedorAjax(input) {
+        var term = input.value.trim();
+        var $modal = $(input).closest('.modal-overlay');
+        var $box = $modal.find('.boxSugerenciasProveedores');
+        if (term.length < 1) { $box.hide().empty(); return; }
+        if (term === cacheUltimoFiltroCliente) return;
+        $.ajax({
+            url: '@Url.Action("BuscarProveedores", "ComprasAlbaranes")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(c) {
+                        $box.append('<div class="sugerencia-item" onclick="injectarProveedor(\'' + $modal.attr('id') + '\',\'' + c.CUENTA + '\',\'' + c.NOMBRE_FISCAL.replace(/'/g, "\\'") + '\',\'' + c.CIF + '\',\'' + c.DIRECCION.replace(/'/g, "\\'") + '\',\'' + c.CP + '\',\'' + c.POBLACION.replace(/'/g, "\\'") + '\',\'' + c.PROVINCIA.replace(/'/g, "\\'") + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function injectarProveedor(modalId, cuenta, fiscal, cif, direccion, cp, poblacion, provincia) {
+        var $m = $('#' + modalId);
+        $m.find('.txtCuentaProveedor').val(cuenta);
+        $m.find('.txtNombreFiscal').val(fiscal);
+        $m.find('.txtCif').val(cif);
+        $m.find('.txtDireccion').val(direccion);
+        $m.find('.txtCp').val(cp);
+        $m.find('.txtPoblacion').val(poblacion);
+        $m.find('.txtProvincia').val(provincia);
+        $m.find('.boxSugerenciasProveedores').hide();
+    }
+
+    function buscarArticuloAjax(input) {
+        var term = input.value.trim();
+        var $fila = $(input).closest('tr');
+        var $box = $(input).siblings('.boxSugerenciasArticulos');
+        var $modal = $(input).closest('.modal-overlay');
+        var provCodigo = $modal.find('.txtCuentaProveedor').val() || "";
+
+        if (term.length < 1) { $box.hide().empty(); return; }
+        $.ajax({
+            url: '@Url.Action("BuscarArticulos", "ComprasAlbaranes")',
+            type: 'POST',
+            data: { term: term, proveedorCodigo: provCodigo },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(a) {
+                        var safeDesarti = a.DESARTI.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarArticuloFila(this,\'' + a.ARTI + '\',\'' + safeDesarti + '\',\'' + a.UNIDAD + '\',\'' + a.IVARTI + '\',\'' + a.EUROS + '\',\'' + a.DTOARTI + '\')">' + a.ARTI + ' - ' + a.DESARTI + '</div>');
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function seleccionarArticuloFila(el, arti, desarti, unidad, iva, tarifa, descuento) {
+        var $fila = $(el).closest('tr');
+        var $modal = $(el).closest('.modal-overlay');
+        $fila.find('.txt-arti').val(arti);
+        $fila.find('.txt-desarti').val(desarti);
+        $fila.find('.txt-unidad').val(unidad);
+        $fila.find('.num-ivarti').val(parseFloat(iva).toFixed(2));
+        $fila.find('.num-euros').val(parseFloat(tarifa).toFixed(4));
+        $fila.find('.num-dtoarti').val(parseFloat(descuento).toFixed(2));
+        $fila.find('.boxSugerenciasArticulos').hide();
+        calcularImporteFila($fila);
+        actualizarTotalesGlobales($modal);
+    }
+
+    function calcularImporteFila($fila) {
+        var canti = parseFloat($fila.find('.num-canti').val()) || 0;
+        var euros = parseFloat($fila.find('.num-euros').val()) || 0;
+        var dto = parseFloat($fila.find('.num-dtoarti').val()) || 0;
+        var importe = canti * euros * (1 - (dto / 100));
+        $fila.find('.num-importe').val(importe.toFixed(2));
+    }
+
+    function actualizarTotalesGlobales($modal) {
+        var base = 0, iva = 0;
+        $modal.find('.tblArticulos tbody tr').each(function() {
+            var $f = $(this);
+            if ($f.find('.txt-arti').val() === "") return;
+            var c = parseFloat($f.find('.num-canti').val()) || 0;
+            var e = parseFloat($f.find('.num-euros').val()) || 0;
+            var d = parseFloat($f.find('.num-dtoarti').val()) || 0;
+            var iv = parseFloat($f.find('.num-ivarti').val()) || 0;
+            var bLinea = c * e * (1 - (d/100));
+            var iLinea = bLinea * (iv/100);
+            base += bLinea; iva += iLinea;
+        });
+        $modal.find('.txt-total-base').val(base.toFixed(2));
+        $modal.find('.txt-total-iva').val(iva.toFixed(2));
+        $modal.find('.txt-total-general').val((base+iva).toFixed(2));
+    }
+
+    function sincronizarReglaPago(select) {
+        var $opt = $(select).find('option:selected');
+        var $modal = $(select).closest('.modal-overlay');
+        if ($opt.val() !== "") {
+            $modal.find('.txtNcb').val($opt.data('cobros') || 1);
+            $modal.find('.txtVto').val($opt.data('vto') || 0);
+            $modal.find('.txtDvto').val($opt.data('dvto') || 0);
+        } else {
+            $modal.find('.txtNcb').val(1); $modal.find('.txtVto').val(0); $modal.find('.txtDvto').val(0);
+        }
+    }
+
+    function generarOpcionesUnidad(valorSeleccionado) {
+        var html = "";
+        var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
+        @if (ViewBag.Unidades != null) {
+            foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades) {
+                <text>
+                var keyOpcion = '@u.Key'.trim().toUpperCase();
+                html += '<option value="@u.Key" label="@u.Key"' + (sel === keyOpcion ? ' selected' : '') + '>@u.Key - @u.Value</option>';
+                </text>
+            }
+        }
+        return html || '<option value="UD" label="UD" selected>UD - UNIDADES</option>';
+    }
+
+    function agregarFilaArticulo(btn) {
+        var nuevaFila = $(btn).closest('tr').clone();
+        nuevaFila.find('input').val('');
+        nuevaFila.find('.num-canti').val('1.00');
+        nuevaFila.find('.num-euros').val('0.0000');
+        nuevaFila.find('.num-dtoarti').val('0.00');
+        nuevaFila.find('.num-ivarti').val('0.00');
+        nuevaFila.find('.num-importe').val('0.00');
+        nuevaFila.find('.txt-unidad').html(generarOpcionesUnidad('UD'));
+        $(btn).closest('tr').after(nuevaFila);
+    }
+
+    function eliminarFilaArticulo(btn) {
+        var $table = $(btn).closest('table');
+        var $modal = $(btn).closest('.modal-overlay');
+        if ($table.find('tbody tr').length > 1) {
+            $(btn).closest('tr').remove();
+            actualizarTotalesGlobales($modal);
+        } else {
+            crearToast("Debe haber al menos una línea.", "error");
+        }
+    }
+
+    function empaquetarArticulosJson(modalId, targetHiddenId) {
+        var lista = [];
+        var llena = false;
+        $('#' + modalId + ' .tblArticulos tbody tr').each(function() {
+            var $f = $(this);
+            var arti = ($f.find('.txt-arti').val() || "").trim();
+            var desarti = ($f.find('.txt-desarti').val() || "").trim();
+            if (arti === "" && desarti === "") return;
+            if (arti !== "" && desarti === "") desarti = "Artículo " + arti;
+            var canti = parseFloat($f.find('.num-canti').val()) || 0;
+            var unidad = ($f.find('.txt-unidad').val() || "UD").trim();
+            var euros = parseFloat($f.find('.num-euros').val()) || 0;
+            var dto = parseFloat($f.find('.num-dtoarti').val()) || 0;
+            var iva = parseFloat($f.find('.num-ivarti').val()) || 0;
+            lista.push({ ARTI: arti, DESARTI: desarti, CANTI: canti, UNIDAD: unidad, EUROS: euros, DTOARTI: dto, IVARTI: iva });
+            llena = true;
+        });
+        if (!llena) { crearToast("Al menos un artículo requerido.", "error"); return false; }
+        $('#' + targetHiddenId).val(JSON.stringify(lista));
+        return true;
+    }
+
+    function cargarYEditarAlbaran(numAlb) {
+        $.ajax({
+            url: '@Url.Action("ObtenerDetalleAlbaran", "ComprasAlbaranes")',
+            type: 'POST',
+            data: { numAlbaran: numAlb },
+            success: function(lineas) {
+                if (lineas && lineas.length > 0) {
+                    var primero = lineas[0];
+                    $('#editNumAlb').val(numAlb);
+                    $('#editNumAlbView').val(numAlb);
+                    $('#editFechAlb').val(primero.FECHA);
+                    $('#editCuenta').val(primero.CUENTA);
+                    $('#editNombreFiscal').val(primero.NOMBRE_FISCAL);
+                    $('#editCif').val(primero.CIF);
+                    $('#editDireccion').val(primero.DIRECCION);
+                    $('#editCp').val(primero.CP);
+                    $('#editPoblacion').val(primero.POBLACION);
+                    $('#editProvincia').val(primero.PROVINCIA);
+                    $('#editFcobro').val(primero.FCOBRO);
+                    $('#editObservaciones').val(primero.OBSERVACIONES);
+                    $('#editNumPedido').val(primero.NUMPEDIDO);
+                    sincronizarReglaPago(document.getElementById('editFcobro'));
+
+                    var $tbody = $('#tablaArticulosEditar tbody').empty();
+                    lineas.forEach(function(item) {
+                        var importe = (item.CANTI * item.EUROS * (1 - item.DTOARTI/100)).toFixed(2);
+                        var fila = `<tr>
+                            <td><div style="position:relative;"><input type="text" class="input-tabla txt-arti" value="${item.ARTI}" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
+                            <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
+                            <td><input type="number" class="input-tabla num-canti" value="${item.CANTI}" step="0.01" /></td>
+                            <td><select class="input-tabla txt-unidad">${generarOpcionesUnidad(item.UNIDAD)}</select></td>
+                            <td><input type="number" class="input-tabla num-euros" value="${item.EUROS.toFixed(4)}" step="0.0001" /></td>
+                            <td><input type="number" class="input-tabla num-dtoarti" value="${item.DTOARTI.toFixed(2)}" step="0.01" /></td>
+                            <td><input type="text" class="input-tabla num-importe" value="${importe}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+                            <td><input type="number" class="input-tabla num-ivarti" value="${item.IVARTI.toFixed(2)}" step="0.01" /></td>
+                            <td style="text-align:center;"><button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button><button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">×</button></td>
+                        </tr>`;
+                        $tbody.append(fila);
+                    });
+                    actualizarTotalesGlobales($('#modalEditar'));
+                    if (primero.ESTADO == '102') {
+                        $('#editFechAlb, #editFcobro, #editObservaciones').prop('disabled', true);
+                        $('#tablaArticulosEditar input, #tablaArticulosEditar select').prop('disabled', true);
+                        $('#btnGuardarEditar').hide();
+                    } else {
+                        $('#editFechAlb, #editFcobro, #editObservaciones').prop('disabled', false);
+                        $('#tablaArticulosEditar input, #tablaArticulosEditar select').prop('disabled', false);
+                        $('#btnGuardarEditar').show();
+                    }
+                    $('#modalEditar').css('display', 'flex');
+                }
+            }
+        });
+    }
+
+    function abrirModalEliminar(numAlb, cliente) {
+        $('#deleteAlbaranHidden').val(numAlb);
+        $('#deleteAlbaranSpan').text(numAlb);
+        $('#deleteClienteSpan').text(cliente);
+        $('#modalEliminar').css('display', 'flex');
+    }
+
+    function abrirModalCrear() { $('#modalCrear').css('display', 'flex'); }
+    function cerrarModal(id) { $('#' + id).css('display', 'none'); }
+    window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none'; }
+
+    function abrirModalFacturar() {
+        $('#modalFacturar').css('display', 'flex');
+        $('#buscarProveedorFac').val('');
+        $('#proveedorFacCodigo').val('');
+        $('#proveedorFacNombre').val('');
+        $('#datosProveedorFacturar').hide();
+        $('#lineasAlbaranFacturar').hide();
+        $('#tablaAlbaranesFacturar tbody').empty();
+        $('#tablaLineasFacturar tbody').empty();
+        if ($.fn.DataTable.isDataTable('#tablaAlbaranesFacturar')) {
+            $('#tablaAlbaranesFacturar').DataTable().destroy();
+        }
+    }
+
+    function buscarProveedorFacturar(input) {
+        var term = $(input).val().trim();
+        var $box = $('#sugerenciasProveedorFac');
+        if (term.length < 1) { $box.hide().empty(); return; }
+
+        $.ajax({
+            url: '@Url.Action("BuscarProveedores", "ComprasAlbaranes")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(c) {
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarProveedorFacturar(\'' + c.CUENTA + '\', \'' + c.NOMBRE_FISCAL.replace(/'/g, "\\'") + '\', \'' + c.CIF + '\', \'' + c.DIRECCION.replace(/'/g, "\\'") + '\', \'' + c.CP + '\', \'' + c.POBLACION.replace(/'/g, "\\'") + '\', \'' + c.PROVINCIA.replace(/'/g, "\\'") + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function seleccionarProveedorFacturar(cuenta, nombre, cif, direccion, cp, poblacion, provincia) {
+        $('#buscarProveedorFac').val(cuenta);
+        $('#proveedorFacCodigo').val(cuenta);
+        $('#proveedorFacNombre').val(nombre);
+        $('#proveedorFacCif').val(cif);
+        $('#proveedorFacDireccion').val(direccion);
+        $('#proveedorFacCp').val(cp);
+        $('#proveedorFacPoblacion').val(poblacion);
+        $('#proveedorFacProvincia').val(provincia);
+        $('#sugerenciasProveedorFac').hide();
+        $('#datosProveedorFacturar').show();
+        $('#lineasAlbaranFacturar').hide();
+        cargarAlbaranesPendientesProveedor(cuenta);
+    }
+
+    function cargarAlbaranesPendientesProveedor(cuenta) {
+        $.ajax({
+            url: '@Url.Action("ObtenerAlbaranesPendientesPorProveedor", "ComprasAlbaranes")',
+            type: 'POST',
+            data: { cuenta: cuenta },
+            success: function(data) {
+                var $tbody = $('#tablaAlbaranesFacturar tbody');
+                $tbody.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function (alb) {
+                        var row = '<tr onclick="seleccionarAlbaranFacturar(\'' + alb.NUMALB + '\')" style="cursor:pointer;">' +
+                            '<td><strong>' + alb.NUMALB + '</strong></td>' +
+                            '<td>' + alb.FECHALB + '</td>' +
+                            '<td>' + (alb.ESTADO == '101' ? 'Pendiente' : (alb.ESTADO == '104' ? 'Parcial' : 'Completado')) + '</td></tr>';
+                        $tbody.append(row);
+                    });
+                    if ($.fn.DataTable.isDataTable('#tablaAlbaranesFacturar')) {
+                        $('#tablaAlbaranesFacturar').DataTable().destroy();
+                    }
+                    $('#tablaAlbaranesFacturar').DataTable({
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                        "pageLength": 5,
+                        "order": [[0, "asc"]]
+                    });
+                } else {
+                    $tbody.append('<tr><td colspan="3" style="text-align:center;">No hay albaranes pendientes para este proveedor.</td></tr>');
+                }
+            }
+        });
+    }
+
+    function seleccionarAlbaranFacturar(numAlbaran) {
+        $('#tablaAlbaranesFacturar tbody tr').removeClass('fila-seleccionada');
+        $('#tablaAlbaranesFacturar tbody tr').filter(function() {
+            return $(this).find('td:first').text().trim() === numAlbaran;
+        }).addClass('fila-seleccionada');
+
+        $('#albaranSeleccionadoTitulo').text(numAlbaran);
+        $.ajax({
+            url: '@Url.Action("ObtenerLineasAlbaranParaFacturar", "ComprasAlbaranes")',
+            type: 'POST',
+            data: { numAlbaran: numAlbaran },
+            success: function(lineas) {
+                var $tbodyLineas = $('#tablaLineasFacturar tbody');
+                $tbodyLineas.empty();
+                if (lineas && lineas.length > 0) {
+                    lineas.forEach(function(l) {
+                        var fila = '<tr data-numlinea="' + l.NUMLINEA + '" data-pendiente="' + l.Pendiente + '">' +
+                                    '<td>' + l.ARTI + '</td>' +
+                                    '<td>' + l.DESARTI + '</td>' +
+                                    '<td>' + l.CantidadOriginal + '</td>' +
+                                    '<td>' + l.CantidadFacturada + '</td>' +
+                                    '<td>' + l.Pendiente + '</td>' +
+                                    '<td><input type="number" class="input-tabla cant-facturar" value="0.00" min="0.00" max="' + l.Pendiente + '" step="0.01" /></td>' +
+                                    '</tr>';
+                        $tbodyLineas.append(fila);
+                    });
+                    $('#lineasAlbaranFacturar').show();
+                } else {
+                    $tbodyLineas.append('<tr><td colspan="6" style="text-align:center;">No hay líneas pendientes de facturar.</td></tr>');
+                    $('#lineasAlbaranFacturar').show();
+                }
+            }
+        });
+    }
+
+    function procesarFacturaDesdeAlbaran() {
+        var numAlbaran = $('#albaranSeleccionadoTitulo').text().trim();
+        if (!numAlbaran) {
+            crearToast("Seleccione un albarán primero.", "error");
+            return;
+        }
+
+        var lineas = [];
+        $('#tablaLineasFacturar tbody tr').each(function() {
+            var numLinea = parseInt($(this).data('numlinea'));
+            var pendiente = parseFloat($(this).data('pendiente'));
+            var cantidad = parseFloat($(this).find('.cant-facturar').val()) || 0;
+            if (cantidad > 0) {
+                if (cantidad > pendiente) {
+                    crearToast("La cantidad supera la pendiente en la línea " + numLinea, "error");
+                    lineas = null;
+                    return false;
+                }
+                lineas.push({ NUMLINEA: numLinea, CANTI: cantidad });
+            }
+        });
+
+        if (!lineas || lineas.length === 0) {
+            if (lineas) crearToast("Introduzca al menos una cantidad.", "error");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("CrearDesdeAlbaran", "ComprasFacturas")',
+            type: 'POST',
+            data: { numAlbaran: numAlbaran, lineasJson: JSON.stringify(lineas) },
+            success: function(res) {
+                if (res.success) {
+                    crearToast(res.mensaje, "success");
+                    location.reload();
+                } else {
+                    crearToast(res.message, "error");
+                }
+            },
+            error: function() {
+                crearToast("Error de comunicación.", "error");
+            }
+        });
+    }
+</script>

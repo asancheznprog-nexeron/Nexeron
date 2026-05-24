@@ -4,27 +4,33 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="31e47d440eba48e6bc883c30be055b47" Name="Diagram1" >
-        <EntityTypeShape EntityType="cortechecoModel.articulo" Width="1.5" PointX="0.75" PointY="0.75" />
-        <EntityTypeShape EntityType="cortechecoModel.usuarios" Width="1.5" PointX="3.375" PointY="0.75" />
-        <EntityTypeShape EntityType="cortechecoModel.cuentas" Width="1.5" PointX="7.25" PointY="0.75" />
-        <EntityTypeShape EntityType="cortechecoModel.articulo_proveedor" Width="1.5" PointX="3" PointY="3.75" />
-        <EntityTypeShape EntityType="cortechecoModel.clientes" Width="1.5" PointX="5.375" PointY="0.75" />
-        <AssociationConnector Association="cortechecoModel.fk_art_prov_articulo" />
-        <EntityTypeShape EntityType="cortechecoModel.proveedores" Width="1.5" PointX="9.125" PointY="0.75" />
-        <EntityTypeShape EntityType="cortechecoModel.bancos" Width="1.5" PointX="7.25" PointY="2.375" />
-        <EntityTypeShape EntityType="cortechecoModel.fpagcob" Width="1.5" PointX="5.75" PointY="6.75" />
-        <EntityTypeShape EntityType="cortechecoModel.paises" Width="1.5" PointX="0.75" PointY="7.75" />
-        <EntityTypeShape EntityType="cortechecoModel.tipos" Width="1.5" PointX="2.75" PointY="7.75" />
-        <EntityTypeShape EntityType="cortechecoModel.unidades" Width="1.5" PointX="7.75" PointY="6.75" />
-        <EntityTypeShape EntityType="cortechecoModel.ofertas" Width="1.5" PointX="11.125" PointY="0.75" />
-        <EntityTypeShape EntityType="cortechecoModel.estados" Width="1.5" PointX="8.75" PointY="9.75" />
-        <EntityTypeShape EntityType="cortechecoModel.facturas" Width="1.5" PointX="0.75" PointY="10.75" />
-        <EntityTypeShape EntityType="cortechecoModel.asientos" Width="1.5" PointX="3.375" PointY="10.75" />
-        <EntityTypeShape EntityType="cortechecoModel.cobros" Width="1.5" PointX="5.375" PointY="10.75" />
-        <EntityTypeShape EntityType="cortechecoModel.pedidos" Width="1.5" PointX="7.375" PointY="12.75" />
-        <EntityTypeShape EntityType="cortechecoModel.pagos" Width="1.5" PointX="11.375" PointY="6.75" />
-        <EntityTypeShape EntityType="cortechecoModel.albaranes" Width="1.5" PointX="11.375" PointY="11.75" />
+      <Diagram DiagramId="c687494676aa4922a17ad2a8f215108a" Name="Diagram1">
+        <EntityTypeShape EntityType="cortechecoModel.albaranes" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.albaranescom" Width="1.5" PointX="2.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.articulo" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.articulo_proveedor" Width="1.5" PointX="3" PointY="2" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.asientos" Width="1.5" PointX="4.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.bancos" Width="1.5" PointX="6.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.clientes" Width="1.5" PointX="7.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.cobros" Width="1.5" PointX="8.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.cuentas" Width="1.5" PointX="9.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.estados" Width="1.5" PointX="10.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.facturas" Width="1.5" PointX="4.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.facturascom" Width="1.5" PointX="10.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.fpagcob" Width="1.5" PointX="0.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.ofertas" Width="1.5" PointX="6.75" PointY="11.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.pagos" Width="1.5" PointX="12.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.paises" Width="1.5" PointX="12.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.pedidos" Width="1.5" PointX="12.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.pedidoscom" Width="1.5" PointX="8.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.proveedores" Width="1.5" PointX="14.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.tipos" Width="1.5" PointX="14.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.unidades" Width="1.5" PointX="14.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="cortechecoModel.usuarios" Width="1.5" PointX="10.75" PointY="14.75" IsExpanded="true" />
+        <AssociationConnector Association="cortechecoModel.fk_art_prov_articulo" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="cortechecoModel.compras_albaranes" Width="1.5" PointX="13.75" PointY="14.75" />
+        <EntityTypeShape EntityType="cortechecoModel.compras_facturas" Width="1.5" PointX="0.75" PointY="15.75" />
+        <EntityTypeShape EntityType="cortechecoModel.compras_pedidos" Width="1.5" PointX="15.75" PointY="11.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
