@@ -623,7 +623,7 @@ namespace Nexeron.Controllers
                             cmdMax.Transaction = transaccion;
                             cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMALB AS UNSIGNED)), 0) + 1 FROM albaranes";
                             object result = cmdMax.ExecuteScalar();
-                            if (result != null) nuevoNumAlb = result.ToString().PadLeft(9, '0');
+                            if (result != null) nuevoNumAlb = result.ToString().PadLeft(9);
                             else nuevoNumAlb = "000000001";
                         }
 

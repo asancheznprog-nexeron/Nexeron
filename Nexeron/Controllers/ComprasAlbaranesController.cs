@@ -640,7 +640,7 @@ namespace Nexeron.Controllers
                             cmdMax.Transaction = transaccion;
                             cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMALB AS UNSIGNED)), 0) + 1 FROM compras_albaranes";
                             object result = cmdMax.ExecuteScalar();
-                            if (result != null) nuevoNumAlb = result.ToString().PadLeft(9, '0');
+                            if (result != null) nuevoNumAlb = result.ToString().PadLeft(9);
                             else nuevoNumAlb = "000000001";
                         }
 
@@ -830,5 +830,54 @@ namespace Nexeron.Controllers
                 }
             }
         }
+
+        [HttpPost]
+        public JsonResult ObtenerLineasAlbaranParaFacturar(string numAlbaran)
+        {
+            List<object> lineas = new List<object>();
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numAlbaran))
+                return Json(lineas);
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (var cmd = conexion.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT a.NUMLINEA, a.ARTI, a.DESARTI, a.CANTI as CantidadOriginal, 
+                       a.UNIDAD, a.EUROS, a.DTOARTI, a.IVARTI, a.FACTURADO,
+                       IFNULL((SELECT SUM(f.CANTI) FROM compras_facturas f WHERE f.NUMALBARAN = a.NUMALB AND f.NUMLINEA = a.NUMLINEA), 0) as CantidadFacturada,
+                       (a.CANTI - IFNULL((SELECT SUM(f.CANTI) FROM compras_facturas f WHERE f.NUMALBARAN = a.NUMALB AND f.NUMLINEA = a.NUMLINEA), 0)) as Pendiente
+                FROM compras_albaranes a
+                WHERE a.NUMALB = @num AND a.FACTURADO IN ('N','P')
+                ORDER BY a.NUMLINEA ASC";
+                    cmd.Parameters.AddWithValue("@num", numAlbaran.PadLeft(9));
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lineas.Add(new
+                            {
+                                NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
+                                ARTI = reader["ARTI"].ToString().Trim(),
+                                DESARTI = reader["DESARTI"].ToString().Trim(),
+                                CantidadOriginal = Convert.ToDecimal(reader["CantidadOriginal"]),
+                                UNIDAD = reader["UNIDAD"].ToString().Trim(),
+                                EUROS = Convert.ToDecimal(reader["EUROS"]),
+                                DTOARTI = Convert.ToDecimal(reader["DTOARTI"]),
+                                IVARTI = Convert.ToDecimal(reader["IVARTI"]),
+                                FACTURADO = reader["FACTURADO"].ToString().Trim(),
+                                CantidadFacturada = Convert.ToDecimal(reader["CantidadFacturada"]),
+                                Pendiente = Convert.ToDecimal(reader["Pendiente"])
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(lineas);
+        }
+
     }
 }

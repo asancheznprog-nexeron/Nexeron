@@ -633,7 +633,7 @@
             <div class="seccion-titulo">Datos del Documento</div>
             <div class="grid-4-col">
                 <div class="form-group"><label>Número Factura</label><input type="text" id="editNumFactura" class="form-control form-control-bloqueado" readonly /></div>
-                <div class="form-group"><label>Fecha Factura</label><input type="date" id="editFechFac" class="form-control" readonly /></div>
+                <div class="form-group"><label>Fecha Factura</label><input type="date" id="editFechFac" class="form-control form-control-bloqueado" readonly /></div>
                 <div class="form-group"><label>Número Albarán</label><input type="text" id="editNumAlbaran" class="form-control form-control-bloqueado" readonly /></div>
                 <div class="form-group">
                     <label>Estado Global</label>
@@ -701,7 +701,7 @@
             </div>
 
             <div class="seccion-titulo">Observaciones</div>
-            <div class="form-group"><textarea id="editObservaciones" class="form-control" rows="3" style="resize: none;" readonly></textarea></div>
+            <div class="form-group"><textarea id="editObservaciones" class="form-control form-control-bloqueado" rows="3" style="resize: none;" readonly></textarea></div>
         </div>
     </div>
 </div>
@@ -841,6 +841,8 @@
                         </tr>`;
                         $tbody.append(trHtml);
                     }
+                    $('#editFechFac').prop('readonly', true).addClass('form-control-bloqueado');
+                    $('#editObservaciones').prop('readonly', true).addClass('form-control-bloqueado');
                     actualizarTotalesGlobales($('#modalEditar'));
                     $('#modalEditar').css('display', 'flex');
                 }

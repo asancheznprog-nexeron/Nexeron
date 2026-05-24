@@ -1241,7 +1241,8 @@
             url: '@Url.Action("CrearDesdePedido", "ComprasAlbaranes")',
             type: 'POST',
             data: { numPedido: numPedido, lineasJson: JSON.stringify(lineas) },
-            success: function(res) {
+            success: function (res) {
+                console.log("Exito");
                 if (res.success) {
                     crearToast(res.mensaje, "success");
                     location.reload();
