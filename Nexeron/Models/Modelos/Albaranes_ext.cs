@@ -1,6 +1,6 @@
 ﻿namespace Nexeron.Models
 {
-    public partial class pedidos
+    public partial class albaranes
     {
         public string NombreCliente { get; set; }
         public string NombreEstado { get; set; }

@@ -39,16 +39,16 @@
         font-size: 0.95rem;
     }
 
-    .btn-submenu:hover {
-        background-color: #e2e6ea;
-        color: #333;
-    }
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
 
-    .btn-submenu.active {
-        background-color: #007bff;
-        color: white;
-        border-color: #007bff;
-    }
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
 
     .card {
         background: #fff;
@@ -68,10 +68,10 @@
         padding-bottom: 1rem;
     }
 
-    .header-acciones h3 {
-        margin: 0;
-        color: #495057;
-    }
+        .header-acciones h3 {
+            margin: 0;
+            color: #495057;
+        }
 
     .grupo-botones {
         display: flex;
@@ -90,9 +90,9 @@
         font-size: 1rem;
     }
 
-    .btn-nuevo:hover {
-        background-color: #218838;
-    }
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
 
     .btn-tabla {
         background: none;
@@ -168,6 +168,7 @@
             transform: translateY(-20px);
             opacity: 0;
         }
+
         to {
             transform: translateY(0);
             opacity: 1;
@@ -217,12 +218,12 @@
         position: relative;
     }
 
-    .form-group label {
-        font-weight: bold;
-        color: #555;
-        margin-bottom: 0.3rem;
-        font-size: 0.85rem;
-    }
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
 
     .form-control {
         padding: 0.5rem;
@@ -232,10 +233,10 @@
         font-size: 0.9rem;
     }
 
-    .form-control:focus {
-        outline: none;
-        border-color: #007bff;
-    }
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+        }
 
     .form-control-bloqueado {
         background-color: #e9ecef !important;
@@ -267,10 +268,10 @@
         text-align: left;
     }
 
-    .sugerencia-item:hover {
-        background-color: #007bff;
-        color: #fff;
-    }
+        .sugerencia-item:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
 
     .tabla-interna {
         width: 100%;
@@ -279,19 +280,19 @@
         margin-bottom: 1.2rem;
     }
 
-    .tabla-interna th {
-        background-color: #f8f9fa;
-        color: #495057;
-        padding: 8px;
-        font-size: 0.85rem;
-        border-bottom: 2px solid #dee2e6;
-        text-align: left;
-    }
+        .tabla-interna th {
+            background-color: #f8f9fa;
+            color: #495057;
+            padding: 8px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+        }
 
-    .tabla-interna td {
-        padding: 5px 3px;
-        border-bottom: 1px solid #eee;
-    }
+        .tabla-interna td {
+            padding: 5px 3px;
+            border-bottom: 1px solid #eee;
+        }
 
     .input-tabla {
         width: 100%;
@@ -315,13 +316,13 @@
         margin-top: 1rem;
     }
 
-    .btn-submit:hover {
-        background-color: #0056b3;
-    }
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
 
-    .btn-submit.btn-danger {
-        background-color: #dc3545;
-    }
+        .btn-submit.btn-danger {
+            background-color: #dc3545;
+        }
 
     .toast-container {
         position: fixed;
@@ -355,6 +356,34 @@
     .toast-alerta.mostrar {
         transform: translateX(0);
     }
+
+    .tabla-ofertas-pendientes {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .tabla-ofertas-pendientes th {
+        background-color: #f8f9fa;
+        text-align: left;
+        padding: 0.6rem;
+        border-bottom: 2px solid #dee2e6;
+        cursor: pointer;
+    }
+
+    .tabla-ofertas-pendientes td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .tabla-ofertas-pendientes tr:hover {
+        background-color: #f1f3f5;
+        cursor: pointer;
+    }
+
+    .fila-seleccionada {
+        background-color: #cce5ff !important;
+    }
 </style>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -363,6 +392,7 @@
     <div class="submenu-container">
         <a href="@Url.Action("Index", "Ofertas")" class="btn-submenu">Ofertas</a>
         <a href="@Url.Action("Index", "Pedidos")" class="btn-submenu active">Pedidos</a>
+        <a href="@Url.Action("Index", "Albaranes")" class="btn-submenu">Albaranes</a>
         <a href="@Url.Action("Index", "Facturas")" class="btn-submenu">Facturas</a>
     </div>
 
@@ -370,6 +400,7 @@
         <div class="header-acciones">
             <h3>Control y Seguimiento de Pedidos</h3>
             <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalAlbaranar()" style="background-color: #ffc107; color: #333;">Albaranar</button>
                 <button class="btn-nuevo" onclick="abrirModalCrear()">Crear Pedido</button>
             </div>
         </div>
@@ -632,6 +663,74 @@
     </div>
 </div>
 
+<div id="modalAlbaranar" class="modal-overlay">
+    <div class="modal-content modal-content-grande">
+        <span class="btn-cerrar" onclick="cerrarModal('modalAlbaranar')">&times;</span>
+        <h3 style="margin-top:0; color:#495057; border-bottom:2px solid #f1f3f5; padding-bottom:0.5rem;">Generar Albarán desde Pedido</h3>
+
+        <div class="grid-3-col" style="margin-bottom:1rem;">
+            <div class="form-group">
+                <label>Buscar Cliente</label>
+                <input type="text" class="form-control" id="buscarClienteAlb" onkeyup="buscarClienteAlbaran(this)" placeholder="Código o nombre..." autocomplete="off" />
+                <div class="sugerencias-autocompletado" id="sugerenciasClienteAlb"></div>
+            </div>
+            <div class="form-group">
+                <label>Cliente seleccionado</label>
+                <input type="text" class="form-control form-control-bloqueado" id="clienteAlbNombre" readonly />
+            </div>
+            <div class="form-group">
+                <label>Código</label>
+                <input type="text" class="form-control form-control-bloqueado" id="clienteAlbCodigo" readonly />
+            </div>
+        </div>
+
+        <div id="datosClienteAlbaran" style="display:none; margin-top:1rem;">
+            <div class="seccion-titulo">Datos del Cliente</div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>CIF/NIF</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbCif" readonly /></div>
+                <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbDireccion" readonly /></div>
+                <div class="form-group"><label>CP</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbCp" readonly /></div>
+            </div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>Población</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbPoblacion" readonly /></div>
+                <div class="form-group"><label>Provincia</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbProvincia" readonly /></div>
+            </div>
+
+            <div class="seccion-titulo" style="margin-top:1.5rem;">Pedidos pendientes de albaranar</div>
+            <table class="tabla-ofertas-pendientes display" id="tablaPedidosAlbaran">
+                <thead>
+                    <tr>
+                        <th>Número Pedido</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Forma de cobro</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="lineasPedidoAlbaran" style="display:none; margin-top:1.5rem;">
+                <div class="seccion-titulo">Líneas del Pedido <span id="pedidoSeleccionadoTitulo"></span></div>
+                <div style="max-height:400px;overflow-y:auto;">
+                    <table class="tabla-interna" id="tablaLineasAlbaran">
+                        <thead>
+                            <tr>
+                                <th>Artículo</th>
+                                <th>Descripción</th>
+                                <th>Cantidad Original</th>
+                                <th>Ya Albaranado</th>
+                                <th>Pendiente</th>
+                                <th>Cantidad a Albaranar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-submit" onclick="procesarAlbaranDesdePedido()">Crear Albarán</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     var cacheUltimoFiltroCliente = "";
 
@@ -658,6 +757,7 @@
         $(document).on('click', function(e) {
             if (!$(e.target).closest('.txtCuentaCliente, .boxSugerenciasClientes').length) { $('.boxSugerenciasClientes').hide(); }
             if (!$(e.target).closest('.txt-arti, .boxSugerenciasArticulos').length) { $('.boxSugerenciasArticulos').hide(); }
+            if (!$(e.target).closest('#buscarClienteAlb, #sugerenciasClienteAlb').length) { $('#sugerenciasClienteAlb').hide(); }
         });
     });
 
@@ -908,4 +1008,168 @@
         setTimeout(function() { $el.addClass('mostrar'); }, 50);
         setTimeout(function() { $el.removeClass('mostrar'); setTimeout(function() { $el.remove(); }, 300); }, 3500);
     }
+
+
+    function abrirModalAlbaranar() {
+        $('#modalAlbaranar').css('display', 'flex');
+        $('#buscarClienteAlb').val('');
+        $('#clienteAlbCodigo').val('');
+        $('#clienteAlbNombre').val('');
+        $('#datosClienteAlbaran').hide();
+        $('#lineasPedidoAlbaran').hide();
+        $('#tablaPedidosAlbaran tbody').empty();
+        $('#tablaLineasAlbaran tbody').empty();
+        if ($.fn.DataTable.isDataTable('#tablaPedidosAlbaran')) {
+            $('#tablaPedidosAlbaran').DataTable().destroy();
+        }
+    }
+
+    function buscarClienteAlbaran(input) {
+        var term = $(input).val().trim();
+        var $box = $('#sugerenciasClienteAlb');
+        if (term.length < 1) { $box.hide().empty(); return; }
+
+        $.ajax({
+            url: '@Url.Action("BuscarClientes", "Pedidos")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(c) {
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarClienteAlbaran(\'' + c.CUENTA + '\', \'' + c.NOMBRE_FISCAL + '\', \'' + c.CIF + '\', \'' + c.DIRECCION + '\', \'' + c.CP + '\', \'' + c.POBLACION + '\', \'' + c.PROVINCIA + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function seleccionarClienteAlbaran(cuenta, nombre, cif, direccion, cp, poblacion, provincia) {
+        $('#buscarClienteAlb').val(cuenta);
+        $('#clienteAlbCodigo').val(cuenta);
+        $('#clienteAlbNombre').val(nombre);
+        $('#clienteAlbCif').val(cif);
+        $('#clienteAlbDireccion').val(direccion);
+        $('#clienteAlbCp').val(cp);
+        $('#clienteAlbPoblacion').val(poblacion);
+        $('#clienteAlbProvincia').val(provincia);
+        $('#sugerenciasClienteAlb').hide();
+        $('#datosClienteAlbaran').show();
+        $('#lineasPedidoAlbaran').hide();
+        cargarPedidosPendientesCliente(cuenta);
+    }
+
+    function cargarPedidosPendientesCliente(cuenta) {
+        $.ajax({
+            url: '@Url.Action("ObtenerPedidosPendientesPorCliente", "Albaranes")',
+            type: 'POST',
+            data: { cuenta: cuenta },
+            success: function(data) {
+                var $tbody = $('#tablaPedidosAlbaran tbody');
+                $tbody.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(ped) {
+                        var row = '<tr onclick="seleccionarPedidoAlbaran(\'' + ped.NUMPEDIDO + '\')" style="cursor:pointer;">' +
+                                  '<td><strong>' + ped.NUMPEDIDO + '</strong></td>' +
+                                  '<td>' + ped.FECHAPED + '</td>' +
+                                  '<td>' + (ped.ESTADO == '101' ? 'Pendiente' : (ped.ESTADO == '104' ? 'Parcial' : 'Activo')) + '</td>' +
+                                  '<td>' + ped.FCOBRO + '</td></tr>';
+                        $tbody.append(row);
+                    });
+                    if ($.fn.DataTable.isDataTable('#tablaPedidosAlbaran')) {
+                        $('#tablaPedidosAlbaran').DataTable().destroy();
+                    }
+                    $('#tablaPedidosAlbaran').DataTable({
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                        "pageLength": 5,
+                        "order": [[0, "asc"]]
+                    });
+                } else {
+                    $tbody.append('<tr><td colspan="4" style="text-align:center;">No hay pedidos pendientes para este cliente.</td></tr>');
+                }
+            }
+        });
+    }
+
+    function seleccionarPedidoAlbaran(numPedido) {
+        $('#tablaPedidosAlbaran tbody tr').removeClass('fila-seleccionada');
+        $('#tablaPedidosAlbaran tbody tr').filter(function() {
+            return $(this).find('td:first').text().trim() === numPedido;
+        }).addClass('fila-seleccionada');
+
+        $('#pedidoSeleccionadoTitulo').text(numPedido);
+        $.ajax({
+            url: '@Url.Action("ObtenerLineasPedidoParaAlbaran", "Albaranes")',
+            type: 'POST',
+            data: { numPedido: numPedido },
+            success: function(lineas) {
+                var $tbodyLineas = $('#tablaLineasAlbaran tbody');
+                $tbodyLineas.empty();
+                if (lineas && lineas.length > 0) {
+                    lineas.forEach(function(l) {
+                        var fila = '<tr data-numlinea="' + l.NUMLINEA + '" data-pendiente="' + l.Pendiente + '">' +
+                                   '<td>' + l.ARTI + '</td>' +
+                                   '<td>' + l.DESARTI + '</td>' +
+                                   '<td>' + l.CantidadOriginal + '</td>' +
+                                   '<td>' + l.CantidadAlbaranada + '</td>' +
+                                   '<td>' + l.Pendiente + '</td>' +
+                                   '<td><input type="number" class="input-tabla cant-albaranar" value="0.00" min="0.00" max="' + l.Pendiente + '" step="0.01" /></td>' +
+                                   '</tr>';
+                        $tbodyLineas.append(fila);
+                    });
+                    $('#lineasPedidoAlbaran').show();
+                } else {
+                    $tbodyLineas.append('<tr><td colspan="6" style="text-align:center;">No hay líneas pendientes.</td></tr>');
+                    $('#lineasPedidoAlbaran').show();
+                }
+            }
+        });
+    }
+
+    function procesarAlbaranDesdePedido() {
+        var numPedido = $('#pedidoSeleccionadoTitulo').text().trim();
+        if (!numPedido) {
+            crearToast("Seleccione un pedido primero.", "error");
+            return;
+        }
+
+        var lineas = [];
+        $('#tablaLineasAlbaran tbody tr').each(function() {
+            var numLinea = parseInt($(this).data('numlinea'));
+            var pendiente = parseFloat($(this).data('pendiente'));
+            var cantidad = parseFloat($(this).find('.cant-albaranar').val()) || 0;
+            if (cantidad > 0) {
+                if (cantidad > pendiente) {
+                    crearToast("La cantidad supera la pendiente en la línea " + numLinea, "error");
+                    lineas = null;
+                    return false;
+                }
+                lineas.push({ NUMLINEA: numLinea, CANTI: cantidad });
+            }
+        });
+
+        if (!lineas || lineas.length === 0) {
+            if (lineas) crearToast("Introduzca al menos una cantidad.", "error");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("CrearDesdePedido", "Albaranes")',
+            type: 'POST',
+            data: { numPedido: numPedido, lineasJson: JSON.stringify(lineas) },
+            success: function(res) {
+                if (res.success) {
+                    crearToast(res.mensaje, "success");
+                    location.reload();
+                } else {
+                    crearToast(res.message, "error");
+                }
+            },
+            error: function() {
+                crearToast("Error de comunicación.", "error");
+            }
+        });
+    }
+
 </script>
