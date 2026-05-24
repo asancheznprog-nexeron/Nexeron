@@ -29,8 +29,8 @@
         <EntityTypeShape EntityType="cortechecoModel.usuarios" Width="1.5" PointX="10.75" PointY="14.75" IsExpanded="true" />
         <AssociationConnector Association="cortechecoModel.fk_art_prov_articulo" ManuallyRouted="false" />
         <EntityTypeShape EntityType="cortechecoModel.compras_albaranes" Width="1.5" PointX="13.75" PointY="14.75" />
-        <EntityTypeShape EntityType="cortechecoModel.compras_facturas" Width="1.5" PointX="0.75" PointY="15.75" />
         <EntityTypeShape EntityType="cortechecoModel.compras_pedidos" Width="1.5" PointX="15.75" PointY="11.75" />
+        <EntityTypeShape EntityType="cortechecoModel.compras_facturas" Width="1.5" PointX="0.75" PointY="15.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

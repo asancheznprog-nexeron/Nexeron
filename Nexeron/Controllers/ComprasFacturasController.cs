@@ -289,9 +289,9 @@ namespace Nexeron.Controllers
                                     NOMBRE_FISCAL = reader["NOMBRE_FISCAL"].ToString().Trim(),
                                     CIF = reader["CIF"].ToString().Trim(),
                                     DIRECCION = reader["DIRECCION"].ToString().Trim(),
-                                   
                                     NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(),
-                                    NUMALBARAN = reader["NUMALBARAN"].ToString().Trim()
+                                    NUMALBARAN = reader["NUMALBARAN"].ToString().Trim(),
+                                    SFRA = reader["SFRA"].ToString().Trim()
                                 });
                             }
                         }
@@ -350,7 +350,7 @@ namespace Nexeron.Controllers
                     try
                     {
                         DateTime fechFac = Convert.ToDateTime(form["FECHFAC"]);
-                        string numAlbaran = form["NUMALBARAN"];
+                        string sfra = form["SFRA"] ?? "";
                         string cuenta = form["CUENTA"].PadLeft(9);
                         string fcobro = form["FCOBRO"];
                         string observaciones = form["OBSERVACIONES"];
@@ -393,16 +393,16 @@ namespace Nexeron.Controllers
                             {
                                 cmd.Transaction = transaccion;
                                 cmd.CommandText = @"INSERT INTO compras_facturas (
-                                    NUMFACTURA, FECHFAC, NUMPEDIDO, NUMALBARAN, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
+                                    NUMFACTURA, FECHFAC, NUMPEDIDO, SFRA, FECHALB, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
                                 ) VALUES (
-                                    @numfactura, @fechfac,'', @numalbaran, @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                                    @numfactura, @fechfac, '', @sfra, @fechalb, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
                                     @unidad, @canti, @euros, @ivarti, @dtoarti, @estado, @estadolin, @observaciones, ''
                                 )";
 
                                 cmd.Parameters.AddWithValue("@numfactura", numFactura);
                                 cmd.Parameters.AddWithValue("@fechfac", fechFac);
-                                cmd.Parameters.AddWithValue("@numalbaran", numAlbaran ?? "");
+                                cmd.Parameters.AddWithValue("@sfra", sfra);
                                 cmd.Parameters.AddWithValue("@fechalb", DBNull.Value);
                                 cmd.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmd.Parameters.AddWithValue("@fcobro", fcobro);
@@ -587,12 +587,12 @@ namespace Nexeron.Controllers
                             cmdClone.Transaction = transaccion;
                             cmdClone.CommandText = @"
                                 INSERT INTO compras_facturas (
-                                    NUMFACTURA, FECHFAC, NUMPEDIDO, NUMALBARAN, FECHALB, 
+                                    NUMFACTURA, FECHFAC, NUMPEDIDO, NUMALBARAN, SFRA, FECHALB, 
                                     CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, 
                                     IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
                                 )
                                 SELECT 
-                                    @nuevoNum, NOW(), NUMPEDIDO, NUMALBARAN, FECHALB, 
+                                    @nuevoNum, NOW(), NUMPEDIDO, NUMALBARAN, SFRA, FECHALB, 
                                     CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, (CANTI * -1), EUROS, 
                                     IVARTI, DTOARTI, '105', '105', CONCAT('Rectificación de factura ', @original), @original
                                 FROM compras_facturas 

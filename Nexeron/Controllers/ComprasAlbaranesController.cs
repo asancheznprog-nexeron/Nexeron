@@ -365,6 +365,48 @@ namespace Nexeron.Controllers
         }
 
         [HttpPost]
+        public JsonResult ObtenerAlbaranesPendientesPorProveedor(string cuenta)
+        {
+            List<object> albaranesPendientes = new List<object>();
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr)) return Json(albaranesPendientes);
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (var cmd = conexion.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO,
+                               IFNULL(fp.FORMACOBPAG, a.FCOBRO) as FormaCobroDesc
+                        FROM compras_albaranes a
+                        LEFT JOIN fpagcob fp ON a.FCOBRO = fp.CODIGO
+                        WHERE a.CUENTA = @cuenta AND EXISTS (
+                            SELECT 1 FROM compras_albaranes sub 
+                            WHERE sub.NUMALB = a.NUMALB AND sub.FACTURADO IN ('N', 'P')
+                        )
+                        GROUP BY a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO, fp.FORMACOBPAG
+                        ORDER BY a.NUMALB ASC";
+                    cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            albaranesPendientes.Add(new
+                            {
+                                NUMALB = reader["NUMALB"].ToString().Trim(),
+                                FECHALB = Convert.ToDateTime(reader["FECHALB"]).ToString("dd/MM/yyyy"),
+                                ESTADO = reader["ESTADO"].ToString().Trim(),
+                                FCOBRO = reader["FormaCobroDesc"].ToString().Trim()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(albaranesPendientes);
+        }
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Crear(FormCollection form, string lineasJson)
         {
