@@ -206,6 +206,12 @@
         gap: 0.8rem;
     }
 
+    .grid-fpago {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 0.6rem;
+    }
+
     .form-group {
         display: flex;
         flex-direction: column;
@@ -327,29 +333,6 @@
         flex-direction: column;
         gap: 0.5rem;
     }
-
-    .toast-alerta {
-        background-color: #28a745;
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 300px;
-        transform: translateX(120%);
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-        .toast-alerta.toast-error {
-            background-color: #dc3545;
-        }
-
-        .toast-alerta.mostrar {
-            transform: translateX(0);
-        }
 
     .tabla-ofertas-pendientes {
         width: 100%;
@@ -498,7 +481,7 @@
 
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
-                <div class="grid-4-col">
+                <div class="grid-3-col">
                     <div class="form-group">
                         <label>Número Pedido *</label>
                         <input type="text" name="NUMPEDIDO" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: 000000001" />
@@ -506,10 +489,6 @@
                     <div class="form-group">
                         <label>Fecha de Pedido *</label>
                         <input type="date" name="FECHPED" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
-                    </div>
-                    <div class="form-group">
-                        <label>Número Oferta</label>
-                        <input type="text" name="NUMOFERTA" class="form-control" autocomplete="off" placeholder="Ej: OF0001" />
                     </div>
                     <div class="form-group">
                         <label>Fecha de Entrega</label>
@@ -570,11 +549,30 @@
                     </tbody>
                 </table>
 
-                <div class="seccion-titulo">Resumen Económico del Pedido</div>
                 <div class="grid-3-col" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
                     <div class="form-group"><label>Base Imponible Total</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
                     <div class="form-group"><label>Importe IVA Total</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
                     <div class="form-group"><label>Total del Pedido</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" /></div>
+                </div>
+
+                <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
+                <div class="grid-fpago">
+                    <div class="form-group">
+                        <label>Forma de Pago *</label>
+                        <select name="FCOBRO" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                            <option value="">Seleccione...</option>
+                            @if (ViewBag.FormasPago != null)
+                            {
+                                foreach (var fp in ViewBag.FormasPago)
+                                {
+                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nº de cobros</label><input type="number" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
+                    <div class="form-group"><label>Primer vencimiento</label><input type="number" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
+                    <div class="form-group"><label>Dias entre vtos</label><input type="number" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
                 </div>
 
                 <div class="seccion-titulo">Observaciones</div>
@@ -597,7 +595,7 @@
 
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
-                <div class="grid-4-col">
+                <div class="grid-3-col">
                     <div class="form-group">
                         <label>Número Pedido</label>
                         <input type="text" name="NUMPEDIDO" id="editNumPedido" class="form-control form-control-bloqueado" readonly />
@@ -605,10 +603,6 @@
                     <div class="form-group">
                         <label>Fecha de Pedido *</label>
                         <input type="date" name="FECHPED" id="editFechPed" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label>Número Oferta</label>
-                        <input type="text" name="NUMOFERTA" id="editNumOferta" class="form-control" autocomplete="off" />
                     </div>
                     <div class="form-group">
                         <label>Fecha de Entrega</label>
@@ -655,11 +649,30 @@
                     <tbody></tbody>
                 </table>
 
-                <div class="seccion-titulo">Resumen Económico del Pedido</div>
                 <div class="grid-3-col" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
                     <div class="form-group"><label>Base Imponible Total</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
                     <div class="form-group"><label>Importe IVA Total</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
                     <div class="form-group"><label>Total del Pedido</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" /></div>
+                </div>
+
+                <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
+                <div class="grid-fpago">
+                    <div class="form-group">
+                        <label>Forma de Pago *</label>
+                        <select name="FCOBRO" id="editFcobro" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
+                            <option value="">Seleccione...</option>
+                            @if (ViewBag.FormasPago != null)
+                            {
+                                foreach (var fp in ViewBag.FormasPago)
+                                {
+                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nº de cobros</label><input type="number" id="editNcb" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
+                    <div class="form-group"><label>Primer vencimiento</label><input type="number" id="editVto" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
+                    <div class="form-group"><label>Dias entre vtos</label><input type="number" id="editDvto" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
                 </div>
 
                 <div class="seccion-titulo">Observaciones</div>
@@ -727,7 +740,6 @@
                     <tr>
                         <th>Número Pedido</th>
                         <th>Fecha</th>
-                        <th>Número Oferta</th>
                         <th>Estado</th>
                     </tr>
                 </thead>
@@ -794,6 +806,18 @@
         });
     });
 
+    function sincronizarReglaPago(selectElement) {
+        var $opcion = $(selectElement).find('option:selected');
+        var $modal = $(selectElement).closest('.modal-overlay');
+        if ($opcion.val() !== "") {
+            $modal.find('.txtNcb').val($opcion.data('cobros'));
+            $modal.find('.txtVto').val($opcion.data('vto'));
+            $modal.find('.txtDvto').val($opcion.data('dvto'));
+        } else {
+            $modal.find('.txtNcb').val(1); $modal.find('.txtVto').val(0); $modal.find('.txtDvto').val(0);
+        }
+    }
+
     function actualizarTotalesGlobales($modal) {
         var acumuladoBase = 0;
         var acumuladoIva = 0;
@@ -835,9 +859,9 @@
 
                     $('#editNumPedido').val(numPedido);
                     $('#editFechPed').val(primerRegistro.FECHA);
-                    $('#editNumOferta').val(primerRegistro.NUMOFERTA);
                     $('#editFechEnt').val(primerRegistro.FECHENT || '');
                     $('#editCuenta').val(primerRegistro.CUENTA);
+                    $('#editFcobro').val(primerRegistro.FCOBRO);
                     $('#editObservaciones').val(primerRegistro.OBSERVACIONES);
 
                     $('#editNombreFiscal').val(primerRegistro.NOMBRE_FISCAL);
@@ -848,6 +872,8 @@
                     $('#editProvincia').val(primerRegistro.PROVINCIA);
                     $('#editTelefono').val(primerRegistro.TELEFONO);
                     $('#editEmail').val(primerRegistro.EMAIL);
+
+                    sincronizarReglaPago(document.getElementById('editFcobro'));
 
                     var $tbody = $('#tablaArticulosEditar tbody');
                     if ($tbody.length == 0) {
@@ -882,7 +908,7 @@
                         </tr>`;
                         $tbody.append(trHtml);
                     }
-                    actualTotalesGlobales($('#modalEditar'));
+                    actualizarTotalesGlobales($('#modalEditar'));
                     $('#modalEditar').css('display', 'flex');
                 }
             }
@@ -1136,11 +1162,14 @@
                 $tbody.empty();
                 if (data && data.length > 0) {
                     data.forEach(function(ped) {
-                        var row = '<tr onclick="seleccionarPedidoAlbaran(\'' + ped.NUMPEDIDO + '\')" style="cursor:pointer;">' +
-                                  '<td><strong>' + ped.NUMPEDIDO + '</strong></td>' +
-                                  '<td>' + ped.FECHAPED + '</td>' +
-                                  '<td>' + ped.NUMOFERTA + '</td>' +
-                                  '<td>' + (ped.ESTADO == '101' ? 'Pendiente' : (ped.ESTADO == '104' ? 'Parcial' : 'Activo')) + '</td></tr>';
+                        var numPedidoVal = ped.NUMPEDIDO || ped.numpedido || '';
+                        var fechaPedVal = ped.FECHAPED || ped.fechaped || ped.FECHPED || '';
+                        var estadoVal = ped.ESTADO || ped.estado || '';
+
+                        var row = '<tr onclick="seleccionarPedidoAlbaran(\'' + numPedidoVal + '\')" style="cursor:pointer;">' +
+                                  '<td><strong>' + numPedidoVal + '</strong></td>' +
+                                  '<td>' + fechaPedVal + '</td>' +
+                                  '<td>' + (estadoVal == '101' ? 'Pendiente' : (estadoVal == '104' ? 'Parcial' : 'Activo')) + '</td></tr>';
                         $tbody.append(row);
                     });
                     if ($.fn.DataTable.isDataTable('#tablaPedidosAlbaran')) {
@@ -1152,7 +1181,7 @@
                         "order": [[0, "asc"]]
                     });
                 } else {
-                    $tbody.append('<tr><td colspan="4" style="text-align:center;">No hay pedidos pendientes para este cliente.</td></tr>');
+                    $tbody.append('<tr><td colspan="3" style="text-align:center;">No hay pedidos pendientes para este cliente.</td></tr>');
                 }
             }
         });

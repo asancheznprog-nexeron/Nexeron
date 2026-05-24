@@ -23,15 +23,36 @@ namespace Nexeron.Controllers
                 {
                     conexion.Open();
 
+                    List<fpagcob> formasPago = new List<fpagcob>();
+                    using (var cmdFp = conexion.CreateCommand())
+                    {
+                        cmdFp.CommandText = "SELECT CODIGO, FORMACOBPAG, NUMCOBROS, PRIMVENCI, DIASVENCI FROM fpagcob ORDER BY CODIGO ASC";
+                        using (var readerFp = cmdFp.ExecuteReader())
+                        {
+                            while (readerFp.Read())
+                            {
+                                formasPago.Add(new fpagcob
+                                {
+                                    CODIGO = readerFp["CODIGO"].ToString().Trim(),
+                                    FORMACOBPAG = readerFp["FORMACOBPAG"].ToString().Trim(),
+                                    NUMCOBROS = Convert.ToInt32(readerFp["NUMCOBROS"]),
+                                    PRIMVENCI = Convert.ToInt32(readerFp["PRIMVENCI"]),
+                                    DIASVENCI = Convert.ToInt32(readerFp["DIASVENCI"])
+                                });
+                            }
+                        }
+                    }
+                    ViewBag.FormasPago = formasPago;
+
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"SELECT p.NUMPEDIDO, p.FECHPED, p.NUMOFERTA, p.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 
-                                            p.ESTADO, p.OBSERVACIONES,
+                                            p.ESTADO, p.FCOBRO, p.OBSERVACIONES,
                                             SUM(ROUND(p.CANTI * p.EUROS * (1 - (p.DTOARTI / 100)), 2)) as BaseTotal,
                                             SUM(ROUND(ROUND(p.CANTI * p.EUROS * (1 - (p.DTOARTI / 100)), 2) * (p.IVARTI / 100), 2)) as IvaTotal
                                             FROM pedidos p
                                             LEFT JOIN clientes c ON p.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
-                                            GROUP BY p.NUMPEDIDO, p.FECHPED, p.NUMOFERTA, p.CUENTA, c.NOMBRE_FISCAL, p.ESTADO, p.OBSERVACIONES
+                                            GROUP BY p.NUMPEDIDO, p.FECHPED, p.NUMOFERTA, p.CUENTA, c.NOMBRE_FISCAL, p.ESTADO, p.FCOBRO, p.OBSERVACIONES
                                             ORDER BY p.NUMPEDIDO DESC";
 
                         using (var reader = cmd.ExecuteReader())
@@ -49,6 +70,7 @@ namespace Nexeron.Controllers
                                     CUENTA = reader["CUENTA"].ToString(),
                                     NombreCliente = reader["NombreCliente"].ToString(),
                                     ESTADO = reader["ESTADO"].ToString(),
+                                    FCOBRO = reader["FCOBRO"].ToString(),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
                                     BaseTotal = baseTotal,
                                     ImporteTotal = baseTotal + ivaTotal
@@ -186,6 +208,7 @@ namespace Nexeron.Controllers
                                     IVARTI = Convert.ToDecimal(reader["IVARTI"]),
                                     CUENTA = reader["CUENTA"].ToString().Trim(),
                                     NUMOFERTA = reader["NUMOFERTA"].ToString().Trim(),
+                                    FCOBRO = reader["FCOBRO"].ToString().Trim(),
                                     ESTADO = reader["ESTADO"].ToString().Trim(),
                                     FECHA = Convert.ToDateTime(reader["FECHPED"]).ToString("yyyy-MM-dd"),
                                     OBSERVACIONES = reader["OBSERVACIONES"].ToString(),
@@ -245,9 +268,9 @@ namespace Nexeron.Controllers
                     {
                         string numPedido = form["NUMPEDIDO"].PadLeft(9);
                         DateTime fechPed = Convert.ToDateTime(form["FECHPED"]);
-                        string numOferta = form["NUMOFERTA"];
                         DateTime? fechEnt = string.IsNullOrEmpty(form["FECHENT"]) ? (DateTime?)null : Convert.ToDateTime(form["FECHENT"]);
                         string cuenta = form["CUENTA"].PadLeft(9);
+                        string fcobro = form["FCOBRO"];
                         string observaciones = form["OBSERVACIONES"];
 
                         int contadorLinea = 10;
@@ -257,18 +280,18 @@ namespace Nexeron.Controllers
                             {
                                 cmd.Transaction = transaccion;
                                 cmd.CommandText = @"INSERT INTO pedidos (
-                                    NUMPEDIDO, FECHPED, NUMOFERTA, FECHENT, CUENTA, NUMLINEA, ARTI, DESARTI, 
+                                    NUMPEDIDO, FECHPED, NUMOFERTA, FECHENT, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES
                                 ) VALUES (
-                                    @numpedido, @fechped, @numoferta, @fechent, @cuenta, @numlinea, @arti, @desarti, 
+                                    @numpedido, @fechped, '', @fechent, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
                                     @unidad, @canti, @euros, @ivarti, @dtoarti, '101', '101', @observaciones
                                 )";
 
                                 cmd.Parameters.AddWithValue("@numpedido", numPedido);
                                 cmd.Parameters.AddWithValue("@fechped", fechPed);
-                                cmd.Parameters.AddWithValue("@numoferta", numOferta ?? "");
                                 cmd.Parameters.AddWithValue("@fechent", fechEnt ?? (object)DBNull.Value);
                                 cmd.Parameters.AddWithValue("@cuenta", cuenta);
+                                cmd.Parameters.AddWithValue("@fcobro", fcobro);
                                 cmd.Parameters.AddWithValue("@numlinea", contadorLinea);
                                 cmd.Parameters.AddWithValue("@arti", linea.ARTI ?? "");
                                 cmd.Parameters.AddWithValue("@desarti", linea.DESARTI ?? "");
@@ -335,9 +358,9 @@ namespace Nexeron.Controllers
                     {
                         string numPedido = form["NUMPEDIDO"].PadLeft(9);
                         DateTime fechPed = Convert.ToDateTime(form["FECHPED"]);
-                        string numOferta = form["NUMOFERTA"];
                         DateTime? fechEnt = string.IsNullOrEmpty(form["FECHENT"]) ? (DateTime?)null : Convert.ToDateTime(form["FECHENT"]);
                         string cuenta = form["CUENTA"].PadLeft(9);
+                        string fcobro = form["FCOBRO"];
                         string observaciones = form["OBSERVACIONES"];
 
                         using (var cmdDelete = conexion.CreateCommand())
@@ -355,18 +378,18 @@ namespace Nexeron.Controllers
                             {
                                 cmdInsert.Transaction = transaccion;
                                 cmdInsert.CommandText = @"INSERT INTO pedidos (
-                                    NUMPEDIDO, FECHPED, NUMOFERTA, FECHENT, CUENTA, NUMLINEA, ARTI, DESARTI, 
+                                    NUMPEDIDO, FECHPED, NUMOFERTA, FECHENT, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
                                     UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES
                                 ) VALUES (
-                                    @numpedido, @fechped, @numoferta, @fechent, @cuenta, @numlinea, @arti, @desarti, 
+                                    @numpedido, @fechped, '', @fechent, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
                                     @unidad, @canti, @euros, @ivarti, @dtoarti, '201', '201', @observaciones
                                 )";
 
                                 cmdInsert.Parameters.AddWithValue("@numpedido", numPedido);
                                 cmdInsert.Parameters.AddWithValue("@fechped", fechPed);
-                                cmdInsert.Parameters.AddWithValue("@numoferta", numOferta ?? "");
                                 cmdInsert.Parameters.AddWithValue("@fechent", fechEnt ?? (object)DBNull.Value);
                                 cmdInsert.Parameters.AddWithValue("@cuenta", cuenta);
+                                cmdInsert.Parameters.AddWithValue("@fcobro", fcobro);
                                 cmdInsert.Parameters.AddWithValue("@numlinea", contadorLinea);
                                 cmdInsert.Parameters.AddWithValue("@arti", linea.ARTI ?? "");
                                 cmdInsert.Parameters.AddWithValue("@desarti", linea.DESARTI ?? "");
