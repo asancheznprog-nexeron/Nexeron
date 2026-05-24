@@ -191,6 +191,7 @@
           <Property Name="FECHFAC" Type="datetime" Precision="0" Nullable="false" />
           <Property Name="NUMPEDIDO" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="NUMALBARAN" Type="char" MaxLength="9" Nullable="false" />
+          <Property Name="SFRA" Type="char" MaxLength="10" Nullable="false" />
           <Property Name="FECHALB" Type="datetime" Precision="0" />
           <Property Name="CUENTA" Type="char" MaxLength="9" Nullable="false" />
           <Property Name="FCOBRO" Type="char" MaxLength="3" Nullable="false" />
@@ -444,7 +445,7 @@
           </Key>
           <Property Name="clave" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="usuario" Type="char" MaxLength="50" />
-          <Property Name="password" Type="char" MaxLength="50" />
+          <Property Name="password" Type="char" MaxLength="60" />
           <Property Name="fallos" Type="int" />
         </EntityType>
         <Association Name="fk_art_prov_articulo">
@@ -859,15 +860,6 @@
           <Property Name="codigo" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="descripcion" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
-        <EntityType Name="usuarios">
-          <Key>
-            <PropertyRef Name="clave" />
-          </Key>
-          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="usuario" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="fallos" Type="Int32" />
-        </EntityType>
         <Association Name="fk_art_prov_articulo">
           <End Role="articulo" Type="Self.articulo" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -904,7 +896,6 @@
           <EntitySet Name="proveedores" EntityType="Self.proveedores" />
           <EntitySet Name="tipos" EntityType="Self.tipos" />
           <EntitySet Name="unidades" EntityType="Self.unidades" />
-          <EntitySet Name="usuarios" EntityType="Self.usuarios" />
           <AssociationSet Name="fk_art_prov_articulo" Association="Self.fk_art_prov_articulo">
             <End Role="articulo" EntitySet="articulo" />
             <End Role="articulo_proveedor" EntitySet="articulo_proveedor" />
@@ -912,6 +903,7 @@
           <EntitySet Name="compras_albaranes" EntityType="cortechecoModel.compras_albaranes" />
           <EntitySet Name="compras_facturas" EntityType="cortechecoModel.compras_facturas" />
           <EntitySet Name="compras_pedidos" EntityType="cortechecoModel.compras_pedidos" />
+          <EntitySet Name="usuarios" EntityType="cortechecoModel.usuarios" />
         </EntityContainer>
         <EntityType Name="compras_albaranes">
           <Key>
@@ -961,6 +953,7 @@
           <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
           <Property Name="RECTIFICATIVA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="SFRA" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="compras_pedidos">
           <Key>
@@ -984,6 +977,15 @@
           <Property Name="ESTADO" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
           <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="usuarios">
+          <Key>
+            <PropertyRef Name="clave" />
+          </Key>
+          <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="usuario" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="password" Type="String" MaxLength="60" FixedLength="false" Unicode="false" />
+          <Property Name="fallos" Type="Int32" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -1373,16 +1375,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="usuarios">
-            <EntityTypeMapping TypeName="cortechecoModel.usuarios">
-              <MappingFragment StoreEntitySet="usuarios">
-                <ScalarProperty Name="clave" ColumnName="clave" />
-                <ScalarProperty Name="usuario" ColumnName="usuario" />
-                <ScalarProperty Name="password" ColumnName="password" />
-                <ScalarProperty Name="fallos" ColumnName="fallos" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="compras_albaranes">
             <EntityTypeMapping TypeName="cortechecoModel.compras_albaranes">
               <MappingFragment StoreEntitySet="compras_albaranes">
@@ -1411,6 +1403,7 @@
           <EntitySetMapping Name="compras_facturas">
             <EntityTypeMapping TypeName="cortechecoModel.compras_facturas">
               <MappingFragment StoreEntitySet="compras_facturas">
+                <ScalarProperty Name="SFRA" ColumnName="SFRA" />
                 <ScalarProperty Name="RECTIFICATIVA" ColumnName="RECTIFICATIVA" />
                 <ScalarProperty Name="OBSERVACIONES" ColumnName="OBSERVACIONES" />
                 <ScalarProperty Name="ESTADOLIN" ColumnName="ESTADOLIN" />
@@ -1454,6 +1447,16 @@
                 <ScalarProperty Name="FECHENT" ColumnName="FECHENT" />
                 <ScalarProperty Name="FECHPED" ColumnName="FECHPED" />
                 <ScalarProperty Name="NUMPEDIDO" ColumnName="NUMPEDIDO" />
+                <ScalarProperty Name="clave" ColumnName="clave" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="usuarios">
+            <EntityTypeMapping TypeName="cortechecoModel.usuarios">
+              <MappingFragment StoreEntitySet="usuarios">
+                <ScalarProperty Name="fallos" ColumnName="fallos" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="usuario" ColumnName="usuario" />
                 <ScalarProperty Name="clave" ColumnName="clave" />
               </MappingFragment>
             </EntityTypeMapping>

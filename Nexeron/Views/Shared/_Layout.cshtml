@@ -14,19 +14,17 @@
 
     <style>
         :root {
-            /* PALETA AZUL CORPORATIVA PREMIUM (Estilo SAP / Salesforce moderno) */
-            --primary-color: #2563eb; /* Azul Real para acentos (botones activos, guardar) */
-            --primary-hover: #1d4ed8; /* Hover del acento */
-            --bg-color: #f8fafc; /* Fondo del contenido (un blanco con un toque de azul pizarra) */
-
-            --ui-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); /* ¡Azul corporativo real e indiscutible! */
+            --primary-color: #2563eb; 
+            --primary-hover: #1d4ed8; 
+            --bg-color: #f8fafc; 
+            --ui-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); 
             --ui-hover: rgba(255, 255, 255, 0.1);
             --ui-submenu: rgba(0, 0, 0, 0.15);
             --ui-submenu-hover: rgba(255, 255, 255, 0.06);
             --ui-border: rgba(255, 255, 255, 0.12);
             --text-light: #ffffff;
-            --text-muted: #93c5fd; /* Azul claro/lila para iconos y textos secundarios del menú */
-            --text-dark: #0f172a; /* Texto oscuro principal */
+            --text-muted: #93c5fd; 
+            --text-dark: #0f172a; 
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -38,7 +36,7 @@
             overflow-x: hidden;
         }
 
-        /* --- SIDEBAR --- */
+
         .sidebar {
             height: 100vh;
             width: 250px;
@@ -126,7 +124,7 @@
             transform: rotate(180deg);
         }
 
-        /* --- SUBMENÚS --- */
+
         .sidebar-submenu {
             max-height: 0;
             overflow: hidden;
@@ -153,7 +151,7 @@
                 padding-left: 3.1rem;
             }
 
-        /* --- SIDEBAR FOOTER --- */
+
         .sidebar-footer {
             margin-top: auto;
             padding: 1.2rem;
@@ -166,7 +164,6 @@
             flex-shrink: 0;
         }
 
-        /* --- MAIN WRAPPER --- */
         .main-wrapper {
             transition: var(--transition);
         }
@@ -175,7 +172,6 @@
                 margin-left: 250px;
             }
 
-        /* --- NAVBAR --- */
         .navbar {
             background: var(--ui-gradient);
             padding: 0.85rem 1.5rem;
@@ -256,7 +252,7 @@
             position: absolute;
             right: 0;
             background-color: #ffffff;
-            min-width: 180px;
+            min-width: 200px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border-radius: 14px;
             z-index: 1001;
@@ -297,11 +293,69 @@
                     color: #18181b;
                 }
 
-        /* ==========================================================================
-           FONDO INTERNO: OVERRIDES GLOBALES PARA CONTROLAR LAS 20 VISTAS DEL ERP
-           ========================================================================== */
+        .user-dropdown-item-toggle {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #27272a;
+            padding: 0.85rem 1.2rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            box-sizing: border-box;
+        }
 
-        /* 1. Botones de submenú activos (Ofertas, Pedidos, etc.) y botones de guardar */
+            .user-dropdown-item-toggle:hover {
+                background-color: #f4f4f5;
+                color: #18181b;
+            }
+
+            .user-dropdown-item-toggle svg {
+                opacity: 0.7;
+                color: #27272a;
+                transition: all 0.2s ease;
+            }
+
+            .user-dropdown-item-toggle:hover svg {
+                opacity: 1;
+                color: #18181b;
+            }
+
+        .user-submenu-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .user-submenu-content.open {
+                max-height: 120px; 
+            }
+
+            .user-submenu-content a {
+                padding: 0.65rem 1.2rem 0.65rem 2.6rem !important;
+                font-size: 0.88rem !important;
+                color: #4b5563 !important;
+            }
+
+                .user-submenu-content a:hover {
+                    background-color: #f1f5f9;
+                    color: var(--primary-color) !important;
+                }
+
+        .user-dropdown-submenu-wrapper.active .submenu-arrow {
+            transform: rotate(180deg);
+        }
+
         body .btn-submenu.active,
         body .btn-submit {
             background-color: var(--primary-color) !important;
@@ -315,13 +369,11 @@
                 border-color: var(--primary-hover) !important;
             }
 
-        /* 2. Títulos de secciones y títulos de modales internos */
         body .seccion-titulo,
         body .modal-content h3 {
             color: var(--primary-color) !important;
         }
 
-        /* 3. Captura y corrige los botones que tengan estilos inline '#007bff' inyectados a mano */
         body [style*="background-color: #007bff"],
         body [style*="background-color:#007bff"] {
             background-color: var(--primary-color) !important;
@@ -332,14 +384,12 @@
                 background-color: var(--primary-hover) !important;
             }
 
-        /* 4. Enfoque (Focus) de los inputs internos de las tablas para que brillen en Azul Real */
         body .form-control:focus,
         body .input-tabla:focus {
             border-color: var(--primary-color) !important;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
         }
 
-        /* 5. Estilo personalizado para las barras de scroll internas de los modales */
         body div::-webkit-scrollbar-thumb {
             background-color: var(--text-muted);
             border-radius: 4px;
@@ -494,10 +544,25 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div id="userDropdownMenu" class="user-dropdown-menu">
-                        <a href="@Url.Action("Configuracion", "Home")">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                            Configuración
-                        </a>
+
+                        <div class="user-dropdown-submenu-wrapper">
+                            <button type="button" class="user-dropdown-item-toggle" onclick="toggleConfigSubmenu(event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Configuración</span>
+                                <svg class="submenu-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div id="configSubmenu" class="user-submenu-content">
+                                <a href="@Url.Action("Index", "Usuarios")">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    Usuarios
+                                </a>
+                                <a href="@Url.Content("~/Manual/Manual_Nexeron_ERP.pdf")" download="Manual_Nexeron_ERP.pdf">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    Manual de Uso
+                                </a>
+                            </div>
+                        </div>
+
                         <a href="@Url.Action("Logout", "Home")">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                             Cerrar sesión
@@ -537,10 +602,25 @@
             document.getElementById("userDropdownMenu").classList.toggle("show");
         }
 
-        window.onclick = function () {
+        
+        function toggleConfigSubmenu(event) {
+            event.stopPropagation(); 
+            var submenu = document.getElementById("configSubmenu");
+            var wrapper = submenu.parentElement;
+
+            submenu.classList.toggle("open");
+            wrapper.classList.toggle("active");
+        }
+
+        window.onclick = function (event) {
             var menu = document.getElementById("userDropdownMenu");
             if (menu && menu.classList.contains("show")) {
-                menu.classList.remove("show");
+                if (!event.target.closest('.user-dropdown')) {
+                    menu.classList.remove("show");
+
+                    document.getElementById("configSubmenu").classList.remove("open");
+                    document.querySelector(".user-dropdown-submenu-wrapper").classList.remove("active");
+                }
             }
         }
     </script>
