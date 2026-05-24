@@ -410,6 +410,10 @@
             background-color: #f1f3f5;
             cursor: pointer;
         }
+
+    .fila-seleccionada {
+        background-color: #cce5ff !important;
+    }
 </style>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -426,6 +430,7 @@
         <div class="header-acciones">
             <h3>Gestión de Albaranes</h3>
             <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalFacturar()" style="background-color: #17a2b8; color: white;">Facturar Albarán</button>
                 <button class="btn-nuevo" onclick="abrirModalCrear()">+ Crear Albarán Manual</button>
             </div>
         </div>
@@ -484,7 +489,7 @@
         {
             @Html.AntiForgeryToken()
             <input type="hidden" id="lineasJson" name="lineasJson" />
-            <input type="hidden" name="NUMPEDIDO" value="" /> 
+            <input type="hidden" name="NUMPEDIDO" value="" />
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
                 <div class="grid-3-col">
@@ -697,6 +702,74 @@
     </div>
 </div>
 
+<div id="modalFacturar" class="modal-overlay">
+    <div class="modal-content modal-content-grande">
+        <span class="btn-cerrar" onclick="cerrarModal('modalFacturar')">&times;</span>
+        <h3 style="margin-top:0; color:#495057; border-bottom:2px solid #f1f3f5; padding-bottom:0.5rem;">Generar Factura desde Albarán</h3>
+
+        <div class="grid-3-col" style="margin-bottom:1rem;">
+            <div class="form-group">
+                <label>Buscar Cliente</label>
+                <input type="text" class="form-control" id="buscarClienteFac" onkeyup="buscarClienteFacturar(this)" placeholder="Código o nombre..." autocomplete="off" />
+                <div class="sugerencias-autocompletado" id="sugerenciasClienteFac"></div>
+            </div>
+            <div class="form-group">
+                <label>Cliente seleccionado</label>
+                <input type="text" class="form-control form-control-bloqueado" id="clienteFacNombre" readonly />
+            </div>
+            <div class="form-group">
+                <label>Código</label>
+                <input type="text" class="form-control form-control-bloqueado" id="clienteFacCodigo" readonly />
+            </div>
+        </div>
+
+        <div id="datosClienteFacturar" style="display:none; margin-top:1rem;">
+            <div class="seccion-titulo">Datos del Cliente</div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>CIF/NIF</label><input type="text" class="form-control form-control-bloqueado" id="clienteFacCif" readonly /></div>
+                <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado" id="clienteFacDireccion" readonly /></div>
+                <div class="form-group"><label>CP</label><input type="text" class="form-control form-control-bloqueado" id="clienteFacCp" readonly /></div>
+            </div>
+            <div class="grid-3-col">
+                <div class="form-group"><label>Población</label><input type="text" class="form-control form-control-bloqueado" id="clienteFacPoblacion" readonly /></div>
+                <div class="form-group"><label>Provincia</label><input type="text" class="form-control form-control-bloqueado" id="clienteFacProvincia" readonly /></div>
+            </div>
+
+            <div class="seccion-titulo" style="margin-top:1.5rem;">Albaranes pendientes de facturar</div>
+            <table class="tabla-ofertas-pendientes display" id="tablaAlbaranesFacturar">
+                <thead>
+                    <tr>
+                        <th>Número Albarán</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Forma de cobro</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div id="lineasAlbaranFacturar" style="display:none; margin-top:1.5rem;">
+                <div class="seccion-titulo">Líneas del Albarán <span id="albaranSeleccionadoTitulo"></span></div>
+                <div style="max-height:400px;overflow-y:auto;">
+                    <table class="tabla-interna" id="tablaLineasFacturar">
+                        <thead>
+                            <tr>
+                                <th>Artículo</th>
+                                <th>Descripción</th>
+                                <th>Cantidad Original</th>
+                                <th>Ya Facturado</th>
+                                <th>Pendiente</th>
+                                <th>Cantidad a Facturar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-submit" onclick="procesarFacturaDesdeAlbaran()">Crear Factura</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     var cacheUltimoFiltroCliente = "";
 
@@ -970,5 +1043,170 @@
 
     function cerrarModal(id) { $('#' + id).css('display', 'none'); }
     window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none'; }
+    
+    function abrirModalFacturar() {
+        $('#modalFacturar').css('display', 'flex');
+        $('#buscarClienteFac').val('');
+        $('#clienteFacCodigo').val('');
+        $('#clienteFacNombre').val('');
+        $('#datosClienteFacturar').hide();
+        $('#lineasAlbaranFacturar').hide();
+        $('#tablaAlbaranesFacturar tbody').empty();
+        $('#tablaLineasFacturar tbody').empty();
+        if ($.fn.DataTable.isDataTable('#tablaAlbaranesFacturar')) {
+            $('#tablaAlbaranesFacturar').DataTable().destroy();
+        }
+    }
 
+    function buscarClienteFacturar(input) {
+        var term = $(input).val().trim();
+        var $box = $('#sugerenciasClienteFac');
+        if (term.length < 1) { $box.hide().empty(); return; }
+
+        $.ajax({
+            url: '@Url.Action("BuscarClientes", "Albaranes")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(c) {
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarClienteFacturar(\'' + c.CUENTA + '\', \'' + c.NOMBRE_FISCAL.replace(/'/g, "\\'") + '\', \'' + c.CIF + '\', \'' + c.DIRECCION.replace(/'/g, "\\'") + '\', \'' + c.CP + '\', \'' + c.POBLACION.replace(/'/g, "\\'") + '\', \'' + c.PROVINCIA.replace(/'/g, "\\'") + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function seleccionarClienteFacturar(cuenta, nombre, cif, direccion, cp, poblacion, provincia) {
+        $('#buscarClienteFac').val(cuenta);
+        $('#clienteFacCodigo').val(cuenta);
+        $('#clienteFacNombre').val(nombre);
+        $('#clienteFacCif').val(cif);
+        $('#clienteFacDireccion').val(direccion);
+        $('#clienteFacCp').val(cp);
+        $('#clienteFacPoblacion').val(poblacion);
+        $('#clienteFacProvincia').val(provincia);
+        $('#sugerenciasClienteFac').hide();
+        $('#datosClienteFacturar').show();
+        $('#lineasAlbaranFacturar').hide();
+        cargarAlbaranesPendientesCliente(cuenta);
+    }
+
+    function cargarAlbaranesPendientesCliente(cuenta) {
+        $.ajax({
+            url: '@Url.Action("ObtenerAlbaranesPendientesPorCliente", "Albaranes")',
+            type: 'POST',
+            data: { cuenta: cuenta },
+            success: function(data) {
+                var $tbody = $('#tablaAlbaranesFacturar tbody');
+                $tbody.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(alb) {
+                        var row = '<tr onclick="seleccionarAlbaranFacturar(\'' + alb.NUMALB + '\')" style="cursor:pointer;">' +
+                                    '<td><strong>' + alb.NUMALB + '</strong></td>' +
+                                    '<td>' + alb.FECHALB + '</td>' +
+                                    '<td>' + (alb.ESTADO == '101' ? 'Pendiente' : (alb.ESTADO == '104' ? 'Parcial' : 'Completado')) + '</td>' +
+                                    '<td>' + alb.FCOBRO + '</td></tr>';
+                        $tbody.append(row);
+                    });
+                    if ($.fn.DataTable.isDataTable('#tablaAlbaranesFacturar')) {
+                        $('#tablaAlbaranesFacturar').DataTable().destroy();
+                    }
+                    $('#tablaAlbaranesFacturar').DataTable({
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                        "pageLength": 5,
+                        "order": [[0, "asc"]]
+                    });
+                } else {
+                    $tbody.append('<tr><td colspan="4" style="text-align:center;">No hay albaranes pendientes para este cliente.</td></tr>');
+                }
+            }
+        });
+    }
+
+    function seleccionarAlbaranFacturar(numAlbaran) {
+        $('#tablaAlbaranesFacturar tbody tr').removeClass('fila-seleccionada');
+        $('#tablaAlbaranesFacturar tbody tr').filter(function() {
+            return $(this).find('td:first').text().trim() === numAlbaran;
+        }).addClass('fila-seleccionada');
+
+        $('#albaranSeleccionadoTitulo').text(numAlbaran);
+        $.ajax({
+            url: '@Url.Action("ObtenerLineasAlbaranParaFacturar", "Albaranes")',
+            type: 'POST',
+            data: { numAlbaran: numAlbaran },
+            success: function(lineas) {
+                var $tbodyLineas = $('#tablaLineasFacturar tbody');
+                $tbodyLineas.empty();
+                if (lineas && lineas.length > 0) {
+                    lineas.forEach(function(l) {
+                        var fila = '<tr data-numlinea="' + l.NUMLINEA + '" data-pendiente="' + l.Pendiente + '">' +
+                                    '<td>' + l.ARTI + '</td>' +
+                                    '<td>' + l.DESARTI + '</td>' +
+                                    '<td>' + l.CantidadOriginal + '</td>' +
+                                    '<td>' + l.CantidadFacturada + '</td>' +
+                                    '<td>' + l.Pendiente + '</td>' +
+                                    '<td><input type="number" class="input-tabla cant-facturar" value="0.00" min="0.00" max="' + l.Pendiente + '" step="0.01" /></td>' +
+                                    '</tr>';
+                        $tbodyLineas.append(fila);
+                    });
+                    $('#lineasAlbaranFacturar').show();
+                } else {
+                    $tbodyLineas.append('<tr><td colspan="6" style="text-align:center;">No hay líneas pendientes de facturar.</td></tr>');
+                    $('#lineasAlbaranFacturar').show();
+                }
+            }
+        });
+    }
+
+    function procesarFacturaDesdeAlbaran() {
+        var numAlbaran = $('#albaranSeleccionadoTitulo').text().trim();
+        if (!numAlbaran) {
+            crearToast("Seleccione un albarán primero.", "error");
+            return;
+        }
+
+        var lineas = [];
+        $('#tablaLineasFacturar tbody tr').each(function() {
+            var numLinea = parseInt($(this).data('numlinea'));
+            var pendiente = parseFloat($(this).data('pendiente'));
+            var cantidad = parseFloat($(this).find('.cant-facturar').val()) || 0;
+            if (cantidad > 0) {
+                if (cantidad > pendiente) {
+                    crearToast("La cantidad supera la pendiente en la línea " + numLinea, "error");
+                    lineas = null;
+                    return false;
+                }
+                lineas.push({ NUMLINEA: numLinea, CANTI: cantidad });
+            }
+        });
+
+        if (!lineas || lineas.length === 0) {
+            if (lineas) crearToast("Introduzca al menos una cantidad.", "error");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("CrearDesdeAlbaran", "Facturas")',
+            type: 'POST',
+            data: { numAlbaran: numAlbaran, lineasJson: JSON.stringify(lineas) },
+            success: function(res) {
+                if (res.success) {
+                    crearToast(res.mensaje, "success");
+                    location.reload();
+                } else {
+                    crearToast(res.message, "error");
+                }
+            },
+            error: function() {
+                crearToast("Error de comunicación.", "error");
+            }
+        });
+    }
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#buscarClienteFac, #sugerenciasClienteFac').length) { $('#sugerenciasClienteFac').hide(); }
+    });
 </script>

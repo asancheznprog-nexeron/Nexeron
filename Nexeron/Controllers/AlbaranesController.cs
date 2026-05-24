@@ -833,5 +833,100 @@ namespace Nexeron.Controllers
             return Json(pedidosPendientes);
         }
 
+
+        [HttpPost]
+        public JsonResult ObtenerAlbaranesPendientesPorCliente(string cuenta)
+        {
+            List<object> albaranesPendientes = new List<object>();
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr)) return Json(albaranesPendientes);
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (var cmd = conexion.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO,
+                       c.NOMBRE_FISCAL as NombreCliente
+                FROM albaranes a
+                LEFT JOIN clientes c ON a.CUENTA = c.CUENTA COLLATE utf8mb4_spanish_ci
+                WHERE a.CUENTA = @cuenta AND EXISTS (
+                    SELECT 1 FROM albaranes sub 
+                    WHERE sub.NUMALB = a.NUMALB AND sub.FACTURADO IN ('N', 'P')
+                )
+                GROUP BY a.NUMALB, a.FECHALB, a.ESTADO, a.FCOBRO, c.NOMBRE_FISCAL
+                ORDER BY a.NUMALB ASC";
+                    cmd.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            albaranesPendientes.Add(new
+                            {
+                                NUMALB = reader["NUMALB"].ToString().Trim(),
+                                FECHAALB = Convert.ToDateTime(reader["FECHALB"]).ToString("dd/MM/yyyy"),
+                                ESTADO = reader["ESTADO"].ToString().Trim(),
+                                FCOBRO = reader["FCOBRO"].ToString().Trim(),
+                                NombreCliente = reader["NombreCliente"].ToString().Trim()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(albaranesPendientes);
+        }
+
+        [HttpPost]
+        public JsonResult ObtenerLineasAlbaranParaFacturar(string numAlbaran)
+        {
+            List<object> lineas = new List<object>();
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr) || string.IsNullOrEmpty(numAlbaran))
+                return Json(lineas);
+
+            using (MySqlConnection conexion = new MySqlConnection(connStr))
+            {
+                conexion.Open();
+                using (var cmd = conexion.CreateCommand())
+                {
+                    // Traemos las líneas del albarán y calculamos la cantidad ya facturada
+                    cmd.CommandText = @"
+                SELECT a.NUMLINEA, a.ARTI, a.DESARTI, a.CANTI as CantidadOriginal, 
+                       a.UNIDAD, a.EUROS, a.DTOARTI, a.IVARTI, a.FACTURADO,
+                       IFNULL((SELECT SUM(f.CANTI) FROM facturas f WHERE f.NUMALBARAN = a.NUMALB AND f.NUMLINEA = a.NUMLINEA), 0) as CantidadFacturada,
+                       (a.CANTI - IFNULL((SELECT SUM(f.CANTI) FROM facturas f WHERE f.NUMALBARAN = a.NUMALB AND f.NUMLINEA = a.NUMLINEA), 0)) as Pendiente
+                FROM albaranes a
+                WHERE a.NUMALB = @num AND a.FACTURADO IN ('N','P')
+                ORDER BY a.NUMLINEA ASC";
+                    cmd.Parameters.AddWithValue("@num", numAlbaran.PadLeft(9));
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lineas.Add(new
+                            {
+                                NUMLINEA = Convert.ToInt32(reader["NUMLINEA"]),
+                                ARTI = reader["ARTI"].ToString().Trim(),
+                                DESARTI = reader["DESARTI"].ToString().Trim(),
+                                CantidadOriginal = Convert.ToDecimal(reader["CantidadOriginal"]),
+                                UNIDAD = reader["UNIDAD"].ToString().Trim(),
+                                EUROS = Convert.ToDecimal(reader["EUROS"]),
+                                DTOARTI = Convert.ToDecimal(reader["DTOARTI"]),
+                                IVARTI = Convert.ToDecimal(reader["IVARTI"]),
+                                FACTURADO = reader["FACTURADO"].ToString().Trim(),
+                                CantidadFacturada = Convert.ToDecimal(reader["CantidadFacturada"]),
+                                Pendiente = Convert.ToDecimal(reader["Pendiente"])
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(lineas);
+        }
+
+
+
     }
 }
