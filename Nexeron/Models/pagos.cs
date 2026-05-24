@@ -27,5 +27,6 @@ namespace Nexeron.Models
         public string OBSERVACION { get; set; }
         public string EMITIDO { get; set; }
         public Nullable<bool> VENCIDO { get; set; }
+        public string ESTADO { get; set; }
     }
 }
