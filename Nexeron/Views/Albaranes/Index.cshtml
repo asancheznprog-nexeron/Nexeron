@@ -852,6 +852,22 @@
         }
     }
 
+    function generarOpcionesUnidad(valorSeleccionado) {
+        var html = "";
+        var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
+
+        @if (ViewBag.Unidades != null) {
+            foreach (var u in (List<KeyValuePair<string, string>>)ViewBag.Unidades) {
+                <text>
+                var keyOpcion = '@u.Key'.trim().toUpperCase();
+                html += '<option value="@u.Key" label="@u.Key"' + (sel === keyOpcion ? ' selected' : '') + '>@u.Key - @u.Value</option>';
+                </text>
+            }
+        }
+
+        return html || '<option value="UD" label="UD" selected>UD - UNIDADES</option>';
+    }
+
     function agregarFilaArticulo(btn) {
         var $modal = $(btn).closest('.modal-overlay');
         var nuevaFila = $(btn).closest('tr').clone();
@@ -861,6 +877,7 @@
         nuevaFila.find('.num-dtoarti').val('0.00');
         nuevaFila.find('.num-ivarti').val('0.00');
         nuevaFila.find('.num-importe').val('0.00');
+        nuevaFila.find('.txt-unidad').html(generarOpcionesUnidad('UD'));
         $(btn).closest('tr').after(nuevaFila);
     }
     function eliminarFilaArticulo(btn) {
@@ -926,7 +943,7 @@
                             <td><div style="position:relative;"><input type="text" class="input-tabla txt-arti" value="${item.ARTI}" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
                             <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
                             <td><input type="number" class="input-tabla num-canti" value="${item.CANTI}" step="0.01" /></td>
-                            <td><input type="text" class="input-tabla txt-unidad" value="${item.UNIDAD}" /></td>
+                            <td><select class="input-tabla txt-unidad">${generarOpcionesUnidad(item.UNIDAD)}</select></td>
                             <td><input type="number" class="input-tabla num-euros" value="${item.EUROS.toFixed(4)}" step="0.0001" /></td>
                             <td><input type="number" class="input-tabla num-dtoarti" value="${item.DTOARTI.toFixed(2)}" step="0.01" /></td>
                             <td><input type="text" class="input-tabla num-importe" value="${importe}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>

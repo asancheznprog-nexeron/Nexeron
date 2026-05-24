@@ -44,8 +44,23 @@ namespace Nexeron.Controllers
                         }
                     }
                     ViewBag.FormasPago = formasPago;
+                    List<KeyValuePair<string, string>> unidadesLista = new List<KeyValuePair<string, string>>();
+                    using (var cmdUni = conexion.CreateCommand())
+                    {
+                        cmdUni.CommandText = "SELECT codigo, descripcion FROM unidades ORDER BY codigo ASC";
+                        using (var readerUni = cmdUni.ExecuteReader())
+                        {
+                            while (readerUni.Read())
+                            {
+                                unidadesLista.Add(new KeyValuePair<string, string>(
+                                    readerUni["codigo"].ToString().Trim(),
+                                    readerUni["descripcion"].ToString().Trim()
+                                ));
+                            }
+                        }
+                    }
+                    ViewBag.Unidades = unidadesLista;
 
-                    
                     using (var cmd = conexion.CreateCommand())
                     {
                         cmd.CommandText = @"SELECT p.NUMPEDIDO, p.FECHPED, p.CUENTA, c.NOMBRE_FISCAL as NombreCliente, 

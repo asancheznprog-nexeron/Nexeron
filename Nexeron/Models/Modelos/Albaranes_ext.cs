@@ -6,5 +6,6 @@
         public string NombreEstado { get; set; }
         public decimal BaseTotal { get; set; }
         public decimal ImporteTotal { get; set; }
+        public string FACTURADO { get; set; }
     }
 }
