@@ -335,10 +335,10 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        z-index: 9999;
+        z-index: 3000;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 0.5rem;
     }
 
     .custom-toast {
@@ -409,6 +409,7 @@
                 <tr>
                     <th>Número Factura</th>
                     <th>Fecha Factura</th>
+                    <th>Número Albarán</th>
                     <th>Cuenta</th>
                     <th>Cliente</th>
                     <th>Estado</th>
@@ -425,6 +426,7 @@
                         <tr>
                             <td><strong>@f.NUMFACTURA</strong></td>
                             <td>@f.FECHFAC.ToString("dd/MM/yyyy")</td>
+                            <td>@f.NUMALBARAN</td>
                             <td>@f.CUENTA</td>
                             <td>@f.NombreCliente</td>
                             <td>
@@ -503,7 +505,7 @@
 
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
-                <div class="grid-3-col">
+                <div class="grid-4-col">
                     <div class="form-group">
                         <label>Número Factura *</label>
                         <input type="text" name="NUMFACTURA" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: F00000001" />
@@ -511,6 +513,10 @@
                     <div class="form-group">
                         <label>Fecha de Emisión *</label>
                         <input type="date" name="FECHFAC" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-group">
+                        <label>Número Albarán</label>
+                        <input type="text" name="NUMALBARAN" class="form-control" autocomplete="off" placeholder="Ej: AL0001" />
                     </div>
                     <div class="form-group">
                         <label>Estado Inicial *</label>
@@ -533,7 +539,7 @@
                         <input type="text" name="CUENTA" class="form-control txtCuentaCliente" required autocomplete="off" maxlength="9" placeholder="Código o nombre..." onkeyup="buscarClienteAjax(this)" />
                         <div class="sugerencias-autocompletado boxSugerenciasClientes"></div>
                     </div>
-                    <div class="form-group"><label>Nombre Fiscal</label><input type="text" class="form-control form-control-bloqueado txtNombreFiscal" readonly /></div>
+                    <div class="form-group"><label>Nombre Fiscal</label><input type="text" class="form-control form-control-bloqueado txt someNombreFiscal" readonly /></div>
                     <div class="form-group"><label>CIF / NIF</label><input type="text" class="form-control form-control-bloqueado txtCif" readonly /></div>
                     <div class="form-group"><label>Dirección Fiscal</label><input type="text" class="form-control form-control-bloqueado txtDireccion" readonly /></div>
                 </div>
@@ -631,9 +637,10 @@
 
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
-                <div class="grid-3-col">
+                <div class="grid-4-col">
                     <div class="form-group"><label>Número Factura</label><input type="text" name="NUMFACTURA" id="editNumFactura" class="form-control form-control-bloqueado" readonly /></div>
                     <div class="form-group"><label>Fecha Factura</label><input type="date" name="FECHFAC" id="editFechFac" class="form-control" readonly /></div>
+                    <div class="form-group"><label>Número Albarán</label><input type="text" name="NUMALBARAN" id="editNumAlbaran" class="form-control form-control-bloqueado" readonly /></div>
                     <div class="form-group">
                         <label>Estado Global</label>
                         <select name="ESTADO" id="editEstado" class="form-control slc-estado-global">
@@ -718,7 +725,7 @@
             "pageLength": 10,
             "order": [[0, "asc"]],
             "scrollY": "400px",
-            "columnDefs": [ { "targets": 7, "orderable": false } ]
+            "columnDefs": [ { "targets": 8, "orderable": false } ]
         });
 
         @if (TempData["MensajeExito"] != null) { <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "success");</text> }
@@ -820,6 +827,7 @@
                     var primer = lineas[0];
                     $('#editNumFactura').val(numFactura);
                     $('#editFechFac').val(primer.FECHA);
+                    $('#editNumAlbaran').val(primer.NUMALBARAN);
                     $('#editEstado').val(primer.ESTADO);
                     $('#editCuenta').val(primer.CUENTA);
                     $('#editFcobro').val(primer.FCOBRO);

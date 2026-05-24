@@ -206,12 +206,6 @@
         gap: 0.8rem;
     }
 
-    .grid-fpago {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-        gap: 0.6rem;
-    }
-
     .form-group {
         display: flex;
         flex-direction: column;
@@ -349,13 +343,13 @@
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .toast-alerta.toast-error {
-        background-color: #dc3545;
-    }
+        .toast-alerta.toast-error {
+            background-color: #dc3545;
+        }
 
-    .toast-alerta.mostrar {
-        transform: translateX(0);
-    }
+        .toast-alerta.mostrar {
+            transform: translateX(0);
+        }
 
     .tabla-ofertas-pendientes {
         width: 100%;
@@ -363,26 +357,69 @@
         margin-top: 1rem;
     }
 
-    .tabla-ofertas-pendientes th {
-        background-color: #f8f9fa;
-        text-align: left;
-        padding: 0.6rem;
-        border-bottom: 2px solid #dee2e6;
-        cursor: pointer;
-    }
+        .tabla-ofertas-pendientes th {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding: 0.6rem;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+        }
 
-    .tabla-ofertas-pendientes td {
-        padding: 0.5rem;
-        border-bottom: 1px solid #eee;
-    }
+        .tabla-ofertas-pendientes td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
 
-    .tabla-ofertas-pendientes tr:hover {
-        background-color: #f1f3f5;
-        cursor: pointer;
-    }
+        .tabla-ofertas-pendientes tr:hover {
+            background-color: #f1f3f5;
+            cursor: pointer;
+        }
 
     .fila-seleccionada {
         background-color: #cce5ff !important;
+    }
+
+    .custom-toast {
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 320px;
+        font-family: system-ui, -apple-system, sans-serif;
+        animation: slideInToast 0.3s ease-out forwards;
+    }
+
+    .toast-success {
+        background-color: #28a745;
+    }
+
+    .toast-error {
+        background-color: #dc3545;
+    }
+
+    @@keyframes slideInToast {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes fadeOutToast {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        to {
+            opacity: 0;
+            transform: scale(0.9);
+        }
     }
 </style>
 
@@ -410,10 +447,12 @@
                 <tr>
                     <th>Número Pedido</th>
                     <th>Fecha</th>
+                    <th>Número Oferta</th>
                     <th>Cuenta</th>
                     <th>Cliente</th>
-                    <th>Forma Cobro</th>
                     <th>Estado</th>
+                    <th style="text-align: right;">Base</th>
+                    <th style="text-align: right;">Total</th>
                     <th style="text-align: center; width: 10%;">Acciones</th>
                 </tr>
             </thead>
@@ -425,10 +464,12 @@
                         <tr>
                             <td><strong>@p.NUMPEDIDO</strong></td>
                             <td>@p.FECHPED.ToString("dd/MM/yyyy")</td>
+                            <td>@p.NUMOFERTA</td>
                             <td>@p.CUENTA</td>
                             <td>@p.NombreCliente</td>
-                            <td>@p.FCOBRO</td>
                             <td><span class="badge-estado estado-aceptada">Activo</span></td>
+                            <td style="text-align: right; font-weight: bold;">@p.BaseTotal.ToString("N2") €</td>
+                            <td style="text-align: right; font-weight: bold; color: #155724;">@p.ImporteTotal.ToString("N2") €</td>
                             <td style="text-align: center; white-space: nowrap;">
                                 <button type="button" class="btn-tabla btn-tabla-editar" onclick="cargarYEditarPedido('@p.NUMPEDIDO')" title="Editar Pedido">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -457,7 +498,7 @@
 
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
-                <div class="grid-3-col">
+                <div class="grid-4-col">
                     <div class="form-group">
                         <label>Número Pedido *</label>
                         <input type="text" name="NUMPEDIDO" class="form-control" required autocomplete="off" maxlength="9" placeholder="Ej: 000000001" />
@@ -465,6 +506,10 @@
                     <div class="form-group">
                         <label>Fecha de Pedido *</label>
                         <input type="date" name="FECHPED" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-group">
+                        <label>Número Oferta</label>
+                        <input type="text" name="NUMOFERTA" class="form-control" autocomplete="off" placeholder="Ej: OF0001" />
                     </div>
                     <div class="form-group">
                         <label>Fecha de Entrega</label>
@@ -508,7 +553,7 @@
                         @for (int i = 1; i <= 10; i++)
                         {
                             <tr class="fila-articulo">
-                                <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti" maxlength="50" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
+                                <td><div style="position: relative;"><input type="text" class="input-tabla txt-arti" maxlength="50" onkeyup="buscarArticuloAjax(this)" autocomplete="off" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
                                 <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly /></td>
                                 <td><input type="number" class="input-tabla num-canti" value="1.00" min="0.01" step="0.01" /></td>
                                 <td><input type="text" class="input-tabla txt-unidad" maxlength="5" placeholder="UD" /></td>
@@ -525,25 +570,13 @@
                     </tbody>
                 </table>
 
-                <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
-                <div class="grid-fpago">
-                    <div class="form-group">
-                        <label>Forma de Pago *</label>
-                        <select name="FCOBRO" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
-                            <option value="">Seleccione...</option>
-                            @if (ViewBag.FormasPago != null)
-                            {
-                                foreach (var fp in ViewBag.FormasPago)
-                                {
-                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Nº de cobros</label><input type="number" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
-                    <div class="form-group"><label>Primer vencimiento</label><input type="number" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
-                    <div class="form-group"><label>Dias entre vtos</label><input type="number" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
+                <div class="seccion-titulo">Resumen Económico del Pedido</div>
+                <div class="grid-3-col" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                    <div class="form-group"><label>Base Imponible Total</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Importe IVA Total</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Total del Pedido</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" /></div>
                 </div>
+
                 <div class="seccion-titulo">Observaciones</div>
                 <div class="form-group"><textarea name="OBSERVACIONES" class="form-control txtObservaciones" rows="3" style="resize: none;"></textarea></div>
             </div>
@@ -564,7 +597,7 @@
 
             <div style="max-height: 540px; overflow-y: auto; padding-right: 8px;">
                 <div class="seccion-titulo">Datos del Documento</div>
-                <div class="grid-3-col">
+                <div class="grid-4-col">
                     <div class="form-group">
                         <label>Número Pedido</label>
                         <input type="text" name="NUMPEDIDO" id="editNumPedido" class="form-control form-control-bloqueado" readonly />
@@ -572,6 +605,10 @@
                     <div class="form-group">
                         <label>Fecha de Pedido *</label>
                         <input type="date" name="FECHPED" id="editFechPed" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Número Oferta</label>
+                        <input type="text" name="NUMOFERTA" id="editNumOferta" class="form-control" autocomplete="off" />
                     </div>
                     <div class="form-group">
                         <label>Fecha de Entrega</label>
@@ -618,25 +655,13 @@
                     <tbody></tbody>
                 </table>
 
-                <div class="seccion-titulo">Condiciones de Cobro y Tesorería</div>
-                <div class="grid-fpago">
-                    <div class="form-group">
-                        <label>Forma de Pago *</label>
-                        <select name="FCOBRO" id="editFcobro" class="form-control slcFcobro" required onchange="sincronizarReglaPago(this)">
-                            <option value="">Seleccione...</option>
-                            @if (ViewBag.FormasPago != null)
-                            {
-                                foreach (var fp in ViewBag.FormasPago)
-                                {
-                                    <option value="@fp.CODIGO" data-cobros="@fp.NUMCOBROS" data-vto="@fp.PRIMVENCI" data-dvto="@fp.DIASVENCI">@fp.FORMACOBPAG</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Nº de cobros</label><input type="number" id="editNcb" class="form-control form-control-bloqueado txtNcb" readonly value="1" /></div>
-                    <div class="form-group"><label>Primer vencimiento</label><input type="number" id="editVto" class="form-control form-control-bloqueado txtVto" readonly value="0" /></div>
-                    <div class="form-group"><label>Dias entre vtos</label><input type="number" id="editDvto" class="form-control form-control-bloqueado txtDvto" readonly value="0" /></div>
+                <div class="seccion-titulo">Resumen Económico del Pedido</div>
+                <div class="grid-3-col" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                    <div class="form-group"><label>Base Imponible Total</label><input type="text" class="form-control form-control-bloqueado txt-total-base" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Importe IVA Total</label><input type="text" class="form-control form-control-bloqueado txt-total-iva" readonly value="0.00" style="text-align: right; font-weight: bold;" /></div>
+                    <div class="form-group"><label>Total del Pedido</label><input type="text" class="form-control form-control-bloqueado txt-total-general" readonly value="0.00" style="text-align: right; font-weight: bold; background-color: #e2f0d9 !important; color: #385723 !important;" /></div>
                 </div>
+
                 <div class="seccion-titulo">Observaciones</div>
                 <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control txtObservaciones" rows="3" style="resize: none;"></textarea></div>
             </div>
@@ -702,8 +727,8 @@
                     <tr>
                         <th>Número Pedido</th>
                         <th>Fecha</th>
+                        <th>Número Oferta</th>
                         <th>Estado</th>
-                        <th>Forma de cobro</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -735,23 +760,31 @@
     var cacheUltimoFiltroCliente = "";
 
     $(document).ready(function() {
+        var toastExito = sessionStorage.getItem("ToastExito");
+        if (toastExito) {
+            crearToast(toastExito, "success");
+            sessionStorage.removeItem("ToastExito");
+        }
+
         $('#tablaPedidos').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
             "order": [[0, "asc"]],
             "scrollY": "400px",
-            "columnDefs": [ { "targets": 6, "orderable": false } ]
+            "columnDefs": [ { "targets": 8, "orderable": false } ]
         });
 
         @if (TempData["MensajeExito"] != null) {
-            <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "exito");</text>
+            <text>crearToast("@Html.Raw(TempData["MensajeExito"])", "success");</text>
         }
         @if (TempData["Error"] != null) {
             <text>crearToast("@Html.Raw(TempData["Error"])", "error");</text>
         }
 
-        $(document).on('input', '.num-canti, .num-euros, .num-dtoarti', function() {
+        $(document).on('input', '.num-canti, .num-euros, .num-dtoarti, .num-ivarti', function() {
+            var $modal = $(this).closest('.modal-overlay');
             calcularImporteFila($(this).closest('tr'));
+            actualizarTotalesGlobales($modal);
         });
 
         $(document).on('click', function(e) {
@@ -760,6 +793,36 @@
             if (!$(e.target).closest('#buscarClienteAlb, #sugerenciasClienteAlb').length) { $('#sugerenciasClienteAlb').hide(); }
         });
     });
+
+    function actualizarTotalesGlobales($modal) {
+        var acumuladoBase = 0;
+        var acumuladoIva = 0;
+
+        $modal.find('.tblArticulos tbody tr').each(function() {
+            var $f = $(this);
+            if ($f.find('.txt-arti').val() === "") return true;
+
+            var canti = parseFloat($f.find('.num-canti').val()) || 0;
+            var euros = parseFloat($f.find('.num-euros').val()) || 0;
+            var dto = parseFloat($f.find('.num-dtoarti').val()) || 0;
+            var ivarti = parseFloat($f.find('.num-ivarti').val()) || 0;
+
+            var baseLinea = canti * euros * (1 - (dto / 100));
+            baseLinea = Math.round(baseLinea * 100) / 100;
+
+            var ivaLinea = baseLinea * (ivarti / 100);
+            ivaLinea = Math.round(ivaLinea * 100) / 100;
+
+            acumuladoBase += baseLinea;
+            acumuladoIva += ivaLinea;
+        });
+
+        var acumuladoTotal = acumuladoBase + acumuladoIva;
+
+        $modal.find('.txt-total-base').val(acumuladoBase.toFixed(2));
+        $modal.find('.txt-total-iva').val(acumuladoIva.toFixed(2));
+        $modal.find('.txt-total-general').val(acumuladoTotal.toFixed(2));
+    }
 
     function cargarYEditarPedido(numPedido) {
         $.ajax({
@@ -772,9 +835,9 @@
 
                     $('#editNumPedido').val(numPedido);
                     $('#editFechPed').val(primerRegistro.FECHA);
+                    $('#editNumOferta').val(primerRegistro.NUMOFERTA);
                     $('#editFechEnt').val(primerRegistro.FECHENT || '');
                     $('#editCuenta').val(primerRegistro.CUENTA);
-                    $('#editFcobro').val(primerRegistro.FCOBRO);
                     $('#editObservaciones').val(primerRegistro.OBSERVACIONES);
 
                     $('#editNombreFiscal').val(primerRegistro.NOMBRE_FISCAL);
@@ -785,8 +848,6 @@
                     $('#editProvincia').val(primerRegistro.PROVINCIA);
                     $('#editTelefono').val(primerRegistro.TELEFONO);
                     $('#editEmail').val(primerRegistro.EMAIL);
-
-                    sincronizarReglaPago(document.getElementById('editFcobro'));
 
                     var $tbody = $('#tablaArticulosEditar tbody');
                     if ($tbody.length == 0) {
@@ -821,6 +882,7 @@
                         </tr>`;
                         $tbody.append(trHtml);
                     }
+                    actualTotalesGlobales($('#modalEditar'));
                     $('#modalEditar').css('display', 'flex');
                 }
             }
@@ -874,6 +936,7 @@
             $fila.find('.txt-desarti, .txt-unidad, .num-importe').val('');
             $fila.find('.num-euros').val('0.0000');
             $fila.find('.num-ivarti').val('0.00');
+            actualizarTotalesGlobales($(input).closest('.modal-overlay'));
             return;
         }
 
@@ -897,24 +960,14 @@
 
     function seleccionarArticuloFila(elementoElement, arti, desarti, unidad, iva) {
         var $fila = $(elementoElement).closest('tr');
+        var $modal = $(elementoElement).closest('.modal-overlay');
         $fila.find('.txt-arti').val(arti);
         $fila.find('.txt-desarti').val(desarti);
         $fila.find('.txt-unidad').val(unidad);
         $fila.find('.num-ivarti').val(parseFloat(iva).toFixed(2));
         $fila.find('.boxSugerenciasArticulos').hide();
         calcularImporteFila($fila);
-    }
-
-    function sincronizarReglaPago(selectElement) {
-        var $opcion = $(selectElement).find('option:selected');
-        var $modal = $(selectElement).closest('.modal-overlay');
-        if ($opcion.val() !== "") {
-            $modal.find('.txtNcb').val($opcion.data('cobros'));
-            $modal.find('.txtVto').val($opcion.data('vto'));
-            $modal.find('.txtDvto').val($opcion.data('dvto'));
-        } else {
-            $modal.find('.txtNcb').val(1); $modal.find('.txtVto').val(0); $modal.find('.txtDvto').val(0);
-        }
+        actualizarTotalesGlobales($modal);
     }
 
     function calcularImporteFila($fila) {
@@ -951,7 +1004,11 @@
 
     function eliminarFilaArticulo(boton) {
         var $table = $(boton).closest('table');
-        if ($table.find('tbody tr').length > 1) { $(boton).closest('tr').remove(); }
+        var $modal = $(boton).closest('.modal-overlay');
+        if ($table.find('tbody tr').length > 1) {
+            $(boton).closest('tr').remove();
+            actualizarTotalesGlobales($modal);
+        }
         else { crearToast("Un pedido debe tener como mínimo una línea de artículo.", "error"); }
     }
 
@@ -994,21 +1051,30 @@
         }
     }
 
-    function abrirModalCrear() { $('#modalCrear').css('display', 'flex'); }
+    function abrirModalCrear() { var $modal = $('#modalCrear'); actualizarTotalesGlobales($modal); $modal.css('display', 'flex'); }
     function abrirModalEliminar(numpedido, cliente) {
         $('#deletePedidoHidden').val(numpedido); $('#deletePedidoSpan').text(numpedido); $('#deleteClienteSpan').text(cliente); $('#modalEliminar').css('display', 'flex');
     }
     function cerrarModal(id) { $('#' + id).css('display', 'none'); }
     window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) { $('.modal-overlay').css('display', 'none'); } }
 
-    function crearToast(m, t) {
-        var svg = t === 'exito' ? '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-        var html = '<div class="toast-alerta ' + (t === 'error' ? 'toast-error' : '') + '"><span style="display:flex;align-items:center;">' + svg + '</span><span>' + m + '</span></div>';
-        var $el = $(html); $('#toastContainer').append($el);
-        setTimeout(function() { $el.addClass('mostrar'); }, 50);
-        setTimeout(function() { $el.removeClass('mostrar'); setTimeout(function() { $el.remove(); }, 300); }, 3500);
-    }
+    function crearToast(mensaje, tipo) {
+        var container = document.getElementById('toastContainer');
+        if (!container) return;
 
+        var toast = document.createElement('div');
+        toast.className = 'custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error');
+        toast.innerText = mensaje;
+
+        container.appendChild(toast);
+
+        setTimeout(function() {
+            toast.style.animation = 'fadeOutToast 0.3s ease-out forwards';
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 4000);
+    }
 
     function abrirModalAlbaranar() {
         $('#modalAlbaranar').css('display', 'flex');
@@ -1073,8 +1139,8 @@
                         var row = '<tr onclick="seleccionarPedidoAlbaran(\'' + ped.NUMPEDIDO + '\')" style="cursor:pointer;">' +
                                   '<td><strong>' + ped.NUMPEDIDO + '</strong></td>' +
                                   '<td>' + ped.FECHAPED + '</td>' +
-                                  '<td>' + (ped.ESTADO == '101' ? 'Pendiente' : (ped.ESTADO == '104' ? 'Parcial' : 'Activo')) + '</td>' +
-                                  '<td>' + ped.FCOBRO + '</td></tr>';
+                                  '<td>' + ped.NUMOFERTA + '</td>' +
+                                  '<td>' + (ped.ESTADO == '101' ? 'Pendiente' : (ped.ESTADO == '104' ? 'Parcial' : 'Activo')) + '</td></tr>';
                         $tbody.append(row);
                     });
                     if ($.fn.DataTable.isDataTable('#tablaPedidosAlbaran')) {
@@ -1171,5 +1237,4 @@
             }
         });
     }
-
 </script>
