@@ -21,9 +21,9 @@
         <EntityTypeShape EntityType="cortechecoModel.estados" Width="1.5" PointX="8.75" PointY="9.75" />
         <EntityTypeShape EntityType="cortechecoModel.facturas" Width="1.5" PointX="0.75" PointY="10.75" />
         <EntityTypeShape EntityType="cortechecoModel.asientos" Width="1.5" PointX="3.375" PointY="10.75" />
-        <EntityTypeShape EntityType="cortechecoModel.pagos" Width="1.5" PointX="11.375" PointY="6.75" />
         <EntityTypeShape EntityType="cortechecoModel.cobros" Width="1.5" PointX="5.375" PointY="10.75" />
         <EntityTypeShape EntityType="cortechecoModel.pedidos" Width="1.5" PointX="7.375" PointY="12.75" />
+        <EntityTypeShape EntityType="cortechecoModel.pagos" Width="1.5" PointX="11.375" PointY="6.75" />
         <EntityTypeShape EntityType="cortechecoModel.albaranes" Width="1.5" PointX="11.375" PointY="11.75" />
       </Diagram>
     </edmx:Diagrams>

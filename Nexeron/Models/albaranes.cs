@@ -33,5 +33,6 @@ namespace Nexeron.Models
         public string ESTADOLIN { get; set; }
         public string FACTURADO { get; set; }
         public string OBSERVACIONES { get; set; }
+        public string FACTURADO { get; set; }
     }
 }

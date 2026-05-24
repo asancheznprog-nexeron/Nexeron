@@ -207,6 +207,7 @@
     <Compile Include="App_Start\BundleConfig2.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\PagosController.cs" />
     <Compile Include="Controllers\CobrosController.cs" />
     <Compile Include="Controllers\AlbaranesController.cs" />
     <Compile Include="Controllers\AsientosController.cs" />
@@ -272,6 +273,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Models\Modelos\Pagos_ext.cs" />
     <Compile Include="Models\Modelos\Cobros_ext.cs" />
     <Compile Include="Models\Modelos\Albaranes_ext.cs" />
     <Compile Include="Models\Modelos\Pedidos_ext.cs" />
@@ -394,6 +396,7 @@
     <Content Include="Views\Asientos\Index.cshtml" />
     <Content Include="Views\Albaranes\Index.cshtml" />
     <Content Include="Views\Cobros\Index.cshtml" />
+    <Content Include="Views\Pagos\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

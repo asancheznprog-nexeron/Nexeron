@@ -7,15 +7,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Nexeron</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            /* PALETA AZUL CORPORATIVA PREMIUM (Estilo SAP / Salesforce moderno) */
+            --primary-color: #2563eb; /* Azul Real para acentos (botones activos, guardar) */
+            --primary-hover: #1d4ed8; /* Hover del acento */
+            --bg-color: #f8fafc; /* Fondo del contenido (un blanco con un toque de azul pizarra) */
+
+            --ui-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); /* ¡Azul corporativo real e indiscutible! */
+            --ui-hover: rgba(255, 255, 255, 0.1);
+            --ui-submenu: rgba(0, 0, 0, 0.15);
+            --ui-submenu-hover: rgba(255, 255, 255, 0.06);
+            --ui-border: rgba(255, 255, 255, 0.12);
+            --text-light: #ffffff;
+            --text-muted: #93c5fd; /* Azul claro/lila para iconos y textos secundarios del menú */
+            --text-dark: #0f172a; /* Texto oscuro principal */
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            color: #333;
+            color: var(--text-dark);
             overflow-x: hidden;
         }
 
+        /* --- SIDEBAR --- */
         .sidebar {
             height: 100vh;
             width: 250px;
@@ -23,13 +46,14 @@
             z-index: 1000;
             top: 0;
             left: -250px;
-            background-color: #2c3e50;
+            background: var(--ui-gradient);
             overflow-x: hidden;
             overflow-y: auto;
-            transition: 0.3s;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            transition: var(--transition);
+            box-shadow: 4px 0 25px rgba(30, 58, 138, 0.15);
             display: flex;
             flex-direction: column;
+            border-right: 1px solid var(--ui-border);
         }
 
             .sidebar.open {
@@ -37,14 +61,15 @@
             }
 
         .sidebar-brand {
-            color: #fff;
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 1.2rem;
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 700;
+            padding: 1.5rem 1.2rem;
             text-align: center;
-            border-bottom: 1px solid #34495e;
-            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--ui-border);
+            margin-bottom: 0.5rem;
             flex-shrink: 0;
+            letter-spacing: -0.5px;
         }
 
         .sidebar-menu-wrapper {
@@ -54,14 +79,15 @@
         }
 
         .sidebar a, .sidebar-toggle {
-            padding: 1rem 1.5rem;
+            padding: 0.9rem 1.5rem;
             text-decoration: none;
-            font-size: 1.05rem;
-            color: #bdc3c7;
+            font-size: 0.98rem;
+            font-weight: 500;
+            color: var(--text-light);
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             background: none;
             border: none;
             width: 100%;
@@ -71,10 +97,20 @@
             font-family: inherit;
         }
 
-            .sidebar a:hover, .sidebar-toggle:hover {
-                color: #fff;
-                background-color: #34495e;
+            .sidebar a svg, .sidebar-toggle svg {
+                color: var(--text-muted);
+                transition: color 0.2s, transform 0.2s;
             }
+
+            .sidebar a:hover, .sidebar-toggle:hover {
+                background-color: var(--ui-hover);
+                color: #ffffff;
+            }
+
+                .sidebar a:hover svg, .sidebar-toggle:hover svg {
+                    color: #ffffff;
+                    transform: translateX(2px);
+                }
 
             .sidebar-toggle .arrow-icon {
                 margin-left: auto;
@@ -82,65 +118,72 @@
             }
 
         .sidebar-group.active .sidebar-toggle {
-            color: #fff;
-            background-color: #34495e;
+            background-color: var(--ui-hover);
+            font-weight: 600;
         }
 
         .sidebar-group.active .arrow-icon {
             transform: rotate(180deg);
         }
 
+        /* --- SUBMENÚS --- */
         .sidebar-submenu {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.25s ease-out;
-            background-color: #1a252f;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--ui-submenu);
             display: flex;
             flex-direction: column;
         }
 
         .sidebar-group.active .sidebar-submenu {
             max-height: 450px;
+            padding: 0.25rem 0;
         }
 
         .sidebar-submenu a {
-            padding: 0.75rem 1.5rem 0.75rem 2.5rem;
-            font-size: 0.95rem;
-            color: #a0aab2;
+            padding: 0.7rem 1.5rem 0.7rem 2.8rem;
+            font-size: 0.92rem;
+            color: var(--text-muted);
         }
 
             .sidebar-submenu a:hover {
-                color: #fff;
-                background-color: #243342;
-                padding-left: 2.8rem;
+                color: #ffffff;
+                background-color: var(--ui-submenu-hover);
+                padding-left: 3.1rem;
             }
 
+        /* --- SIDEBAR FOOTER --- */
         .sidebar-footer {
             margin-top: auto;
             padding: 1.2rem;
-            color: #7f8c8d;
+            color: var(--text-muted);
             text-align: center;
-            font-size: 0.85rem;
-            border-top: 1px solid #34495e;
-            background-color: #243342;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-top: 1px solid var(--ui-border);
+            background-color: var(--ui-submenu);
             flex-shrink: 0;
         }
 
+        /* --- MAIN WRAPPER --- */
         .main-wrapper {
-            transition: margin-left .3s;
+            transition: var(--transition);
         }
 
             .main-wrapper.shifted {
                 margin-left: 250px;
             }
 
+        /* --- NAVBAR --- */
         .navbar {
-            background-color: #2c3e50;
-            padding: 1rem 1.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background: var(--ui-gradient);
+            padding: 0.85rem 1.5rem;
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--ui-border);
         }
 
         .nav-left {
@@ -157,50 +200,69 @@
         .btn-toggle {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             cursor: pointer;
             color: #ffffff;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            transition: background 0.2s;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
             .btn-toggle:hover {
-                background-color: #34495e;
+                background-color: var(--ui-hover);
             }
 
-        .content-body {
-            padding: 2rem;
+        .navbar h2 {
+            color: #ffffff !important;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
+        /* --- CONTENT BODY --- */
+        .content-body {
+            padding: 2.5rem 2rem;
+        }
+
+        /* --- USER DROPDOWN --- */
         .user-dropdown {
             position: relative;
             display: inline-block;
         }
 
         .user-dropdown-toggle {
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--ui-border);
             color: #ffffff;
-            font-size: 1rem;
+            font-size: 0.92rem;
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 0.55rem 1.1rem;
+            border-radius: 50px;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-family: inherit;
+            transition: all 0.2s ease;
         }
+
+            .user-dropdown-toggle:hover {
+                background-color: var(--ui-hover);
+            }
 
         .user-dropdown-menu {
             display: none;
             position: absolute;
             right: 0;
             background-color: #ffffff;
-            min-width: 160px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 4px;
+            min-width: 180px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 14px;
             z-index: 1001;
-            margin-top: 0.5rem;
+            margin-top: 0.6rem;
             overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
             .user-dropdown-menu.show {
@@ -208,20 +270,80 @@
             }
 
             .user-dropdown-menu a {
-                color: #333333;
-                padding: 0.8rem 1.2rem;
+                color: #27272a;
+                padding: 0.85rem 1.2rem;
                 text-decoration: none;
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                font-size: 0.95rem;
-                transition: background-color 0.2s, color 0.2s;
+                gap: 12px;
+                font-size: 0.92rem;
+                font-weight: 500;
+                transition: all 0.2s ease;
             }
 
                 .user-dropdown-menu a:hover {
-                    background-color: #f1f3f5;
-                    color: #007bff;
+                    background-color: #f4f4f5;
+                    color: #18181b;
                 }
+
+                .user-dropdown-menu a svg {
+                    opacity: 0.7;
+                    color: #27272a;
+                    transition: all 0.2s ease;
+                }
+
+                .user-dropdown-menu a:hover svg {
+                    opacity: 1;
+                    color: #18181b;
+                }
+
+        /* ==========================================================================
+           FONDO INTERNO: OVERRIDES GLOBALES PARA CONTROLAR LAS 20 VISTAS DEL ERP
+           ========================================================================== */
+
+        /* 1. Botones de submenú activos (Ofertas, Pedidos, etc.) y botones de guardar */
+        body .btn-submenu.active,
+        body .btn-submit {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: #ffffff !important;
+        }
+
+            body .btn-submenu.active:hover,
+            body .btn-submit:hover {
+                background-color: var(--primary-hover) !important;
+                border-color: var(--primary-hover) !important;
+            }
+
+        /* 2. Títulos de secciones y títulos de modales internos */
+        body .seccion-titulo,
+        body .modal-content h3 {
+            color: var(--primary-color) !important;
+        }
+
+        /* 3. Captura y corrige los botones que tengan estilos inline '#007bff' inyectados a mano */
+        body [style*="background-color: #007bff"],
+        body [style*="background-color:#007bff"] {
+            background-color: var(--primary-color) !important;
+        }
+
+            body [style*="background-color: #007bff"]:hover,
+            body [style*="background-color:#007bff"]:hover {
+                background-color: var(--primary-hover) !important;
+            }
+
+        /* 4. Enfoque (Focus) de los inputs internos de las tablas para que brillen en Azul Real */
+        body .form-control:focus,
+        body .input-tabla:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        }
+
+        /* 5. Estilo personalizado para las barras de scroll internas de los modales */
+        body div::-webkit-scrollbar-thumb {
+            background-color: var(--text-muted);
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>

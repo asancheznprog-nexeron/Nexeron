@@ -94,7 +94,7 @@ namespace Nexeron.Controllers
             }
 
             
-            return RedirectToAction("Cuentas");
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -174,7 +174,7 @@ namespace Nexeron.Controllers
                 }
             }
 
-            return RedirectToAction("Cuentas");
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -261,7 +261,7 @@ namespace Nexeron.Controllers
                 }
             }
 
-            return RedirectToAction("Cuentas");
+            return RedirectToAction("Index");
         }
     }
 
