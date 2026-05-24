@@ -1,0 +1,498 @@
+﻿@model IEnumerable<Nexeron.Models.InventarioStockModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Inventario";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<style>
+    .wrap-contabilidad {
+        max-width: 95%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .submenu-container {
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .btn-submenu {
+        padding: 0.6rem 1.2rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        text-decoration: none;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+        .btn-submenu:hover {
+            background-color: #e2e6ea;
+            color: #333;
+        }
+
+        .btn-submenu.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .header-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f3f5;
+        padding-bottom: 1rem;
+    }
+
+        .header-acciones h3 {
+            margin: 0;
+            color: #495057;
+        }
+
+    .grupo-botones {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: abrirPopup 0.3s ease-out;
+    }
+
+    @@keyframes abrirPopup {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .btn-cerrar {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+
+    .form-control {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+
+    .btn-tabla {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #6c757d;
+        padding: 4px 6px;
+    }
+
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 3000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .custom-toast {
+        padding: 1rem 1.5rem;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 300px;
+        animation: slideInToast 0.3s ease-out forwards;
+    }
+
+    .toast-success {
+        background-color: #28a745;
+    }
+
+    .toast-error {
+        background-color: #dc3545;
+    }
+
+    @@keyframes slideInToast {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .tabla-movimientos {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+        .tabla-movimientos th, .tabla-movimientos td {
+            border: 1px solid #dee2e6;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .tabla-movimientos th {
+            background-color: #f8f9fa;
+        }
+</style>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="wrap-contabilidad">
+    <div class="submenu-container">
+        <a href="@Url.Action("Index", "Referencias")" class="btn-submenu">Artículos</a>
+        <a href="@Url.Action("Tipos", "Referencias")" class="btn-submenu">Tipos de Artículo</a>
+        <a href="@Url.Action("Unidades", "Referencias")" class="btn-submenu">Unidades de Medida</a>
+        <a href="@Url.Action("Index", "Inventario")" class="btn-submenu active">Inventario</a>
+    </div>
+
+    <div class="card">
+        <div class="header-acciones">
+            <h3>Inventario de Artículos</h3>
+            <div class="grupo-botones">
+                <button class="btn-nuevo" onclick="abrirModalRegularizar()" style="background-color: #007bff;">Regularizar Inventario</button>
+            </div>
+        </div>
+
+        <table id="tablaInventario" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Artículo</th>
+                    <th>Descripción</th>
+                    <th style="text-align: right;">Stock Actual</th>
+                    <th style="text-align: center;">Movimientos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.Articulo</strong></td>
+                            <td>@item.Descripcion</td>
+                            <td style="text-align: right; font-weight: bold;">@item.Stock.ToString("N2")</td>
+                            <td style="text-align: center;">
+                                <button type="button" class="btn-tabla" onclick="verMovimientos('@item.Articulo')" title="Ver Movimientos">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Regularizar -->
+<div id="modalRegularizar" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalRegularizar')">&times;</span>
+        <h3 style="margin-top:0;">Regularizar Inventario</h3>
+        <input type="hidden" id="regId" value="0" />
+        <div class="form-grid">
+            <div class="form-group col-span-2">
+                <label>Artículo *</label>
+                <input type="text" id="regArticulo" class="form-control" placeholder="Código del artículo" onkeyup="buscarArticuloReg(this)" autocomplete="off" />
+                <div class="sugerencias-autocompletado" id="sugRegArticulo" style="display:none;"></div>
+            </div>
+            <div class="form-group col-span-2">
+                <label>Descripción</label>
+                <input type="text" id="regDescripcion" class="form-control" readonly />
+            </div>
+            <div class="form-group">
+                <label>Cantidad *</label>
+                <input type="number" step="any" id="regCantidad" class="form-control" placeholder="Positivo=entrada, Negativo=salida" />
+            </div>
+            <div class="form-group">
+                <label>Tipo</label>
+                <select id="regTipo" class="form-control"><option value="M">Manual</option></select>
+            </div>
+            <div class="form-group">
+                <label>Referencia (opcional)</label>
+                <input type="text" id="regReferencia" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Cuenta (opcional)</label>
+                <input type="text" id="regCuenta" class="form-control" />
+            </div>
+        </div>
+        <button type="button" class="btn-submit" onclick="guardarRegularizacion()">Guardar Movimiento</button>
+    </div>
+</div>
+
+<!-- Modal Movimientos -->
+<div id="modalMovimientos" class="modal-overlay">
+    <div class="modal-content">
+        <span class="btn-cerrar" onclick="cerrarModal('modalMovimientos')">&times;</span>
+        <h3 style="margin-top:0;">Movimientos de <span id="movArticuloTitulo"></span></h3>
+        <table class="tabla-movimientos" id="tablaMovimientos">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                    <th>Tipo</th>
+                    <th>Origen</th>
+                    <th>Referencia</th>
+                    <th>Cuenta</th>
+                    <th style="text-align:center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#tablaInventario').DataTable({
+            language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+            pageLength: 10,
+            order: [[0, "asc"]]
+        });
+    });
+
+    function abrirModalRegularizar(id) {
+        $('#regId').val(0);
+        $('#regArticulo').val('');
+        $('#regDescripcion').val('');
+        $('#regCantidad').val('');
+        $('#regReferencia').val('');
+        $('#regCuenta').val('');
+        $('#modalRegularizar').css('display', 'flex');
+    }
+
+    function buscarArticuloReg(input) {
+        var term = $(input).val().trim();
+        var $box = $('#sugRegArticulo');
+        if (term.length < 1) { $box.hide().empty(); return; }
+        $.ajax({
+            url: '@Url.Action("BuscarArticulos", "Referencias")',
+            type: 'POST',
+            data: { term: term },
+            success: function(data) {
+                $box.empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(a) {
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarArticuloReg(\'' + a.ARTI + '\', \'' + a.DESARTI.replace(/'/g, "\\'") + '\')">' + a.ARTI + ' - ' + a.DESARTI + '</div>');
+                    });
+                    $box.show();
+                } else { $box.hide(); }
+            }
+        });
+    }
+
+    function seleccionarArticuloReg(arti, des) {
+        $('#regArticulo').val(arti);
+        $('#regDescripcion').val(des);
+        $('#sugRegArticulo').hide();
+    }
+
+    function guardarRegularizacion() {
+        var data = {
+            Id: $('#regId').val() || 0,
+            Articulo: $('#regArticulo').val(),
+            Descripcion: $('#regDescripcion').val(),
+            Cantidad: $('#regCantidad').val().replace(',', '.'),
+            Tipo: $('#regTipo').val(),
+            Origen: 'MANUAL',
+            Referencia: $('#regReferencia').val(),
+            Cuenta: $('#regCuenta').val()
+        };
+        if (!data.Articulo || data.Cantidad === '') {
+            crearToast('Artículo y cantidad son obligatorios', 'error');
+            return;
+        }
+        $.ajax({
+            url: '@Url.Action("GuardarMovimientoManual", "Inventario")',
+            type: 'POST',
+            data: data,
+            success: function(res) {
+                if (res.success) {
+                    crearToast('Movimiento guardado', 'success');
+                    cerrarModal('modalRegularizar');
+                    location.reload();
+                } else {
+                    crearToast(res.message, 'error');
+                }
+            }
+        });
+    }
+
+    function verMovimientos(articulo) {
+        $('#movArticuloTitulo').text(articulo);
+        $.ajax({
+            url: '@Url.Action("ObtenerMovimientosArticulo", "Inventario")',
+            type: 'GET',
+            data: { articulo: articulo },
+            success: function(data) {
+                var $tbody = $('#tablaMovimientos tbody').empty();
+                if (data && data.length > 0) {
+                    data.forEach(function(m) {
+                        var acciones = '';
+                        if (m.origen === 'MANUAL') {
+                            acciones = '<button class="btn-tabla" onclick="editarMovimiento(' + m.id + ', \'' + m.articulo + '\', \'' + m.descripcion.replace(/'/g, "\\'") + '\', ' + m.cantidad + ', \'' + m.tipo + '\', \'' + m.referencia + '\', \'' + m.cuenta + '\')">✏️</button>' +
+                                       '<button class="btn-tabla" onclick="eliminarMovimiento(' + m.id + ')">🗑️</button>';
+                        }
+                        $tbody.append('<tr>' +
+                            '<td>' + m.fecha + '</td>' +
+                            '<td>' + m.cantidad + '</td>' +
+                            '<td>' + m.tipo + '</td>' +
+                            '<td>' + m.origen + '</td>' +
+                            '<td>' + m.referencia + '</td>' +
+                            '<td>' + m.cuenta + '</td>' +
+                            '<td style="text-align:center;">' + acciones + '</td>' +
+                            '</tr>');
+                    });
+                } else {
+                    $tbody.append('<tr><td colspan="7" style="text-align:center;">Sin movimientos</td></tr>');
+                }
+                $('#modalMovimientos').css('display', 'flex');
+            }
+        });
+    }
+
+    function editarMovimiento(id, arti, desc, cant, tipo, refe, cuenta) {
+        $('#regId').val(id);
+        $('#regArticulo').val(arti);
+        $('#regDescripcion').val(desc);
+        $('#regCantidad').val(cant);
+        $('#regTipo').val(tipo);
+        $('#regReferencia').val(refe);
+        $('#regCuenta').val(cuenta);
+        $('#modalMovimientos').css('display', 'none');
+        $('#modalRegularizar').css('display', 'flex');
+    }
+
+    function eliminarMovimiento(id) {
+        if (!confirm('¿Eliminar este movimiento manual?')) return;
+        $.ajax({
+            url: '@Url.Action("EliminarMovimiento", "Inventario")',
+            type: 'POST',
+            data: { id: id },
+            success: function(res) {
+                if (res.success) {
+                    crearToast('Movimiento eliminado', 'success');
+                    var articulo = $('#movArticuloTitulo').text();
+                    verMovimientos(articulo);
+                } else {
+                    crearToast(res.message, 'error');
+                }
+            }
+        });
+    }
+
+    function crearToast(mensaje, tipo) {
+        var toast = $('<div class="custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error') + '">' + mensaje + '</div>');
+        $('#toastContainer').append(toast);
+        setTimeout(function() { toast.fadeOut(300, function() { $(this).remove(); }); }, 4000);
+    }
+
+    function cerrarModal(id) { $('#' + id).css('display', 'none'); }
+    window.onclick = function(e) { if ($(e.target).hasClass('modal-overlay')) $(e.target).css('display', 'none'); };
+</script>

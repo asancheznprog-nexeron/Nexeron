@@ -807,7 +807,7 @@
             url: '@Url.Action("ObtenerDetalleFactura", "ComprasFacturas")',
             type: 'POST',
             data: { numFactura: numFactura },
-            success: function(lineas) {
+            success: function (lineas) {
                 if(lineas && lineas.length > 0) {
                     var primer = lineas[0];
                     $('#editNumFactura').val(numFactura);
@@ -832,14 +832,14 @@
 
                         var trHtml = `
                         <tr>
-                            <td><input type="text" class="input-tabla form-control-bloqueado" readonly value="${item.ARTI}" /></td>
+                            <td><input type="text" class="input-tabla txt-arti form-control-bloqueado" readonly value="${item.ARTI}" /></td>
                             <td><input type="text" class="input-tabla form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
-                            <td><input type="number" class="input-tabla form-control-bloqueado" readonly value="${parseFloat(item.CANTI).toFixed(2)}" /></td>
+                            <td><input type="number" class="input-tabla num-canti form-control-bloqueado" readonly value="${parseFloat(item.CANTI).toFixed(2)}" /></td>
                             <td><input type="text" class="input-tabla form-control-bloqueado" readonly value="${item.UNIDAD}" /></td>
-                            <td><input type="number" class="input-tabla form-control-bloqueado" readonly value="${parseFloat(item.EUROS).toFixed(4)}" /></td>
-                            <td><input type="number" class="input-tabla form-control-bloqueado" readonly value="${parseFloat(item.DTOARTI).toFixed(2)}" /></td>
-                            <td><input type="text" class="input-tabla" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
-                            <td><input type="number" class="input-tabla form-control-bloqueado" readonly value="${parseFloat(item.IVARTI).toFixed(2)}" /></td>
+                            <td><input type="number" class="input-tabla num-euros form-control-bloqueado" readonly value="${parseFloat(item.EUROS).toFixed(4)}" /></td>
+                            <td><input type="number" class="input-tabla num-dtoarti form-control-bloqueado" readonly value="${parseFloat(item.DTOARTI).toFixed(2)}" /></td>
+                            <td><input type="text" class="input-tabla num-importe" value="${importeFila}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
+                            <td><input type="number" class="input-tabla num-ivarti form-control-bloqueado" readonly value="${parseFloat(item.IVARTI).toFixed(2)}" /></td>
                         </tr>`;
                         $tbody.append(trHtml);
                     }

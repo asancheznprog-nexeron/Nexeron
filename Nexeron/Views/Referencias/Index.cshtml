@@ -400,15 +400,15 @@
         <a href="@Url.Action("Index", "Referencias")" class="btn-submenu active">Artículos</a>
         <a href="@Url.Action("Tipos", "Referencias")" class="btn-submenu">Tipos de Artículo</a>
         <a href="@Url.Action("Unidades", "Referencias")" class="btn-submenu">Unidades de Medida</a>
-        <a href="@Url.Action("Inventario", "Referencias")" class="btn-submenu">Inventario</a>
+        <a href="@Url.Action("Index", "Inventario")" class="btn-submenu">Inventario</a>
     </div>
 
     <div class="card">
         <div class="header-acciones">
             <h3>Fichero General de Artículos</h3>
             <div class="botones-header">
-                <a href="@Url.Action("Index", "Referencias")" class="btn-limpiar">Limpiar Filtros</a>
-                <button type="button" class="btn-info-custom" onclick="abrirModalFiltros()">Filtros Avanzados</button>
+                @*<a href="@Url.Action("Index", "Referencias")" class="btn-limpiar">Limpiar Filtros</a>
+                <button type="button" class="btn-info-custom" onclick="abrirModalFiltros()">Filtros Avanzados</button>*@
                 <button class="btn-nuevo" onclick="abrirModalCrear()">Crear Artículo</button>
             </div>
         </div>
@@ -773,6 +773,19 @@
     </div>
 </div>
 
+<div id="modalConfirmarEliminarProveedor" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px;">
+        <span class="btn-cerrar" onclick="cerrarModal('modalConfirmarEliminarProveedor')">&times;</span>
+        <h3 style="color:#dc3545;">¿Desvincular Proveedor?</h3>
+        <p style="color:#666; font-size:0.9rem;">El proveedor será desvinculado del artículo. Esta acción no se puede deshacer.</p>
+        <div style="background:#f8f9fa; padding:0.8rem; border-radius:4px; margin-bottom:1rem; border-left:4px solid #dc3545;">
+            Código: <span id="provEliminarCodigo" style="font-weight:bold;"></span>
+        </div>
+        <input type="hidden" id="provEliminarId" />
+        <button type="button" class="btn-submit btn-danger" onclick="eliminarProveedorConfirmado()">Confirmar Eliminación</button>
+    </div>
+</div>
+
 <div id="modalEliminarArticulo" class="modal-overlay">
     <div class="modal-content" style="max-width: 450px;">
         <span class="btn-cerrar" onclick="cerrarModal('modalEliminarArticulo')">&times;</span>
@@ -983,9 +996,10 @@
             success: function (data) {
                 var tbody = $('#tbodyProveedores');
                 tbody.empty();
+                window.proveedoresData = {};
                 if (data && data.length > 0) {
                     data.forEach(function (p) {
-                        var jsonP = JSON.stringify(p).replace(/"/g, '&quot;');
+                        window.proveedoresData[p.id] = p;
                         var html = '<tr>' +
                             '<td>' + p.proveedor_codigo + '</td>' +
                             '<td>' + (p.descripcion_proveedor || '') + '</td>' +
@@ -993,8 +1007,8 @@
                             '<td>' + p.descuento + '</td>' +
                             '<td>' + (p.unidad || '') + '</td>' +
                             '<td style="text-align:center;">' +
-                            '<button type="button" class="btn-editar" onclick="editarArticuloProveedor(' + jsonP + ')" style="padding:2px 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>' +
-                            '<button type="button" class="btn-eliminar" onclick="eliminarArticuloProveedor(' + p.id + ')" style="padding:2px 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>' +
+                            '<button type="button" class="btn-editar" onclick="editarArticuloProveedorPorId(' + p.id + ')" style="padding:2px 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>' +
+                            '<button type="button" class="btn-eliminar" onclick="confirmarEliminarProveedor(' + p.id + ')" style="padding:2px 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>' +
                             '</td>' +
                             '</tr>';
                         tbody.append(html);
@@ -1006,7 +1020,9 @@
         });
     }
 
-    function editarArticuloProveedor(p) {
+    function editarArticuloProveedorPorId(id) {
+        var p = window.proveedoresData && window.proveedoresData[id];
+        if (!p) return;
         $('#provId').val(p.id);
         $('#provCodigo').val(p.proveedor_codigo);
         $('#provDesc').val(p.descripcion_proveedor);
@@ -1056,9 +1072,17 @@
         });
     }
 
-    function eliminarArticuloProveedor(id) {
-        if (!confirm('¿Seguro que desea desvincular este proveedor del artículo?')) return;
+    function confirmarEliminarProveedor(id) {
+        var p = window.proveedoresData && window.proveedoresData[id];
+        if (!p) return;
+        $('#provEliminarId').val(id);
+        $('#provEliminarCodigo').text(p.proveedor_codigo);
+        $('#modalConfirmarEliminarProveedor').css('display', 'flex');
+    }
 
+    function eliminarProveedorConfirmado() {
+        var id = $('#provEliminarId').val();
+        if (!id) return;
         $.ajax({
             url: '@Url.Action("EliminarProveedorArticulo", "Referencias")',
             type: 'POST',
@@ -1068,6 +1092,7 @@
                     crearToast('Proveedor eliminado correctamente', 'exito');
                     var articuloCodigo = $('#editCodigoHidden').val();
                     cargarProveedoresArticulo(articuloCodigo);
+                    $('#modalConfirmarEliminarProveedor').css('display', 'none');
                 } else {
                     crearToast('Error al eliminar: ' + res.message, 'error');
                 }

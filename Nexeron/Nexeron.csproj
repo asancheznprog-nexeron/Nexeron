@@ -210,6 +210,7 @@
     <Compile Include="Controllers\ComprasAlbaranesController.cs" />
     <Compile Include="Controllers\ComprasFacturasController.cs" />
     <Compile Include="Controllers\ComprasPedidosController.cs" />
+    <Compile Include="Controllers\InventarioController.cs" />
     <Compile Include="Controllers\PagosController.cs" />
     <Compile Include="Controllers\CobrosController.cs" />
     <Compile Include="Controllers\AlbaranesController.cs" />
@@ -291,12 +292,14 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
-    <Compile Include="Models\Modelos\compras_albaranes.cs" />
-    <Compile Include="Models\Modelos\compras_facturas.cs" />
+    <Compile Include="Models\Modelos\InventarioMovimientoModel.cs" />
+    <Compile Include="Models\Modelos\InventarioStockModel.cs" />
+    <Compile Include="Models\Modelos\compras_albaranes_ext.cs" />
+    <Compile Include="Models\Modelos\compras_facturas_ext.cs" />
     <Compile Include="Models\Modelos\Pagos_ext.cs" />
     <Compile Include="Models\Modelos\Cobros_ext.cs" />
     <Compile Include="Models\Modelos\Albaranes_ext.cs" />
-    <Compile Include="Models\Modelos\compras_pedidos.cs" />
+    <Compile Include="Models\Modelos\compras_pedidos_ext.cs" />
     <Compile Include="Models\Modelos\Pedidos_ext.cs" />
     <Compile Include="Models\Modelos\Facturas_ext.cs" />
     <Compile Include="Models\Modelos\Asientos_ext.cs" />
@@ -426,6 +429,7 @@
     <Content Include="Views\ComprasAlbaranes\Index.cshtml" />
     <Content Include="Views\ComprasFacturas\Index.cshtml" />
     <Content Include="Views\ComprasPedidos\Index.cshtml" />
+    <Content Include="Views\Inventario\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

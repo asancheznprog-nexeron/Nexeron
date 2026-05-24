@@ -19,6 +19,7 @@ namespace Nexeron.Models
         public System.DateTime FECHFAC { get; set; }
         public string NUMPEDIDO { get; set; }
         public string NUMALBARAN { get; set; }
+        public string SFRA { get; set; }
         public Nullable<System.DateTime> FECHALB { get; set; }
         public string CUENTA { get; set; }
         public string FCOBRO { get; set; }

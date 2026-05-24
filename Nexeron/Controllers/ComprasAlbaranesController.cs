@@ -484,6 +484,23 @@ namespace Nexeron.Controllers
                             contadorLinea += 10;
                         }
 
+
+                        foreach (var linea in lineasArticulos)
+                        {
+                            using (var cmdInv = conexion.CreateCommand())
+                            {
+                                cmdInv.Transaction = transaccion;
+                                cmdInv.CommandText = @"INSERT INTO inventario (articulo, descripcion, cantidad, tipo, origen, referencia, cuenta, fecha) 
+                               VALUES (@articulo, @descripcion, @cantidad, 'E', 'COMPRAS', @referencia, @cuenta, @fecha)";
+                                cmdInv.Parameters.AddWithValue("@articulo", linea.ARTI ?? "");
+                                cmdInv.Parameters.AddWithValue("@descripcion", linea.DESARTI ?? "");
+                                cmdInv.Parameters.AddWithValue("@cantidad", linea.CANTI);
+                                cmdInv.Parameters.AddWithValue("@referencia", numAlb);
+                                cmdInv.Parameters.AddWithValue("@cuenta", cuenta);
+                                cmdInv.Parameters.AddWithValue("@fecha", fechAlb);
+                                cmdInv.ExecuteNonQuery();
+                            }
+                        }
                         transaccion.Commit();
                         TempData["MensajeExito"] = "Albarán de compra creado correctamente.";
                     }
@@ -570,6 +587,13 @@ namespace Nexeron.Controllers
                             cmdDelete.Parameters.AddWithValue("@numalb", numAlb);
                             cmdDelete.ExecuteNonQuery();
                         }
+                        using (var cmdDelInv = conexion.CreateCommand())
+                        {
+                            cmdDelInv.Transaction = transaccion;
+                            cmdDelInv.CommandText = "DELETE FROM inventario WHERE origen = 'COMPRAS' AND referencia = @ref";
+                            cmdDelInv.Parameters.AddWithValue("@ref", numAlb);
+                            cmdDelInv.ExecuteNonQuery();
+                        }
 
                         int contadorLinea = 10;
                         foreach (var linea in nuevasLineas)
@@ -607,7 +631,22 @@ namespace Nexeron.Controllers
                             }
                             contadorLinea += 10;
                         }
-
+                        foreach (var linea in nuevasLineas)
+                        {
+                            using (var cmdInv = conexion.CreateCommand())
+                            {
+                                cmdInv.Transaction = transaccion;
+                                cmdInv.CommandText = @"INSERT INTO inventario (articulo, descripcion, cantidad, tipo, origen, referencia, cuenta, fecha) 
+                               VALUES (@articulo, @descripcion, @cantidad, 'E', 'COMPRAS', @referencia, @cuenta, @fecha)";
+                                cmdInv.Parameters.AddWithValue("@articulo", linea.ARTI ?? "");
+                                cmdInv.Parameters.AddWithValue("@descripcion", linea.DESARTI ?? "");
+                                cmdInv.Parameters.AddWithValue("@cantidad", linea.CANTI);
+                                cmdInv.Parameters.AddWithValue("@referencia", numAlb);
+                                cmdInv.Parameters.AddWithValue("@cuenta", cuenta);
+                                cmdInv.Parameters.AddWithValue("@fecha", fechAlb);
+                                cmdInv.ExecuteNonQuery();
+                            }
+                        }
                         transaccion.Commit();
                         TempData["MensajeExito"] = "Albarán de compra actualizado correctamente.";
                     }
@@ -641,6 +680,13 @@ namespace Nexeron.Controllers
                         cmd.Parameters.AddWithValue("@num", id.PadLeft(9));
                         cmd.ExecuteNonQuery();
                     }
+                    using (var cmdDelInv = conexion.CreateCommand())
+                    {
+                        cmdDelInv.CommandText = "DELETE FROM inventario WHERE origen = 'COMPRAS' AND referencia = @ref";
+                        cmdDelInv.Parameters.AddWithValue("@ref", id.PadLeft(9));
+                        cmdDelInv.ExecuteNonQuery();
+                    }
+
                     TempData["MensajeExito"] = "Albarán de compra eliminado correctamente.";
                 }
                 catch (Exception ex)
@@ -833,7 +879,21 @@ namespace Nexeron.Controllers
                             cmdGlobal.Parameters.AddWithValue("@num", numPedido.PadLeft(9));
                             cmdGlobal.ExecuteNonQuery();
                         }
-
+                        foreach (var linea in lineasSeleccionadas)
+                        {
+                            using (var cmdInv = conexion.CreateCommand())
+                            {
+                                cmdInv.Transaction = transaccion;
+                                cmdInv.CommandText = @"INSERT INTO inventario (articulo, descripcion, cantidad, tipo, origen, referencia, cuenta, fecha) 
+                               VALUES (@articulo, @descripcion, @cantidad, 'E', 'COMPRAS', @referencia, @cuenta, NOW())";
+                                cmdInv.Parameters.AddWithValue("@articulo", linea["ARTI"]?.ToString() ?? "");
+                                cmdInv.Parameters.AddWithValue("@descripcion", linea["DESARTI"]?.ToString() ?? "");
+                                cmdInv.Parameters.AddWithValue("@cantidad", Convert.ToDecimal(linea["CANTI"]));
+                                cmdInv.Parameters.AddWithValue("@referencia", nuevoNumAlb);
+                                cmdInv.Parameters.AddWithValue("@cuenta", cuenta);
+                                cmdInv.ExecuteNonQuery();
+                            }
+                        }
                         transaccion.Commit();
                         return Json(new { success = true, mensaje = $"Albarán {nuevoNumAlb} generado correctamente." });
                     }

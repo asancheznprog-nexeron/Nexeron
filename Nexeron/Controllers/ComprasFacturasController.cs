@@ -291,7 +291,7 @@ namespace Nexeron.Controllers
                                     DIRECCION = reader["DIRECCION"].ToString().Trim(),
                                     NUMPEDIDO = reader["NUMPEDIDO"].ToString().Trim(),
                                     NUMALBARAN = reader["NUMALBARAN"].ToString().Trim(),
-                                    SFRA = reader["SFRA"].ToString().Trim()
+                                    SFRA = reader["SFRA"] != DBNull.Value ? reader["SFRA"].ToString().Trim() : ""
                                 });
                             }
                         }
@@ -462,7 +462,7 @@ namespace Nexeron.Controllers
                         {
                             cmdDebeCompras.Transaction = transaccion;
                             cmdDebeCompras.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
-                                                           VALUES ('FC', @asiento, @fechaAs, @obs, '6000000', 'D', @euros)";
+                                                           VALUES ('FC', @asiento, @fechaAs, @obs, '600000000', 'D', @euros)";
                             cmdDebeCompras.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
                             cmdDebeCompras.Parameters.AddWithValue("@fechaAs", DateTime.Now);
                             cmdDebeCompras.Parameters.AddWithValue("@obs", textoObservacion);
@@ -884,7 +884,7 @@ namespace Nexeron.Controllers
                         {
                             cmdDebeCompras.Transaction = transaccion;
                             cmdDebeCompras.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
-                                                           VALUES ('FC', @asiento, @fechaAs, @obs, '6000000', 'D', @euros)";
+                                                           VALUES ('FC', @asiento, @fechaAs, @obs, '600000000', 'D', @euros)";
                             cmdDebeCompras.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
                             cmdDebeCompras.Parameters.AddWithValue("@fechaAs", DateTime.Now);
                             cmdDebeCompras.Parameters.AddWithValue("@obs", textoObservacion);

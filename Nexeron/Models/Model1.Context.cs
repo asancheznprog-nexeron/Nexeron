@@ -48,7 +48,7 @@ namespace Nexeron.Models
         public virtual DbSet<unidades> unidades { get; set; }
         public virtual DbSet<usuarios> usuarios { get; set; }
         public virtual DbSet<compras_albaranes> compras_albaranes { get; set; }
-        public virtual DbSet<compras_facturas> compras_facturas { get; set; }
         public virtual DbSet<compras_pedidos> compras_pedidos { get; set; }
+        public virtual DbSet<compras_facturas> compras_facturas { get; set; }
     }
 }

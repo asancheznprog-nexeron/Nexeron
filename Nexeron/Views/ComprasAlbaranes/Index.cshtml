@@ -757,6 +757,11 @@
     var cacheUltimoFiltroCliente = "";
 
     $(document).ready(function () {
+        var toastExito = sessionStorage.getItem("ToastExito");
+        if (toastExito) {
+            crearToast(toastExito, "success");
+            sessionStorage.removeItem("ToastExito");
+        }
         $('#tablaAlbaranes').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
@@ -1007,8 +1012,11 @@
                     sincronizarReglaPago(document.getElementById('editFcobro'));
 
                     var $tbody = $('#tablaArticulosEditar tbody').empty();
-                    lineas.forEach(function(item) {
-                        var importe = (item.CANTI * item.EUROS * (1 - item.DTOARTI/100)).toFixed(2);
+                    lineas.forEach(function (item) {
+                        var importe = (item.CANTI * item.EUROS * (1 - item.DTOARTI / 100)).toFixed(2);
+                        var accionesTd = (primero.ESTADO == '102') ? '' :
+                            '<td style="text-align:center;"><button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button><button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">×</button></td>';
+
                         var fila = `<tr>
                             <td><div style="position:relative;"><input type="text" class="input-tabla txt-arti" value="${item.ARTI}" onkeyup="buscarArticuloAjax(this)" /><div class="sugerencias-autocompletado boxSugerenciasArticulos"></div></div></td>
                             <td><input type="text" class="input-tabla txt-desarti form-control-bloqueado" readonly value="${item.DESARTI}" /></td>
@@ -1018,10 +1026,13 @@
                             <td><input type="number" class="input-tabla num-dtoarti" value="${item.DTOARTI.toFixed(2)}" step="0.01" /></td>
                             <td><input type="text" class="input-tabla num-importe" value="${importe}" disabled style="background:#f1f3f5;font-weight:bold;text-align:right;" /></td>
                             <td><input type="number" class="input-tabla num-ivarti" value="${item.IVARTI.toFixed(2)}" step="0.01" /></td>
-                            <td style="text-align:center;"><button type="button" class="btn-tabla" onclick="agregarFilaArticulo(this)" style="color:#28a745;">+</button><button type="button" class="btn-tabla" onclick="eliminarFilaArticulo(this)" style="color:#dc3545;">×</button></td>
+                            ${accionesTd}
                         </tr>`;
                         $tbody.append(fila);
                     });
+                    if (primero.ESTADO == '102') {
+                        $('#tablaArticulosEditar thead th:last-child').hide();
+                    }
                     actualizarTotalesGlobales($('#modalEditar'));
                     if (primero.ESTADO == '102') {
                         $('#editFechAlb, #editFcobro, #editObservaciones').prop('disabled', true);
@@ -1198,7 +1209,7 @@
             data: { numAlbaran: numAlbaran, lineasJson: JSON.stringify(lineas) },
             success: function(res) {
                 if (res.success) {
-                    crearToast(res.mensaje, "success");
+                    sessionStorage.setItem("ToastExito", res.mensaje);
                     location.reload();
                 } else {
                     crearToast(res.message, "error");
