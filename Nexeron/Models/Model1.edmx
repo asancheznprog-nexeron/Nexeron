@@ -938,6 +938,32 @@
           <Property Name="password" Type="String" MaxLength="60" FixedLength="false" Unicode="false" />
           <Property Name="fallos" Type="Int32" />
         </EntityType>
+		  <EntityType Name="compras_facturas">
+			  <Key>
+				  <PropertyRef Name="clave" />
+			  </Key>
+			  <Property Name="clave" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+			  <Property Name="NUMFACTURA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+			  <Property Name="FECHFAC" Type="DateTime" Nullable="false" />
+			  <Property Name="NUMPEDIDO" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+			  <Property Name="NUMALBARAN" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+			  <Property Name="SFRA" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+			  <Property Name="FECHALB" Type="DateTime" />
+			  <Property Name="CUENTA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+			  <Property Name="FCOBRO" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+			  <Property Name="NUMLINEA" Type="Int32" Nullable="false" />
+			  <Property Name="ARTI" Type="String" MaxLength="13" FixedLength="false" Unicode="false" />
+			  <Property Name="DESARTI" Type="String" MaxLength="75" FixedLength="false" Unicode="false" />
+			  <Property Name="UNIDAD" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+			  <Property Name="CANTI" Type="Decimal" />
+			  <Property Name="EUROS" Type="Decimal" />
+			  <Property Name="IVARTI" Type="Decimal" />
+			  <Property Name="DTOARTI" Type="Decimal" />
+			  <Property Name="ESTADO" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+			  <Property Name="ESTADOLIN" Type="String" MaxLength="3" FixedLength="false" Unicode="false" />
+			  <Property Name="OBSERVACIONES" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+			  <Property Name="RECTIFICATIVA" Type="String" Nullable="false" MaxLength="9" FixedLength="false" Unicode="false" />
+		  </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
