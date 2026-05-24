@@ -391,6 +391,7 @@
     <div class="submenu-container">
         <a href="@Url.Action("Index", "Ofertas")" class="btn-submenu">Ofertas</a>
         <a href="@Url.Action("Index", "Pedidos")" class="btn-submenu">Pedidos</a>
+        <a href="@Url.Action("Index", "Albaranes")" class="btn-submenu">Albaranes</a>
         <a href="@Url.Action("Index", "Facturas")" class="btn-submenu active">Facturas</a>
     </div>
 
@@ -715,7 +716,7 @@
         $('#tablaFacturas').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
-            "order": [[0, "desc"]],
+            "order": [[0, "asc"]],
             "scrollY": "400px",
             "columnDefs": [ { "targets": 7, "orderable": false } ]
         });

@@ -205,12 +205,9 @@
 
 <div class="wrap-ventas">
     <div class="submenu-container">
-        <a href="@Url.Action("Index", "Cuentas")" class="btn-submenu">Plan de Cuentas</a>
-        <a href="@Url.Action("Index", "Clientes")" class="btn-submenu">Clientes</a>
-        <a href="@Url.Action("Index", "Proveedores")" class="btn-submenu">Proveedores</a>
-        <a href="@Url.Action("Index", "Bancos")" class="btn-submenu">Bancos</a>
-        <a href="@Url.Action("Index", "FormasPago")" class="btn-submenu">Formas de Cobro/Pago</a>
         <a href="@Url.Action("Index", "Asientos")" class="btn-submenu active">Asientos</a>
+        <a href="@Url.Action("Index", "Cobros")" class="btn-submenu">Cobros</a>
+        <a href="@Url.Action("Index", "Pagos")" class="btn-submenu">Pagos</a>
     </div>
 
     <div class="card">
@@ -301,7 +298,7 @@
         $('#tablaAsientos').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 15,
-            "order": [[0, "desc"]],
+            "order": [[0, "asc"]],
             "scrollY": "500px",
             "columnDefs": [ { "targets": 8, "orderable": false } ]
         });
