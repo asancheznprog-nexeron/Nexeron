@@ -11,117 +11,225 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewBag.Title - Mi Proyecto</title>
+    <title>@ViewBag.Title - Nexeron</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Estilos básicos para un diseño limpio y centrado */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #5a189a, #9d4edd);
+            --primary-color: #7b2cbf;
+            --primary-hover: #3c096c;
+            --bg-color: #f8f7fa;
+            --card-bg: #ffffff;
+            --text-dark: #240046;
+            --text-muted: #6b6375;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top right, rgba(157, 78, 221, 0.08), transparent 40%), radial-gradient(circle at bottom left, rgba(90, 24, 154, 0.04), transparent 50%);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
         }
 
         .login-card {
-            background-color: #ffffff;
-            padding: 2.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
+            background-color: var(--card-bg);
+            padding: 3rem 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(90, 24, 154, 0.06);
+            border: 1px solid rgba(157, 78, 221, 0.08);
+            text-align: center;
         }
 
-            .login-card h1 {
-                text-align: center;
-                margin-top: 0;
-                margin-bottom: 1.5rem;
-                color: #333;
-                font-size: 1.5rem;
+        /* --- LOGO CORPORATIVO --- */
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.2rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .logo-container img {
+                width: 100%;
+                height: auto;
+                object-fit: contain;
             }
 
+        .login-card h1 {
+            color: var(--text-dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .login-card .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* --- FORMULARIOS --- */
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.4rem;
+            text-align: left;
         }
 
             .form-group label {
                 display: block;
                 margin-bottom: 0.5rem;
-                color: #555;
-                font-weight: bold;
+                color: var(--text-dark);
+                font-weight: 600;
+                font-size: 0.9rem;
             }
 
         .form-control {
             width: 100%;
-            padding: 0.6rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 0.85rem 1.2rem;
+            border: 1px solid rgba(123, 44, 191, 0.2);
+            border-radius: 12px; /* Esquinas suavizadas para los inputs */
             box-sizing: border-box;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-dark);
+            background-color: #faf9fc;
+            transition: var(--transition);
         }
 
             .form-control:focus {
-                border-color: #007bff;
+                border-color: var(--primary-color);
+                background-color: #ffffff;
+                box-shadow: 0 0 0 4px rgba(123, 44, 191, 0.1);
                 outline: none;
             }
 
+        /* --- BOTÓN REDONDEADO (ESTILO PÍLDORA) --- */
         .btn-submit {
             width: 100%;
-            padding: 0.8rem;
-            background-color: #007bff;
+            padding: 1rem;
+            background: var(--primary-gradient);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 50px; /* Redondeado idéntico a los de la Landing */
             font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(123, 44, 191, 0.2);
             margin-top: 1rem;
+            transition: var(--transition);
+            font-family: inherit;
         }
 
             .btn-submit:hover {
-                background-color: #0056b3;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(123, 44, 191, 0.3);
             }
 
+            .btn-submit:active {
+                transform: translateY(0);
+            }
+
+        /* --- MENSAJES DE ERROR --- */
         .text-danger {
             color: #dc3545;
             font-size: 0.85rem;
             display: block;
-            margin-top: 0.25rem;
+            margin-top: 0.4rem;
+            font-weight: 500;
+            text-align: left;
         }
+
+        .validation-summary-errors {
+            background-color: rgba(220, 53, 69, 0.05);
+            border-left: 4px solid #dc3545;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+            .validation-summary-errors ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+        /* --- LINK ADICIONAL --- */
+        .back-link {
+            display: inline-block;
+            margin-top: 1.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+            .back-link:hover {
+                color: var(--primary-color);
+            }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h1>Iniciar Sesión</h1>
-
-        @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @id = "frmLogin" }))
-        {
-            @Html.AntiForgeryToken()
-            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-            <div class="form-group">
-                <label for="Empresa">Empresa</label>
-                @Html.EditorFor(model => model.Empresa, new { htmlAttributes = new { @class = "form-control", autocomplete = "off" } })
-                @Html.ValidationMessageFor(model => model.Empresa, "", new { @class = "text-danger" })
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-container">
+                <img src="~/Nexeron2.png" alt="Logo Nexeron" />
             </div>
 
-            <div class="form-group">
-                <label for="Usuario">Usuario</label>
-                @Html.EditorFor(model => model.Usuario, new { htmlAttributes = new { @class = "form-control", autocomplete = "username" } })
-                @Html.ValidationMessageFor(model => model.Usuario, "", new { @class = "text-danger" })
-            </div>
+            <h1>¡Hola de nuevo!</h1>
+            <p class="subtitle">Ingresa las credenciales de tu organización para acceder al ERP.</p>
 
-            <div class="form-group">
-                <label for="Password">Contraseña</label>
-                @Html.PasswordFor(model => model.Password, new { @class = "form-control", autocomplete = "current-password" })
-                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-            </div>
+            @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @id = "frmLogin" }))
+            {
+                @Html.AntiForgeryToken()
 
-            <button type="submit" class="btn-submit">Ingresar</button>
-        }
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-group">
+                    <label for="Empresa">Empresa</label>
+                    @Html.EditorFor(model => model.Empresa, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej. MiEmpresa S.L.", autocomplete = "off" } })
+                    @Html.ValidationMessageFor(model => model.Empresa, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label for="Usuario">Usuario</label>
+                    @Html.EditorFor(model => model.Usuario, new { htmlAttributes = new { @class = "form-control", placeholder = "nombre@ejemplo.com", autocomplete = "username" } })
+                    @Html.ValidationMessageFor(model => model.Usuario, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label for="Password">Contraseña</label>
+                    @Html.PasswordFor(model => model.Password, new { @class = "form-control", placeholder = "••••••••", autocomplete = "current-password" })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+
+                <button type="submit" class="btn-submit">Ingresar al Sistema</button>
+            }
+
+            <a href="/" class="back-link">← Volver a la página principal</a>
+        </div>
     </div>
 
 </body>
