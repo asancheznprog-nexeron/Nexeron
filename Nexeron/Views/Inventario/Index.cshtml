@@ -238,6 +238,73 @@
         .tabla-movimientos th {
             background-color: #f8f9fa;
         }
+
+    /* Estilos Autocompletado */
+    .sugerencias-autocompletado {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 0 0 4px 4px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .sugerencia-item {
+        padding: 0.6rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.9rem;
+    }
+
+        .sugerencia-item:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+    input[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+        color: #6c757d;
+    }
+
+    .sugerencias-autocompletado {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 0 0 4px 4px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .sugerencia-item {
+        padding: 0.6rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.9rem;
+    }
+
+        .sugerencia-item:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+    input[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+        color: #6c757d;
+    }
 </style>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -289,21 +356,21 @@
     </div>
 </div>
 
-<!-- Modal Regularizar -->
 <div id="modalRegularizar" class="modal-overlay">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 700px;">
         <span class="btn-cerrar" onclick="cerrarModal('modalRegularizar')">&times;</span>
         <h3 style="margin-top:0;">Regularizar Inventario</h3>
         <input type="hidden" id="regId" value="0" />
-        <div class="form-grid">
-            <div class="form-group col-span-2">
+
+        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="form-group" style="position: relative;">
                 <label>Artículo *</label>
-                <input type="text" id="regArticulo" class="form-control" placeholder="Código del artículo" onkeyup="buscarArticuloReg(this)" autocomplete="off" />
+                <input type="text" id="regArticulo" class="form-control" placeholder="Buscar por código o nombre..." onkeyup="buscarArticuloReg(this)" autocomplete="off" />
                 <div class="sugerencias-autocompletado" id="sugRegArticulo" style="display:none;"></div>
             </div>
-            <div class="form-group col-span-2">
+            <div class="form-group">
                 <label>Descripción</label>
-                <input type="text" id="regDescripcion" class="form-control" readonly />
+                <input type="text" id="regDescripcion" class="form-control" readonly placeholder="Se rellena automáticamente" tabindex="-1" />
             </div>
             <div class="form-group">
                 <label>Cantidad *</label>
@@ -311,22 +378,15 @@
             </div>
             <div class="form-group">
                 <label>Tipo</label>
-                <select id="regTipo" class="form-control"><option value="M">Manual</option></select>
-            </div>
-            <div class="form-group">
-                <label>Referencia (opcional)</label>
-                <input type="text" id="regReferencia" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Cuenta (opcional)</label>
-                <input type="text" id="regCuenta" class="form-control" />
+                <select id="regTipo" class="form-control">
+                    <option value="M">Manual</option>
+                </select>
             </div>
         </div>
         <button type="button" class="btn-submit" onclick="guardarRegularizacion()">Guardar Movimiento</button>
     </div>
 </div>
 
-<!-- Modal Movimientos -->
 <div id="modalMovimientos" class="modal-overlay">
     <div class="modal-content">
         <span class="btn-cerrar" onclick="cerrarModal('modalMovimientos')">&times;</span>
@@ -338,8 +398,6 @@
                     <th>Cantidad</th>
                     <th>Tipo</th>
                     <th>Origen</th>
-                    <th>Referencia</th>
-                    <th>Cuenta</th>
                     <th style="text-align:center;">Acciones</th>
                 </tr>
             </thead>
@@ -362,27 +420,45 @@
         $('#regArticulo').val('');
         $('#regDescripcion').val('');
         $('#regCantidad').val('');
-        $('#regReferencia').val('');
-        $('#regCuenta').val('');
+        $('#sugRegArticulo').hide();
         $('#modalRegularizar').css('display', 'flex');
     }
+
+    // Vaciar la descripción si el usuario altera el código manualmente
+    $('#regArticulo').on('input', function() {
+        $('#regDescripcion').val('');
+    });
+
+    $(document).click(function(e) {
+        if (!$(e.target).closest('#regArticulo, #sugRegArticulo').length) {
+            $('#sugRegArticulo').hide();
+        }
+    });
 
     function buscarArticuloReg(input) {
         var term = $(input).val().trim();
         var $box = $('#sugRegArticulo');
-        if (term.length < 1) { $box.hide().empty(); return; }
+
+        if (term.length < 1) {
+            $box.hide().empty();
+            return;
+        }
+
         $.ajax({
-            url: '@Url.Action("BuscarArticulos", "Referencias")',
+            url: '@Url.Action("BuscarArticulos", "Inventario")',
             type: 'POST',
             data: { term: term },
             success: function(data) {
                 $box.empty();
                 if (data && data.length > 0) {
                     data.forEach(function(a) {
-                        $box.append('<div class="sugerencia-item" onclick="seleccionarArticuloReg(\'' + a.ARTI + '\', \'' + a.DESARTI.replace(/'/g, "\\'") + '\')">' + a.ARTI + ' - ' + a.DESARTI + '</div>');
+                        var descSegura = a.DESARTI ? a.DESARTI.replace(/'/g, "\\'") : '';
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarArticuloReg(\'' + a.ARTI + '\', \'' + descSegura + '\')"><strong>' + a.ARTI + '</strong> - ' + a.DESARTI + '</div>');
                     });
                     $box.show();
-                } else { $box.hide(); }
+                } else {
+                    $box.hide();
+                }
             }
         });
     }
@@ -393,6 +469,18 @@
         $('#sugRegArticulo').hide();
     }
 
+    $(document).ready(function() {
+        $('#regArticulo').on('input', function() {
+            $('#regDescripcion').val('');
+        });
+
+        $(document).click(function(e) {
+            if (!$(e.target).closest('#regArticulo, #sugRegArticulo').length) {
+                $('#sugRegArticulo').hide();
+            }
+        });
+    });
+
     function guardarRegularizacion() {
         var data = {
             Id: $('#regId').val() || 0,
@@ -400,14 +488,14 @@
             Descripcion: $('#regDescripcion').val(),
             Cantidad: $('#regCantidad').val().replace(',', '.'),
             Tipo: $('#regTipo').val(),
-            Origen: 'MANUAL',
-            Referencia: $('#regReferencia').val(),
-            Cuenta: $('#regCuenta').val()
+            Origen: 'MANUAL'
         };
+
         if (!data.Articulo || data.Cantidad === '') {
             crearToast('Artículo y cantidad son obligatorios', 'error');
             return;
         }
+
         $.ajax({
             url: '@Url.Action("GuardarMovimientoManual", "Inventario")',
             type: 'POST',
@@ -435,8 +523,10 @@
                 if (data && data.length > 0) {
                     data.forEach(function(m) {
                         var acciones = '';
+                        var descSegura = m.descripcion ? m.descripcion.replace(/'/g, "\\'") : '';
+
                         if (m.origen === 'MANUAL') {
-                            acciones = '<button class="btn-tabla" onclick="editarMovimiento(' + m.id + ', \'' + m.articulo + '\', \'' + m.descripcion.replace(/'/g, "\\'") + '\', ' + m.cantidad + ', \'' + m.tipo + '\', \'' + m.referencia + '\', \'' + m.cuenta + '\')">✏️</button>' +
+                            acciones = '<button class="btn-tabla" onclick="editarMovimiento(' + m.id + ', \'' + m.articulo + '\', \'' + descSegura + '\', ' + m.cantidad + ', \'' + m.tipo + '\')">✏️</button>' +
                                        '<button class="btn-tabla" onclick="eliminarMovimiento(' + m.id + ')">🗑️</button>';
                         }
                         $tbody.append('<tr>' +
@@ -444,27 +534,23 @@
                             '<td>' + m.cantidad + '</td>' +
                             '<td>' + m.tipo + '</td>' +
                             '<td>' + m.origen + '</td>' +
-                            '<td>' + m.referencia + '</td>' +
-                            '<td>' + m.cuenta + '</td>' +
                             '<td style="text-align:center;">' + acciones + '</td>' +
                             '</tr>');
                     });
                 } else {
-                    $tbody.append('<tr><td colspan="7" style="text-align:center;">Sin movimientos</td></tr>');
+                    $tbody.append('<tr><td colspan="5" style="text-align:center;">Sin movimientos</td></tr>');
                 }
                 $('#modalMovimientos').css('display', 'flex');
             }
         });
     }
 
-    function editarMovimiento(id, arti, desc, cant, tipo, refe, cuenta) {
+    function editarMovimiento(id, arti, desc, cant, tipo) {
         $('#regId').val(id);
         $('#regArticulo').val(arti);
         $('#regDescripcion').val(desc);
         $('#regCantidad').val(cant);
         $('#regTipo').val(tipo);
-        $('#regReferencia').val(refe);
-        $('#regCuenta').val(cuenta);
         $('#modalMovimientos').css('display', 'none');
         $('#modalRegularizar').css('display', 'flex');
     }

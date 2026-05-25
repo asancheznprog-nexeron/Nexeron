@@ -96,7 +96,9 @@ namespace Nexeron.Controllers
             {
                 con.Open();
                 string descripcion = "";
-                using (var cmdArt = new MySqlCommand("SELECT descripcion FROM articulo WHERE articulo = @art", con))
+
+                // Obtener la descripción para evitar inconsistencias si no viene por modelo
+                using (var cmdArt = new MySqlCommand("SELECT articulo FROM articulo WHERE codigo = @art", con))
                 {
                     cmdArt.Parameters.AddWithValue("@art", model.Articulo);
                     var res = cmdArt.ExecuteScalar();
@@ -107,8 +109,8 @@ namespace Nexeron.Controllers
                 {
                     using (var cmdUpd = new MySqlCommand(
                         @"UPDATE inventario SET articulo=@articulo, descripcion=@descripcion, cantidad=@cantidad, 
-                          tipo=@tipo, origen=@origen, referencia=@referencia, cuenta=@cuenta, fecha=NOW() 
-                          WHERE id=@id AND origen='MANUAL'", con))
+                  tipo=@tipo, origen=@origen, referencia='', cuenta='', fecha=NOW() 
+                  WHERE id=@id AND origen='MANUAL'", con))
                     {
                         cmdUpd.Parameters.AddWithValue("@id", model.Id);
                         cmdUpd.Parameters.AddWithValue("@articulo", model.Articulo);
@@ -116,8 +118,6 @@ namespace Nexeron.Controllers
                         cmdUpd.Parameters.AddWithValue("@cantidad", model.Cantidad);
                         cmdUpd.Parameters.AddWithValue("@tipo", model.Tipo ?? "M");
                         cmdUpd.Parameters.AddWithValue("@origen", "MANUAL");
-                        cmdUpd.Parameters.AddWithValue("@referencia", model.Referencia ?? "");
-                        cmdUpd.Parameters.AddWithValue("@cuenta", model.Cuenta ?? "");
                         cmdUpd.ExecuteNonQuery();
                     }
                 }
@@ -125,14 +125,12 @@ namespace Nexeron.Controllers
                 {
                     using (var cmdIns = new MySqlCommand(
                         @"INSERT INTO inventario (articulo, descripcion, cantidad, tipo, origen, referencia, cuenta, fecha) 
-                          VALUES (@articulo, @descripcion, @cantidad, @tipo, 'MANUAL', @referencia, @cuenta, NOW())", con))
+                  VALUES (@articulo, @descripcion, @cantidad, @tipo, 'MANUAL', '', '', NOW())", con))
                     {
                         cmdIns.Parameters.AddWithValue("@articulo", model.Articulo);
                         cmdIns.Parameters.AddWithValue("@descripcion", model.Descripcion ?? descripcion);
                         cmdIns.Parameters.AddWithValue("@cantidad", model.Cantidad);
                         cmdIns.Parameters.AddWithValue("@tipo", model.Tipo ?? "M");
-                        cmdIns.Parameters.AddWithValue("@referencia", model.Referencia ?? "");
-                        cmdIns.Parameters.AddWithValue("@cuenta", model.Cuenta ?? "");
                         cmdIns.ExecuteNonQuery();
                     }
                 }
@@ -176,5 +174,45 @@ namespace Nexeron.Controllers
             }
             return lista;
         }
+
+        [HttpPost]
+        public JsonResult BuscarArticulos(string term)
+        {
+            List<object> resultados = new List<object>();
+            if (string.IsNullOrEmpty(term))
+                return Json(resultados);
+
+            string connStr = Session["cadenaConexion"]?.ToString();
+            if (string.IsNullOrEmpty(connStr))
+                return Json(resultados);
+
+            using (MySqlConnection con = new MySqlConnection(connStr))
+            {
+                con.Open();
+
+                string sql = @"SELECT articulo, descripcion 
+                       FROM articulo 
+                       WHERE articulo LIKE @term OR descripcion LIKE @term 
+                       LIMIT 15";
+
+                using (var cmd = new MySqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@term", "%" + term + "%");
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultados.Add(new
+                            {
+                                ARTI = reader["articulo"].ToString(),
+                                DESARTI = reader["descripcion"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(resultados);
+        }
+
     }
 }
