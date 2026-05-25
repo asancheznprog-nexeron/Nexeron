@@ -573,6 +573,64 @@ namespace Nexeron.Controllers
                 {
                     try
                     {
+                       
+                        string cuenta = "";
+                        string fcobro = "";
+                        string sfraOriginal = "";
+                        string nombreProveedor = "PROVEEDOR DESCONOCIDO";
+                        decimal totalBaseImponible = 0;
+                        Dictionary<int, decimal> desgloseIva = new Dictionary<int, decimal>();
+
+                        using (var cmdOrig = conexion.CreateCommand())
+                        {
+                            cmdOrig.Transaction = transaccion;
+                            cmdOrig.CommandText = @"
+                        SELECT f.CUENTA, f.FCOBRO, f.SFRA, f.CANTI, f.EUROS, f.DTOARTI, f.IVARTI, p.NOMBRE_FISCAL 
+                        FROM compras_facturas f 
+                        LEFT JOIN proveedores p ON f.CUENTA = p.CUENTA COLLATE utf8mb4_spanish_ci 
+                        WHERE f.NUMFACTURA = @original";
+                            cmdOrig.Parameters.AddWithValue("@original", numFacturaOriginal.PadLeft(9));
+
+                            using (var readerOrig = cmdOrig.ExecuteReader())
+                            {
+                                bool tieneLineas = false;
+                                while (readerOrig.Read())
+                                {
+                                    tieneLineas = true;
+                                    cuenta = readerOrig["CUENTA"].ToString().Trim();
+                                    fcobro = readerOrig["FCOBRO"].ToString().Trim();
+                                    sfraOriginal = readerOrig["SFRA"].ToString().Trim();
+                                    nombreProveedor = readerOrig["NOMBRE_FISCAL"] != DBNull.Value ? readerOrig["NOMBRE_FISCAL"].ToString().Trim() : "PROVEEDOR DESCONOCIDO";
+
+                                    decimal canti = Convert.ToDecimal(readerOrig["CANTI"]);
+                                    decimal euros = Convert.ToDecimal(readerOrig["EUROS"]);
+                                    decimal dtoarti = Convert.ToDecimal(readerOrig["DTOARTI"]);
+                                    decimal ivarti = Convert.ToDecimal(readerOrig["IVARTI"]);
+
+                                    decimal baseLinea = Math.Round((decimal)(canti * euros * (1 - (dtoarti / 100m))), 2);
+                                    decimal ivaLinea = Math.Round((decimal)(baseLinea * (ivarti / 100m)), 2);
+
+                                    totalBaseImponible += baseLinea;
+
+                                    if (ivarti > 0 && ivaLinea > 0)
+                                    {
+                                        int porcentajeIvaInt = Convert.ToInt32(ivarti);
+                                        if (!desgloseIva.ContainsKey(porcentajeIvaInt))
+                                            desgloseIva[porcentajeIvaInt] = 0;
+
+                                        desgloseIva[porcentajeIvaInt] += ivaLinea;
+                                    }
+                                }
+
+                                if (!tieneLineas)
+                                {
+                                    transaccion.Rollback();
+                                    return Json(new { success = false, message = "No se localizaron líneas en el documento origen." });
+                                }
+                            }
+                        }
+
+                       
                         string nuevoNumFactura = "1".PadLeft(9);
                         using (var cmdMax = conexion.CreateCommand())
                         {
@@ -582,32 +640,29 @@ namespace Nexeron.Controllers
                             if (result != null) nuevoNumFactura = result.ToString().PadLeft(9);
                         }
 
+                        
                         using (var cmdClone = conexion.CreateCommand())
                         {
                             cmdClone.Transaction = transaccion;
                             cmdClone.CommandText = @"
-                                INSERT INTO compras_facturas (
-                                    NUMFACTURA, FECHFAC, NUMPEDIDO, NUMALBARAN, SFRA, FECHALB, 
-                                    CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, 
-                                    IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
-                                )
-                                SELECT 
-                                    @nuevoNum, NOW(), NUMPEDIDO, NUMALBARAN, SFRA, FECHALB, 
-                                    CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, (CANTI * -1), EUROS, 
-                                    IVARTI, DTOARTI, '105', '105', CONCAT('Rectificación de factura ', @original), @original
-                                FROM compras_facturas 
-                                WHERE NUMFACTURA = @original";
+                        INSERT INTO compras_facturas (
+                            NUMFACTURA, FECHFAC, NUMPEDIDO, NUMALBARAN, SFRA, FECHALB, 
+                            CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, CANTI, EUROS, 
+                            IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES, RECTIFICATIVA
+                        )
+                        SELECT 
+                            @nuevoNum, NOW(), NUMPEDIDO, NUMALBARAN, SFRA, FECHALB, 
+                            CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, UNIDAD, (CANTI * -1), EUROS, 
+                            IVARTI, DTOARTI, '105', '105', CONCAT('Rectificación de factura ', @original), @original
+                        FROM compras_facturas 
+                        WHERE NUMFACTURA = @original";
 
                             cmdClone.Parameters.AddWithValue("@nuevoNum", nuevoNumFactura);
                             cmdClone.Parameters.AddWithValue("@original", numFacturaOriginal.PadLeft(9));
-
-                            int creadas = cmdClone.ExecuteNonQuery();
-                            if (creadas == 0)
-                            {
-                                return Json(new { success = false, message = "No se localizaron líneas en el documento origen." });
-                            }
+                            cmdClone.ExecuteNonQuery();
                         }
 
+                        
                         using (var cmdUpdateOriginal = conexion.CreateCommand())
                         {
                             cmdUpdateOriginal.Transaction = transaccion;
@@ -616,14 +671,101 @@ namespace Nexeron.Controllers
                             cmdUpdateOriginal.ExecuteNonQuery();
                         }
 
+                        
+                        decimal totalIvaAcumulado = 0;
+                        foreach (var kvp in desgloseIva) { totalIvaAcumulado += kvp.Value; }
+                        decimal totalFacturaDocumento = totalBaseImponible + totalIvaAcumulado;
+
+                        int anioContable = DateTime.Now.Year;
+                        long rangoMinimo = (long)anioContable * 1000000 + 1;
+                        long rangoMaximo = (long)anioContable * 1000000 + 999999;
+                        long numeroAsientoGenerado = rangoMinimo;
+
+                        using (var cmdAsiNum = conexion.CreateCommand())
+                        {
+                            cmdAsiNum.Transaction = transaccion;
+                            cmdAsiNum.CommandText = "SELECT IFNULL(MAX(ASIENTO), @rangoMin - 1) + 1 FROM asientos WHERE ASIENTO BETWEEN @rangoMin AND @rangoMax";
+                            cmdAsiNum.Parameters.AddWithValue("@rangoMin", rangoMinimo);
+                            cmdAsiNum.Parameters.AddWithValue("@rangoMax", rangoMaximo);
+                            numeroAsientoGenerado = Convert.ToInt64(cmdAsiNum.ExecuteScalar());
+                        }
+
+                        string textoObservacion = "RECTIF. COMPRA " + numFacturaOriginal.Trim() + " " + nombreProveedor;
+                        if (textoObservacion.Length > 50) textoObservacion = textoObservacion.Substring(0, 50);
+
+                        
+                        using (var cmdDebeProveedor = conexion.CreateCommand())
+                        {
+                            cmdDebeProveedor.Transaction = transaccion;
+                            cmdDebeProveedor.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
+                                                   VALUES ('RC', @asiento, @fechaAs, @obs, @cuenta, 'D', @euros)";
+                            cmdDebeProveedor.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
+                            cmdDebeProveedor.Parameters.AddWithValue("@fechaAs", DateTime.Now);
+                            cmdDebeProveedor.Parameters.AddWithValue("@obs", textoObservacion);
+                            cmdDebeProveedor.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
+                            cmdDebeProveedor.Parameters.AddWithValue("@euros", totalFacturaDocumento);
+                            cmdDebeProveedor.ExecuteNonQuery();
+                        }
+
+                        
+                        using (var cmdHaberCompras = conexion.CreateCommand())
+                        {
+                            cmdHaberCompras.Transaction = transaccion;
+                            cmdHaberCompras.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
+                                                   VALUES ('RC', @asiento, @fechaAs, @obs, '600000000', 'H', @euros)";
+                            cmdHaberCompras.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
+                            cmdHaberCompras.Parameters.AddWithValue("@fechaAs", DateTime.Now);
+                            cmdHaberCompras.Parameters.AddWithValue("@obs", textoObservacion);
+                            cmdHaberCompras.Parameters.AddWithValue("@euros", totalBaseImponible);
+                            cmdHaberCompras.ExecuteNonQuery();
+                        }
+
+                        
+                        foreach (var tasaIva in desgloseIva)
+                        {
+                            string cuentaIvaFormateada = "472" + tasaIva.Key.ToString().PadLeft(6, '0');
+                            using (var cmdHaberIva = conexion.CreateCommand())
+                            {
+                                cmdHaberIva.Transaction = transaccion;
+                                cmdHaberIva.CommandText = @"INSERT INTO asientos (CONCEPTO, ASIENTO, FECHA_ASIENTO, OBSERVACION, CUENTA, DH, EUROS) 
+                                                   VALUES ('RC', @asiento, @fechaAs, @obs, @cuentaIva, 'H', @euros)";
+                                cmdHaberIva.Parameters.AddWithValue("@asiento", numeroAsientoGenerado);
+                                cmdHaberIva.Parameters.AddWithValue("@fechaAs", DateTime.Now);
+                                cmdHaberIva.Parameters.AddWithValue("@obs", textoObservacion);
+                                cmdHaberIva.Parameters.AddWithValue("@cuentaIva", cuentaIvaFormateada);
+                                cmdHaberIva.Parameters.AddWithValue("@euros", tasaIva.Value);
+                                cmdHaberIva.ExecuteNonQuery();
+                            }
+                        }
+
+                        
+                        using (var cmdPago = conexion.CreateCommand())
+                        {
+                            cmdPago.Transaction = transaccion;
+                            cmdPago.CommandText = @"INSERT INTO pagos (
+                        FPAGO, NUMFAC, FECHA_VEN, IMPORTE, CUENTA, FECHA_LIB, FECH_FAC, BANCO, SFRA, OBSERVACION, EMITIDO, VENCIDO, ESTADO
+                    ) VALUES (
+                        @fpago, @numfac, @fecha_ven, @importe, @cuenta, NULL, @fech_fac, '', @sfra, @observacion, 'N', 0, '101'
+                    )";
+                            cmdPago.Parameters.AddWithValue("@fpago", fcobro);
+                            cmdPago.Parameters.AddWithValue("@numfac", nuevoNumFactura);
+                            cmdPago.Parameters.AddWithValue("@fecha_ven", DateTime.Now);
+                            cmdPago.Parameters.AddWithValue("@importe", totalFacturaDocumento * -1); 
+                            cmdPago.Parameters.AddWithValue("@cuenta", cuenta.PadLeft(9));
+                            cmdPago.Parameters.AddWithValue("@fech_fac", DateTime.Now);
+                            cmdPago.Parameters.AddWithValue("@sfra", nuevoNumFactura.Trim());
+                            cmdPago.Parameters.AddWithValue("@observacion", "Abono Recibido - Fac. Origen: " + numFacturaOriginal.Trim());
+                            cmdPago.ExecuteNonQuery();
+                        }
+
                         transaccion.Commit();
-                        TempData["MensajeExito"] = "Factura rectificativa de compra " + nuevoNumFactura.Trim() + " generada. Documento de origen revocado.";
+                        TempData["MensajeExito"] = "Factura rectificativa de compra " + nuevoNumFactura.Trim() + " generada. Contabilizada (Asiento " + numeroAsientoGenerado + ") y deducida de la cartera de pagos.";
                         return Json(new { success = true });
                     }
                     catch (Exception ex)
                     {
                         transaccion.Rollback();
-                        return Json(new { success = false, message = "Error de consistencia: " + ex.Message });
+                        return Json(new { success = false, message = "Error de consistencia al rectificar y contabilizar la compra: " + ex.Message });
                     }
                 }
             }
@@ -661,7 +803,7 @@ namespace Nexeron.Controllers
                             cmdMax.CommandText = "SELECT IFNULL(MAX(CAST(NUMFACTURA AS UNSIGNED)), 0) + 1 FROM compras_facturas";
                             object result = cmdMax.ExecuteScalar();
                             if (result != null) nuevoNumFactura = result.ToString().PadLeft(9);
-                            else nuevoNumFactura = "000000001";
+                            else nuevoNumFactura = "1".PadLeft(9);
                         }
 
                         string cuenta = "";
@@ -926,9 +1068,9 @@ namespace Nexeron.Controllers
                         {
                             cmdPago.Transaction = transaccion;
                             cmdPago.CommandText = @"INSERT INTO pagos (
-                                FPAGO, NUMFAC, FECHA_VEN, IMPORTE, CUENTA, FECHA_LIB, FECH_FAC, BANCO, SFRA, OBSERVACION, EMITIDO, VENCIDO, ESTADO
+                                FPAGO, NUMFAC, FECHA_VEN, IMPORTE, CUENTA, FECHA_LIB, FECH_FAC, BANCO, OBSERVACION, EMITIDO, VENCIDO, ESTADO
                             ) VALUES (
-                                @fcobro, @numfac, @fecha_ven, @importe, @cuenta, NULL, @fech_fac, '', @sfra, '', 'N', 0, '101'
+                                @fcobro, @numfac, @fecha_ven, @importe, @cuenta, NULL, @fech_fac, '', '', 'N', 0, '101'
                             )";
                             cmdPago.Parameters.AddWithValue("@fcobro", fcobro);
                             cmdPago.Parameters.AddWithValue("@numfac", nuevoNumFactura);
@@ -936,7 +1078,6 @@ namespace Nexeron.Controllers
                             cmdPago.Parameters.AddWithValue("@importe", totalFacturaDocumento);
                             cmdPago.Parameters.AddWithValue("@cuenta", cuenta);
                             cmdPago.Parameters.AddWithValue("@fech_fac", DateTime.Now);
-                            cmdPago.Parameters.AddWithValue("@sfra", numAlbaran.Trim());
                             cmdPago.ExecuteNonQuery();
                         }
 

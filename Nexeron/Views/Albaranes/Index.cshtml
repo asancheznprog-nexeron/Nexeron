@@ -338,10 +338,11 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        z-index: 3000;
+        z-index: 9999;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 0.5rem;
+        pointer-events: none;
     }
 
     .custom-toast {
@@ -353,6 +354,7 @@
         min-width: 320px;
         font-family: system-ui, -apple-system, sans-serif;
         animation: slideInToast 0.3s ease-out forwards;
+        pointer-events: auto;
     }
 
     .toast-success {
@@ -869,7 +871,7 @@
                 <div class="seccion-titulo">Observaciones</div>
                 <div class="form-group"><textarea name="OBSERVACIONES" id="editObservaciones" class="form-control txtObservaciones" rows="3"></textarea></div>
             </div>
-            <button type="submit" class="btn-submit" style="background-color:#007bff;">Guardar Cambios</button>
+            <button type="submit" id="btnGuardarEditar" class="btn-submit" style="background-color:#007bff;">Guardar Cambios</button>
         }
     </div>
 </div>
@@ -1042,6 +1044,12 @@
     var cacheUltimoFiltroCliente = "";
 
     $(document).ready(function () {
+        var toastExito = sessionStorage.getItem("ToastExito");
+        if (toastExito) {
+            crearToast(toastExito, "success");
+            sessionStorage.removeItem("ToastExito");
+        }
+
         $('#tablaAlbaranes').DataTable({
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
@@ -1093,9 +1101,18 @@
     });
 
     function crearToast(mensaje, tipo) {
-        var toast = $('<div class="custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error') + '">' + mensaje + '</div>');
-        $('#toastContainer').append(toast);
-        setTimeout(function() { toast.fadeOut(300, function() { $(this).remove(); }); }, 4000);
+        var contenedor = document.getElementById('toastContainer');
+        if (!contenedor) return;
+        var toast = document.createElement('div');
+        toast.className = 'custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error');
+        toast.innerText = mensaje;
+        contenedor.appendChild(toast);
+        setTimeout(function () {
+            toast.style.animation = 'fadeOutToast 0.3s ease-out forwards';
+            setTimeout(function () {
+                toast.remove();
+            }, 300);
+        }, 4000);
     }
 
     function buscarClienteAjax(input) {
@@ -1112,7 +1129,7 @@
                 $box.empty();
                 if (data && data.length > 0) {
                     data.forEach(function(c) {
-                        $box.append('<div class="sugerencia-item" onclick="injectarCliente(\'' + $modal.attr('id') + '\',\'' + c.CUENTA + '\',\'' + c.NOMBRE_FISCAL + '\',\'' + c.CIF + '\',\'' + c.DIRECCION + '\',\'' + c.CP + '\',\'' + c.POBLACION + '\',\'' + c.PROVINCIA + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
+                        $box.append('<div class="sugerencia-item" onclick="injectarCliente(\'' + $modal.attr('id') + '\',\'' + c.CUENTA + '\',\'' + c.NOMBRE_FISCAL.replace(/'/g, "\\'") + '\',\'' + c.CIF + '\',\'' + c.DIRECCION.replace(/'/g, "\\'") + '\',\'' + c.CP + '\',\'' + c.POBLACION.replace(/'/g, "\\'") + '\',\'' + c.PROVINCIA.replace(/'/g, "\\'") + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
                     });
                     $box.show();
                 } else { $box.hide(); }
@@ -1145,7 +1162,7 @@
                 $box.empty();
                 if (data && data.length > 0) {
                     data.forEach(function(a) {
-                        $box.append('<div class="sugerencia-item" onclick="seleccionarArticuloFila(this,\'' + a.ARTI + '\',\'' + a.DESARTI + '\',\'' + a.UNIDAD + '\',\'' + a.IVARTI + '\')">' + a.ARTI + ' - ' + a.DESARTI + '</div>');
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarArticuloFila(this,\'' + a.ARTI + '\',\'' + a.DESARTI.replace(/'/g, "\\'") + '\',\'' + a.UNIDAD + '\',\'' + a.IVARTI + '\')">' + a.ARTI + ' - ' + a.DESARTI + '</div>');
                     });
                     $box.show();
                 } else { $box.hide(); }
@@ -1466,7 +1483,7 @@
                     lineas = null;
                     return false;
                 }
-                lineas.push({ NUMLINEA: numLinea, CANTI: cantidad });
+                lineas.push({ NUMLINEA: numLinea, CANTI: quantity = cantidad });
             }
         });
 
@@ -1481,7 +1498,7 @@
             data: { numAlbaran: numAlbaran, lineasJson: JSON.stringify(lineas) },
             success: function(res) {
                 if (res.success) {
-                    crearToast(res.mensaje, "success");
+                    sessionStorage.setItem("ToastExito", res.mensaje);
                     location.reload();
                 } else {
                     crearToast(res.message, "error");
@@ -1492,10 +1509,6 @@
             }
         });
     }
-
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#buscarClienteFac, #sugerenciasClienteFac').length) { $('#sugerenciasClienteFac').hide(); }
-    });
 
     function exportarAlbaranPdf(numAlbaran) {
         if (!numAlbaran) return;

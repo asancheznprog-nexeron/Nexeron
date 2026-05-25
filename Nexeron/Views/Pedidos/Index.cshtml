@@ -357,15 +357,29 @@
         background-color: #cce5ff !important;
     }
 
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        pointer-events: none;
+    }
+
     .custom-toast {
-        padding: 1rem 1.5rem;
+        padding: 0.65rem 1.2rem;
         border-radius: 6px;
         color: white;
-        font-weight: bold;
+        font-weight: 600;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        min-width: 320px;
+        min-width: 260px;
+        max-width: 400px;
         font-family: system-ui, -apple-system, sans-serif;
+        font-size: 0.9rem;
         animation: slideInToast 0.3s ease-out forwards;
+        pointer-events: auto;
     }
 
     .toast-success {
@@ -576,7 +590,8 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
-<div class="wrap-ventas">
+<div class="wrap-ventas {
+">
     <div class="submenu-container">
         <a href="@Url.Action("Index", "Ofertas")" class="btn-submenu">Ofertas</a>
         <a href="@Url.Action("Index", "Pedidos")" class="btn-submenu active">Pedidos</a>
@@ -909,7 +924,7 @@
         </div>
 
         <div id="datosClienteAlbaran" style="display:none; margin-top:1rem;">
-            <div class="seccion-titulo">Datos del Cliente</div>
+            <div class="seccion-titulo">Datos del Client</div>
             <div class="grid-3-col">
                 <div class="form-group"><label>CIF/NIF</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbCif" readonly /></div>
                 <div class="form-group"><label>Dirección</label><input type="text" class="form-control form-control-bloqueado" id="clienteAlbDireccion" readonly /></div>
@@ -1071,6 +1086,21 @@
         });
     });
 
+    function crearToast(mensaje, tipo) {
+        var contenedor = document.getElementById('toastContainer');
+        if (!contenedor) return;
+        var toast = document.createElement('div');
+        toast.className = 'custom-toast ' + (tipo === 'success' ? 'toast-success' : 'toast-error');
+        toast.innerText = mensaje;
+        contenedor.appendChild(toast);
+        setTimeout(function () {
+            toast.style.animation = 'fadeOutToast 0.3s ease-out forwards';
+            setTimeout(function () {
+                toast.remove();
+            }, 300);
+        }, 4000);
+    }
+
     function sincronizarReglaPago(selectElement) {
         var $opcion = $(selectElement).find('option:selected');
         var $modal = $(selectElement).closest('.modal-overlay');
@@ -1173,7 +1203,7 @@
                         </tr>`;
                         $tbody.append(trHtml);
                     }
-                    actualizarTotalesGlobales($('#modalEditar'));
+                    updateGlobalTotals = actualizarTotalesGlobales($('#modalEditar'));
                     $('#modalEditar').css('display', 'flex');
                 }
             }
@@ -1196,7 +1226,7 @@
                 $contenedor.empty();
                 if (data && data.length > 0) {
                     data.forEach(function(c) {
-                        var itemHtml = `<div class="sugerencia-item" onclick="injectarCliente('${$modal.attr('id')}', '${c.CUENTA}', '${c.NOMBRE_FISCAL}', '${c.CIF}', '${c.DIRECCION}', '${c.CP}', '${c.POBLACION}', '${c.PROVINCIA}', '${c.TELEFONO}', '${c.EMAIL}')"><strong>${c.CUENTA}</strong> - ${c.NOMBRE_FISCAL}</div>`;
+                        var itemHtml = `<div class="sugerencia-item" onclick="injectarCliente('${$modal.attr('id')}', '${c.CUENTA}', '${c.NOMBRE_FISCAL.replace(/'/g, "\\'")}', '${c.CIF}', '${c.DIRECCION.replace(/'/g, "\\'")}', '${c.CP}', '${c.POBLACION.replace(/'/g, "\\'")}', '${c.PROVINCIA.replace(/'/g, "\\'")}', '${c.TELEFONO}', '${c.EMAIL}')"><strong>${c.CUENTA}</strong> - ${c.NOMBRE_FISCAL}</div>`;
                         $contenedor.append(itemHtml);
                     });
                     $contenedor.show();
@@ -1269,7 +1299,15 @@
         $fila.find('.num-importe').val(importe.toFixed(2));
     }
 
+    var cachedUnitOptions = "";
     function generarOpcionesUnidad(valorSeleccionado) {
+        if (cachedUnitOptions !== "") {
+            var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
+            var $temp = $('<div>' + cachedUnitOptions + '</div>');
+            $temp.find('option').removeAttr('selected');
+            $temp.find('option[value="' + sel + '"]').attr('selected', 'selected');
+            return $temp.html();
+        }
         var html = "";
         var sel = (valorSeleccionado && valorSeleccionado.trim() !== "") ? valorSeleccionado.trim().toUpperCase() : "UD";
         @if (ViewBag.Unidades != null) {
@@ -1280,6 +1318,7 @@
                 </text>
             }
         }
+        cachedUnitOptions = html;
         return html || '<option value="UD" label="UD" selected>UD - UNIDADES</option>';
     }
 
@@ -1390,7 +1429,7 @@
                 $box.empty();
                 if (data && data.length > 0) {
                     data.forEach(function(c) {
-                        $box.append('<div class="sugerencia-item" onclick="seleccionarClienteAlbaran(\'' + c.CUENTA + '\', \'' + c.NOMBRE_FISCAL + '\', \'' + c.CIF + '\', \'' + c.DIRECCION + '\', \'' + c.CP + '\', \'' + c.POBLACION + '\', \'' + c.PROVINCIA + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
+                        $box.append('<div class="sugerencia-item" onclick="seleccionarClienteAlbaran(\'' + c.CUENTA + '\', \'' + c.NOMBRE_FISCAL.replace(/'/g, "\\'") + '\', \'' + c.CIF + '\', \'' + c.DIRECCION.replace(/'/g, "\\'") + '\', \'' + c.CP + '\', \'' + c.POBLACION.replace(/'/g, "\\'") + '\', \'' + c.PROVINCIA.replace(/'/g, "\\'") + '\')">' + c.CUENTA + ' - ' + c.NOMBRE_FISCAL + '</div>');
                     });
                     $box.show();
                 } else { $box.hide(); }
