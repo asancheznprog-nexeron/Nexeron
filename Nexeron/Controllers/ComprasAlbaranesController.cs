@@ -771,10 +771,10 @@ namespace Nexeron.Controllers
                             {
                                 cmdLin.Transaction = transaccion;
                                 cmdLin.CommandText = @"
-                                    SELECT CANTI, ARTI, DESARTI, UNIDAD, EUROS, DTOARTI, IVARTI, ALBARANADO,
-                                           IFNULL((SELECT SUM(a.CANTI) FROM compras_albaranes a WHERE a.NUMPEDIDO = p.NUMPEDIDO AND a.NUMLINEAPED = p.NUMLINEA), 0) as YaAlbaranada
-                                    FROM compras_pedidos p
-                                    WHERE NUMPEDIDO = @num AND NUMLINEA = @linea";
+                            SELECT CANTI, ARTI, DESARTI, UNIDAD, EUROS, DTOARTI, IVARTI, ALBARANADO,
+                                   IFNULL((SELECT SUM(a.CANTI) FROM compras_albaranes a WHERE a.NUMPEDIDO = p.NUMPEDIDO AND a.NUMLINEAPED = p.NUMLINEA), 0) as YaAlbaranada
+                            FROM compras_pedidos p
+                            WHERE NUMPEDIDO = @num AND NUMLINEA = @linea";
                                 cmdLin.Parameters.AddWithValue("@num", numPedido.PadLeft(9));
                                 cmdLin.Parameters.AddWithValue("@linea", numLineaPed);
                                 using (var reader = cmdLin.ExecuteReader())
@@ -805,12 +805,12 @@ namespace Nexeron.Controllers
                             {
                                 cmdIns.Transaction = transaccion;
                                 cmdIns.CommandText = @"INSERT INTO compras_albaranes (
-                                    NUMALB, FECHALB, NUMPEDIDO, NUMLINEAPED, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
-                                    UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES
-                                ) VALUES (
-                                    @numalb, NOW(), @numpedido, @numlineaped, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
-                                    @unidad, @canti, @euros, @ivarti, @dtoarti, '101', '101', @obs
-                                )";
+                            NUMALB, FECHALB, NUMPEDIDO, NUMLINEAPED, CUENTA, FCOBRO, NUMLINEA, ARTI, DESARTI, 
+                            UNIDAD, CANTI, EUROS, IVARTI, DTOARTI, ESTADO, ESTADOLIN, OBSERVACIONES
+                        ) VALUES (
+                            @numalb, NOW(), @numpedido, @numlineaped, @cuenta, @fcobro, @numlinea, @arti, @desarti, 
+                            @unidad, @canti, @euros, @ivarti, @dtoarti, '101', '101', @obs
+                        )";
                                 cmdIns.Parameters.AddWithValue("@numalb", nuevoNumAlb);
                                 cmdIns.Parameters.AddWithValue("@numpedido", numPedido.PadLeft(9));
                                 cmdIns.Parameters.AddWithValue("@numlineaped", numLineaPed);
@@ -849,12 +849,12 @@ namespace Nexeron.Controllers
                         {
                             cmdEst.Transaction = transaccion;
                             cmdEst.CommandText = @"
-                                SELECT 
-                                    SUM(CASE WHEN ALBARANADO = 'N' THEN 1 ELSE 0 END) as Pendientes,
-                                    SUM(CASE WHEN ALBARANADO = 'P' THEN 1 ELSE 0 END) as Parciales,
-                                    SUM(CASE WHEN ALBARANADO = 'S' THEN 1 ELSE 0 END) as Completadas,
-                                    COUNT(*) as Total
-                                FROM compras_pedidos WHERE NUMPEDIDO = @num";
+                        SELECT 
+                            SUM(CASE WHEN ALBARANADO = 'N' THEN 1 ELSE 0 END) as Pendientes,
+                            SUM(CASE WHEN ALBARANADO = 'P' THEN 1 ELSE 0 END) as Parciales,
+                            SUM(CASE WHEN ALBARANADO = 'S' THEN 1 ELSE 0 END) as Completadas,
+                            COUNT(*) as Total
+                        FROM compras_pedidos WHERE NUMPEDIDO = @num";
                             cmdEst.Parameters.AddWithValue("@num", numPedido.PadLeft(9));
                             using (var reader = cmdEst.ExecuteReader())
                             {
@@ -879,21 +879,27 @@ namespace Nexeron.Controllers
                             cmdGlobal.Parameters.AddWithValue("@num", numPedido.PadLeft(9));
                             cmdGlobal.ExecuteNonQuery();
                         }
+
                         foreach (var linea in lineasSeleccionadas)
                         {
                             using (var cmdInv = conexion.CreateCommand())
                             {
                                 cmdInv.Transaction = transaccion;
                                 cmdInv.CommandText = @"INSERT INTO inventario (articulo, descripcion, cantidad, tipo, origen, referencia, cuenta, fecha) 
-                               VALUES (@articulo, @descripcion, @cantidad, 'E', 'COMPRAS', @referencia, @cuenta, NOW())";
-                                cmdInv.Parameters.AddWithValue("@articulo", linea["ARTI"]?.ToString() ?? "");
-                                cmdInv.Parameters.AddWithValue("@descripcion", linea["DESARTI"]?.ToString() ?? "");
+                       VALUES (@articulo, @descripcion, @cantidad, 'E', 'COMPRAS', @referencia, @cuenta, NOW())";
+
+                                string articuloInv = linea.ContainsKey("ARTI") && linea["ARTI"] != null ? linea["ARTI"].ToString() : "";
+                                string descripcionInv = linea.ContainsKey("DESARTI") && linea["DESARTI"] != null ? linea["DESARTI"].ToString() : "";
+
+                                cmdInv.Parameters.AddWithValue("@articulo", articuloInv);
+                                cmdInv.Parameters.AddWithValue("@descripcion", descripcionInv);
                                 cmdInv.Parameters.AddWithValue("@cantidad", Convert.ToDecimal(linea["CANTI"]));
                                 cmdInv.Parameters.AddWithValue("@referencia", nuevoNumAlb);
                                 cmdInv.Parameters.AddWithValue("@cuenta", cuenta);
                                 cmdInv.ExecuteNonQuery();
                             }
                         }
+
                         transaccion.Commit();
                         return Json(new { success = true, mensaje = $"Albarán {nuevoNumAlb} generado correctamente." });
                     }

@@ -1464,7 +1464,7 @@
                 $tbodyLineas.empty();
                 if (lineas && lineas.length > 0) {
                     lineas.forEach(function(l) {
-                        var fila = '<tr data-numlinea="' + l.NUMLINEA + '" data-pendiente="' + l.Pendiente + '">' +
+                        var fila = '<tr data-numlinea="' + l.NUMLINEA + '" data-pendiente="' + l.Pendiente + '" data-arti="' + l.ARTI + '" data-desarti="' + l.DESARTI + '">' +
                                    '<td>' + l.ARTI + '</td>' +
                                    '<td>' + l.DESARTI + '</td>' +
                                    '<td>' + l.CantidadOriginal + '</td>' +
@@ -1494,14 +1494,22 @@
         $('#tablaLineasAlbaran tbody tr').each(function() {
             var numLinea = parseInt($(this).data('numlinea'));
             var pendiente = parseFloat($(this).data('pendiente'));
+            var arti = $(this).data('arti');
+            var desarti = $(this).data('desarti');
             var cantidad = parseFloat($(this).find('.cant-albaranar').val()) || 0;
+
             if (cantidad > 0) {
                 if (cantidad > pendiente) {
                     crearToast("La cantidad supera la pendiente en la línea " + numLinea, "error");
                     lineas = null;
                     return false;
                 }
-                lineas.push({ NUMLINEA: numLinea, CANTI: cantidad });
+                lineas.push({
+                    NUMLINEA: numLinea,
+                    CANTI: cantidad,
+                    ARTI: String(arti),
+                    DESARTI: String(desarti)
+                });
             }
         });
 
@@ -1517,7 +1525,7 @@
             success: function(res) {
                 if (res.success) {
                     crearToast(res.mensaje, "success");
-                    location.reload();
+                    setTimeout(function() { location.reload(); }, 1500);
                 } else {
                     crearToast(res.message, "error");
                 }
@@ -1527,7 +1535,6 @@
             }
         });
     }
-
     function exportarPedidoPdf(numPedido) {
         if (!numPedido) return;
         $.ajax({
